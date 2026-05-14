@@ -1,0 +1,41 @@
+<button class="menu-toggle" (click)="toggleMenu()">
+  <span></span><span></span><span></span>
+</button>
+
+<div class="sidebar-overlay" [class.visible]="isOpen" (click)="closeMenu()"></div>
+
+<aside class="sidebar" [class.open]="isOpen">
+
+  <div class="sidebar-brand">
+    <div class="logo-circle"><span>VID</span></div>
+    <p class="brand-name">VIRTUALID</p>
+    <p class="brand-sub">Admin Panel</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item" [class.active]="paginaActiva === 'dashboard'"        routerLink="/admin/dashboard"         (click)="closeMenu()">Inicio</a>
+    <a class="nav-item" [class.active]="paginaActiva === 'usuarios'"         routerLink="/admin/usuarios"          (click)="closeMenu()">Usuarios</a>
+    <a class="nav-item" [class.active]="paginaActiva === 'mi-institucion'"   routerLink="/admin/mi-institucion"    (click)="closeMenu()">Mi Institución</a>
+    <a class="nav-item" [class.active]="paginaActiva === 'administradores'"  routerLink="/admin/administradores"   (click)="closeMenu()">Administrador</a>
+    <a class="nav-item" [class.active]="paginaActiva === 'credenciales'"     routerLink="/admin/credenciales"      (click)="closeMenu()">Credenciales</a>
+    <a class="nav-item" [class.active]="paginaActiva === 'puntos-acceso'"    routerLink="/admin/puntos-acceso"     (click)="closeMenu()">Puntos de Acceso</a>
+    <a class="nav-item" [class.active]="paginaActiva === 'historial-global'" routerLink="/admin/historial-global"  (click)="closeMenu()">Historial Global</a>
+    <a class="nav-item" [class.active]="paginaActiva === 'reportes'"         routerLink="/admin/reportes"          (click)="closeMenu()">Reportes</a>
+    <a class="nav-item" [class.active]="paginaActiva === 'soporte'"          routerLink="/admin/soporte"           (click)="closeMenu()">Soporte</a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="admin-info-row">
+      <div class="admin-avatar">{{ adminIniciales }}</div>
+      <div class="admin-info">
+        <span class="admin-name">{{ adminNombre }}</span>
+        <span class="admin-role">Administrador</span>
+      </div>
+    </div>
+  </div>
+
+</aside>
+
+<header class="topbar">
+  <button class="btn-cerrar-sesion" (click)="cerrarSesion()">Cerrar Sesión</button>
+</header>

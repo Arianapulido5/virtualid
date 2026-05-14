@@ -1,0 +1,202 @@
+<!-- src/app/pages/admin/historial-accesos/historial-accesos.html -->
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="historial-global" />
+
+  <!-- ══ MODAL CONFIRMACIÓN ══ -->
+  <div class="modal-overlay" *ngIf="confirmVisible">
+    <div class="modal-card">
+      <div class="modal-icon confirm-icon">?</div>
+      <h3>{{ confirmTitulo }}</h3>
+      <p>{{ confirmMensaje }}</p>
+      <div class="modal-btns">
+        <button class="btn-cancelar-modal" (click)="cancelarConfirmacion()">Cancelar</button>
+        <button class="btn-aceptar" (click)="confirmarAccion()">Sí, continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL RESULTADO ══ -->
+  <div class="modal-overlay" *ngIf="modalVisible">
+    <div class="modal-card">
+      <div class="modal-icon" [ngClass]="modalTipo">
+        {{ modalTipo === 'exito' ? '✓' : '!' }}
+      </div>
+      <h3>{{ modalTitulo }}</h3>
+      <p>{{ modalMensaje }}</p>
+      <button class="btn-aceptar" (click)="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <!-- FILA 1: flecha regreso a la izquierda -->
+      <a class="back-link" routerLink="/admin/puntos-acceso">
+        <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </a>
+
+      <!-- FILA 2: título + botón eliminar en la misma línea -->
+      <div class="titulo-row">
+        <h1 class="page-title">{{ punto.nombre }} Historial</h1>
+        <button
+          class="btn-eliminar-punto"
+          (click)="pedirEliminarPunto()"
+          [disabled]="procesando">
+           Eliminar punto de acceso
+        </button>
+      </div>
+
+      <!-- BANNER AZUL — completamente sin tocar -->
+      <div class="punto-banner">
+        <div class="banner-icon">🏛</div>
+        <div class="banner-info">
+          <span class="banner-nombre">{{ punto.nombre }} — {{ punto.descripcion }}</span>
+          <span class="banner-meta">{{ punto.tipo }}</span>
+          <span class="banner-estado">● {{ punto.activo ? 'Activo' : 'Inactivo' }}</span>
+        </div>
+        <div class="banner-stats">
+          <div class="stat-item">
+            <span class="stat-num blue">{{ punto.accesos_hoy }}</span>
+            <span class="stat-label">accesos hoy</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num red">{{ punto.denegados_hoy }}</span>
+            <span class="stat-label">denegados hoy</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTROS -->
+      <div class="filtros-bar">
+        <div class="filtro-grupo">
+          <span class="filtro-label">Periodo</span>
+          <div class="periodo-btns">
+            <button class="periodo-btn" [class.active]="periodo === 'hoy'"           (click)="cambiarPeriodo('hoy')">Hoy</button>
+            <button class="periodo-btn" [class.active]="periodo === 'semana'"        (click)="cambiarPeriodo('semana')">Semana</button>
+            <button class="periodo-btn" [class.active]="periodo === 'mes'"           (click)="cambiarPeriodo('mes')">Mes</button>
+            <button class="periodo-btn" [class.active]="periodo === 'personalizado'" (click)="cambiarPeriodo('personalizado')">Personalizado</button>
+          </div>
+        </div>
+
+        <div class="filtro-grupo">
+          <span class="filtro-label">Resultado</span>
+          <select class="filtro-select" [(ngModel)]="filtroResultado" (ngModelChange)="onFiltroChange()">
+            <option value="todos">Todos</option>
+            <option value="exitoso">Exitoso</option>
+            <option value="denegado">Denegado</option>
+          </select>
+        </div>
+
+        <div class="filtro-grupo">
+          <span class="filtro-label">Tipo de usuario</span>
+          <select class="filtro-select" [(ngModel)]="filtroTipo" (ngModelChange)="onFiltroChange()">
+            <option value="todos">Todos</option>
+            <option value="estudiante">Estudiante</option>
+            <option value="empleado">Empleado</option>
+          </select>
+        </div>
+
+        <div class="filtro-grupo search-grupo">
+          <input class="search-input" type="text" placeholder="Buscar usuario..."
+            [(ngModel)]="busqueda" (keyup.enter)="buscar()" />
+          <button class="btn-buscar" (click)="buscar()">BUSCAR</button>
+        </div>
+      </div>
+
+      <!-- RANGO PERSONALIZADO -->
+      <div class="rango-bar" *ngIf="periodo === 'personalizado'">
+        <div class="rango-grupo">
+          <label class="rango-label">Fecha inicio</label>
+          <input type="date" class="rango-input" [(ngModel)]="fechaInicio" />
+        </div>
+        <div class="rango-grupo">
+          <label class="rango-label">Fecha fin</label>
+          <input type="date" class="rango-input" [(ngModel)]="fechaFin" />
+        </div>
+        <button class="btn-aplicar" (click)="aplicarPersonalizado()">Aplicar</button>
+        <span class="error-fecha" *ngIf="errorFecha">{{ errorFecha }}</span>
+      </div>
+
+      <!-- ESPERANDO FECHAS -->
+      <div class="empty-state"
+        *ngIf="periodo === 'personalizado' && !cargando && !fechaInicio && !fechaFin">
+        Selecciona un rango de fechas y presiona Aplicar.
+      </div>
+
+      <!-- CARGANDO -->
+      <div class="estado-txt" *ngIf="cargando">Cargando historial...</div>
+
+      <!-- TABLA -->
+      <div class="tabla-card"
+        *ngIf="!cargando && !(periodo === 'personalizado' && !fechaInicio && !fechaFin)">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>USUARIO</th>
+              <th>TIPO</th>
+              <th>HORA</th>
+              <th>DETALLES</th>
+              <th>RESULTADO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="tabla-row" *ngFor="let r of registros; let i = index">
+              <td>
+                <div class="col-usuario">
+                  <div class="user-avatar" [ngClass]="avatarColor(i)">{{ iniciales(r) }}</div>
+                  <div class="user-info">
+                    <span class="user-nombre">{{ nombreCompleto(r) }}</span>
+                    <span class="user-id">{{ r.numero_id ?? r.correo }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="tipo-badge" [ngClass]="r.tipo_usuario">{{ r.tipo_usuario }}</span>
+              </td>
+              <td>
+                <div class="col-hora">
+                  <span class="hora-val">{{ formatHora(r.creado_en) }}</span>
+                  <span class="hora-dia">{{ formatDia(r.creado_en) }}</span>
+                </div>
+              </td>
+              <td class="col-detalle">
+                <span [ngClass]="{'detalle-warn': esAdvertencia(r)}">{{ detalle(r) }}</span>
+              </td>
+              <td>
+                <span class="resultado-badge" [ngClass]="r.exitoso ? 'exitoso' : 'denegado'">
+                  {{ r.exitoso ? '●' : '✕' }} {{ r.exitoso ? 'Exitoso' : 'Denegado' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- VACÍO -->
+        <div class="empty-state" *ngIf="registros.length === 0">
+          No hay registros para los filtros seleccionados.
+        </div>
+
+        <!-- PAGINACIÓN -->
+        <div class="paginacion" *ngIf="paginacion.total_paginas > 1">
+          <button class="pag-btn" [disabled]="paginaActual === 1" (click)="irPagina(paginaActual - 1)">‹</button>
+          <button
+            *ngFor="let p of paginas"
+            class="pag-btn"
+            [class.active]="paginaActual === p"
+            (click)="irPagina(p)">
+            {{ p }}
+          </button>
+          <button class="pag-btn" [disabled]="paginaActual === paginacion.total_paginas" (click)="irPagina(paginaActual + 1)">›</button>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>

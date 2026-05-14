@@ -1,0 +1,149 @@
+<!-- src/app/pages/admin/editar-institucion/editar-institucion.html -->
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="mi-institucion" />
+
+  <!-- MODAL ÉXITO -->
+  <div class="modal-overlay" *ngIf="exitoso">
+    <div class="modal-card">
+      <div class="modal-icon">✓</div>
+      <h3>¡Cambios guardados!</h3>
+      <p>La información de la institución ha sido actualizada correctamente.</p>
+      <button class="btn-aceptar" (click)="irAInstitucion()">Aceptar</button>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <a class="back-link" routerLink="/admin/mi-institucion">
+        <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </a>
+
+      <div *ngIf="cargandoDatos" class="estado-txt">Cargando datos...</div>
+
+      <ng-container *ngIf="!cargandoDatos">
+
+        <div class="form-header">
+          <h1 class="form-title">Editar información de la institución</h1>
+          <p class="form-sub">Los cambios se guardarán y actualizarán de inmediato</p>
+        </div>
+
+        <div class="form-card">
+
+          <!-- NOMBRE + TIPO -->
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">Nombre de la institución *</label>
+              <input class="field-input" type="text" placeholder="Universidad Tecnológica"
+                [(ngModel)]="form.nombre_institucion" (ngModelChange)="v.nombre_institucion()"
+                [class.input-error]="errores['nombre_institucion']" />
+              <span class="field-error" *ngIf="errores['nombre_institucion']">{{ errores['nombre_institucion'] }}</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Tipo *</label>
+              <input class="field-input" type="text" placeholder="Universidad pública"
+                [(ngModel)]="form.tipo" (ngModelChange)="v.tipo()"
+                [class.input-error]="errores['tipo']" />
+              <span class="field-error" *ngIf="errores['tipo']">{{ errores['tipo'] }}</span>
+            </div>
+          </div>
+
+          <!-- RFC + DOMINIO -->
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">RFC *</label>
+              <input class="field-input" type="text" placeholder="UTE200101ABC" maxlength="13"
+                [(ngModel)]="form.rfc" (ngModelChange)="v.rfc()"
+                [class.input-error]="errores['rfc']" />
+              <span class="field-error" *ngIf="errores['rfc']">{{ errores['rfc'] }}</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Dominio de correo institucional *</label>
+              <input class="field-input" type="text" placeholder="@utec.edu.mx"
+                [(ngModel)]="form.dominio" (ngModelChange)="v.dominio()"
+                [class.input-error]="errores['dominio']" />
+              <span class="field-error" *ngIf="errores['dominio']">{{ errores['dominio'] }}</span>
+            </div>
+          </div>
+
+          <!-- CORREO CONTACTO -->
+          <div class="field">
+            <label class="field-label">Correo de contacto *</label>
+            <input class="field-input" type="email" placeholder="admisiones@utec.edu.mx"
+              [(ngModel)]="form.correo_contacto" (ngModelChange)="v.correo_contacto()"
+              [class.input-error]="errores['correo_contacto']" />
+            <span class="field-error" *ngIf="errores['correo_contacto']">{{ errores['correo_contacto'] }}</span>
+          </div>
+
+          <!-- CIUDAD + ESTADO -->
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">Ciudad *</label>
+              <input class="field-input" type="text" placeholder="Córdoba"
+                [(ngModel)]="form.ciudad" (ngModelChange)="v.ciudad()"
+                [class.input-error]="errores['ciudad']" />
+              <span class="field-error" *ngIf="errores['ciudad']">{{ errores['ciudad'] }}</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Estado *</label>
+              <select class="field-input"
+                [(ngModel)]="form.estado" (ngModelChange)="v.estado()"
+                [class.input-error]="errores['estado']">
+                <option value="">Selecciona</option>
+                <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
+              </select>
+              <span class="field-error" *ngIf="errores['estado']">{{ errores['estado'] }}</span>
+            </div>
+          </div>
+
+          <!-- GEOLOCALIZACIÓN -->
+          <p class="section-label">
+            📍 Ubicación geográfica
+            <span class="section-opcional">(opcional — permite validar presencia del usuario)</span>
+          </p>
+
+          <div class="geo-info-box">
+            <span class="geo-info-icon">ℹ️</span>
+            <p class="geo-info-text">
+              Si marcas la ubicación en el mapa, los usuarios solo podrán generar su QR cuando
+              estén físicamente cerca de la institución. Deja el mapa sin marcador para desactivar
+              esta validación.
+            </p>
+          </div>
+
+          <app-mapa-selector
+            [lat]="mapaLat"
+            [lng]="mapaLng"
+            mapId="mapa-editar"
+            (coordenadasChange)="onCoordsChange($event)"
+            (lugarChange)="onLugarChange($event)">
+          </app-mapa-selector>
+
+          <div class="field radio-field-standalone">
+            <label class="field-label">Radio permitido (metros)</label>
+            <input class="field-input" type="number" min="50" max="5000"
+              placeholder="200" [(ngModel)]="form.radio_metros" />
+          </div>
+
+          <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+          <div class="form-actions">
+            <button class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+            <button class="btn-guardar" [disabled]="cargando" (click)="guardar()">
+              <span *ngIf="!cargando">Guardar cambios</span>
+              <span *ngIf="cargando" class="spinner"></span>
+            </button>
+          </div>
+
+        </div>
+      </ng-container>
+
+    </div>
+  </main>
+</div>

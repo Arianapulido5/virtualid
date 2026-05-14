@@ -1,0 +1,66 @@
+<!-- src/app/pages/configuracion/configuracion.html -->
+<div class="config-container">
+
+  <h1 class="page-title">Configuración</h1>
+
+  <!-- ── CUENTA ──────────────────────────────────────────── -->
+  <div class="config-section">
+    <h2 class="section-title">Cuenta</h2>
+    <div class="section-body">
+      <a class="config-item" routerLink="/informacion-personal">
+        <span>Información personal</span>
+        <span class="item-arrow">›</span>
+      </a>
+      <div class="item-divider"></div>
+      <a class="config-item" routerLink="/cambiar-contrasena">
+        <span>Cambiar contraseña</span>
+        <span class="item-arrow">›</span>
+      </a>
+      <div class="item-divider"></div>
+      <a class="config-item" routerLink="/ubicacion">
+        <span>Ubicación</span>
+        <span class="item-arrow">›</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ── SEGURIDAD ──────────────────────────────────────── -->
+  <div class="config-section">
+    <h2 class="section-title">Seguridad</h2>
+    <div class="section-body">
+      <div class="config-item">
+        <span>Autenticación biométrica</span>
+        <label class="toggle">
+          <input type="checkbox" [(ngModel)]="biometrica">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PREFERENCIAS ───────────────────────────────────── -->
+  <div class="config-section">
+    <h2 class="section-title">Preferencias</h2>
+    <div class="section-body">
+      <div class="config-item">
+        <span>Notificaciones</span>
+        <label class="toggle">
+          <input type="checkbox" [(ngModel)]="notificaciones">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── AYUDA ──────────────────────────────────────────── -->
+  <div class="config-section">
+    <h2 class="section-title">Ayuda</h2>
+    <div class="section-body">
+      <a class="config-item" routerLink="/soporte">
+        <span>Contactar soporte</span>
+        <span class="item-arrow">›</span>
+      </a>
+    </div>
+  </div>
+
+</div>

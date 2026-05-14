@@ -1,0 +1,677 @@
+// src/app/pages/dashboard/dashboard.scss
+
+$purple-dark:  #4D0F60;
+$purple-mid:   #6B2080;
+$purple-light: #9C27B0;
+$blue-dark:    #32488C;
+$bg:           #EDF2F4;
+$white:        #ffffff;
+$text-main:    #111118;
+$text-soft:    #4A4D56;
+$border:       #e3e6ed;
+$success:      #2e7d32;
+$danger:       #A93845;
+$warning:      #e65100;
+
+// ─────────────────────────────────────────────
+//  KEYFRAMES
+// ─────────────────────────────────────────────
+@keyframes fadeIn       { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeInUp     { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeInScale  { from { opacity:0; transform:scale(0.9) translateY(16px); } to { opacity:1; transform:scale(1) translateY(0); } }
+@keyframes slideInLeft  { from { opacity:0; transform:translateX(-36px); } to { opacity:1; transform:translateX(0); } }
+@keyframes slideInRight { from { opacity:0; transform:translateX(36px); } to { opacity:1; transform:translateX(0); } }
+@keyframes slideUp      { from { transform:translateY(28px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+@keyframes girar        { to { transform:rotate(360deg); } }
+@keyframes gradientShift{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+@keyframes orbFloat1    { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(16px,-20px) scale(1.07)} 66%{transform:translate(-10px,14px) scale(0.94)} }
+@keyframes orbFloat2    { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(-18px,16px) scale(1.09)} 80%{transform:translate(14px,-12px) scale(0.93)} }
+@keyframes pulseGreen   { 0%{box-shadow:0 0 0 0 rgba(46,125,50,0.55)} 70%{box-shadow:0 0 0 9px rgba(46,125,50,0)} 100%{box-shadow:0 0 0 0 rgba(46,125,50,0)} }
+@keyframes badgeIn      { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
+@keyframes chipShine    { 0%{background-position:-200% center} 100%{background-position:200% center} }
+@keyframes progressGlow { 0%,100%{filter:drop-shadow(0 0 4px rgba(77,15,96,0.55))} 50%{filter:drop-shadow(0 0 10px rgba(77,15,96,0.9))} }
+@keyframes timerTick    { 0%{transform:scale(1)} 40%{transform:scale(1.18)} 100%{transform:scale(1)} }
+@keyframes timerUrgente { 0%,100%{color:#A93845;text-shadow:0 0 0 rgba(169,56,69,0)} 50%{color:#c0392b;text-shadow:0 0 12px rgba(169,56,69,0.6)} }
+@keyframes qrScanLine   { 0%{top:14px;opacity:1} 88%{top:calc(100% - 14px);opacity:1} 100%{top:calc(100% - 14px);opacity:0} }
+@keyframes modalIconPop { 0%{transform:scale(0) rotate(-15deg);opacity:0} 60%{transform:scale(1.2) rotate(4deg);opacity:1} 100%{transform:scale(1) rotate(0deg);opacity:1} }
+@keyframes shimmer      { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+@keyframes listItemIn   { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:translateX(0)} }
+@keyframes iconBounce   { 0%{transform:translateY(0)} 40%{transform:translateY(-4px)} 70%{transform:translateY(-2px)} 100%{transform:translateY(0)} }
+@keyframes headerWave   { 0%{transform:translateX(-120%) skewX(-15deg)} 100%{transform:translateX(220%) skewX(-15deg)} }
+@keyframes geoPulse     { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:0.7} }
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(32px) scale(0.96); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+// ─────────────────────────────────────────────
+//  BASE
+// ─────────────────────────────────────────────
+.dashboard-container {
+  height: 100dvh;        // ← cambia min-height por height
+  overflow: hidden;      // ← añade esto
+  background: $bg;
+  font-family: 'Open Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.4s ease both;
+}
+
+// ─────────────────────────────────────────────
+//  HEADER
+// ─────────────────────────────────────────────
+.dash-header {
+  background: linear-gradient(135deg, $purple-dark 0%, $purple-mid 40%, $blue-dark 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 9s ease infinite;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+  padding-bottom: 20px;
+  padding-left: 40px;
+  padding-right: 40px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 320px; height: 320px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.09) 0%, transparent 70%);
+    top: -140px; right: -60px;
+    pointer-events: none;
+    animation: orbFloat1 10s ease-in-out infinite;
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+    bottom: -80px; left: 80px;
+    pointer-events: none;
+    animation: orbFloat2 13s ease-in-out infinite;
+  }
+}
+
+.dash-header__text {
+  position: relative; z-index: 1;
+  &::before {
+    content: '';
+    position: absolute; inset: -16px -40px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    animation: headerWave 2.8s ease 0.4s 1 forwards;
+    pointer-events: none;
+  }
+}
+
+.dash-header__greeting {
+  font-size: 12px; color: rgba(255,255,255,0.55); margin: 0 0 2px;
+  animation: fadeInUp 0.5s ease 0.15s both;
+}
+.dash-header__name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 24px; font-weight: 800; color: $white; margin: 0;
+  animation: fadeInUp 0.5s ease 0.25s both;
+}
+
+// ─────────────────────────────────────────────
+//  BODY
+// ─────────────────────────────────────────────
+.dash-body {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 6px;
+  padding: 80px 16px;
+  flex: -0px;
+  min-height: 0;         // ← añade esto (fix crítico de flexbox)
+  overflow: hidden;      // ← añade esto
+  align-items: stretch;  // ← cambia start por stretch
+}
+// ─────────────────────────────────────────────
+//  COLUMNA IZQUIERDA
+// ─────────────────────────────────────────────
+.dash-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;      // ← añade
+  overflow-x: hidden;    // ← añade
+  min-height: 0;         // ← añade
+  animation: slideInLeft 0.55s cubic-bezier(.34,1.2,.64,1) 0.1s both;
+}
+
+.dash-right {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;      // ← añade
+  min-height: 0;         // ← añade
+  animation: slideInRight 0.55s cubic-bezier(.34,1.2,.64,1) 0.2s both;
+}
+
+
+// ─────────────────────────────────────────────
+//  ACCIONES RÁPIDAS
+// ─────────────────────────────────────────────
+.quick-actions {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid $border;
+}
+
+.quick-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 12px 6px;
+  background: transparent; border: none;
+  border-right: 1px solid $border;
+  border-radius: 0;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px; font-weight: 700; color: $text-soft; cursor: pointer;
+  transition: all 0.2s ease;
+
+  svg { width: 13px; height: 13px; flex-shrink: 0; transition: transform 0.25s ease; }
+
+  &:last-child { border-right: none; }
+
+  &:hover {
+    background: #faf5ff; color: $purple-dark;
+    svg { transform: translateY(-2px); animation: iconBounce 0.4s ease; }
+  }
+  &:active { background: #f3e8ff; }
+}
+
+// ─────────────────────────────────────────────
+//  SKELETON WALLET
+// ─────────────────────────────────────────────
+.wallet-skeleton {
+  height: 260px;
+  border-radius: 24px;
+  background: linear-gradient(90deg, #d8dce6 25%, #eaecf2 50%, #d8dce6 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+// ─────────────────────────────────────────────
+//  SIN CREDENCIALES
+// ─────────────────────────────────────────────
+.cred-empty {
+  background: $white; border-radius: 20px; padding: 48px 24px;
+  text-align: center; display: flex; flex-direction: column;
+  gap: 16px; align-items: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  animation: fadeInScale 0.5s ease both;
+
+  .cred-empty__text { font-size: 14px; color: $text-soft; margin: 0; }
+  .cred-empty__btn {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, $purple-dark, $blue-dark);
+    color: $white; border: none; border-radius: 10px;
+    font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    &:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(77,15,96,0.4); }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  WALLET STACK (Google Wallet style)
+// ─────────────────────────────────────────────
+.wallet-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeInUp 0.5s ease both;
+}
+
+.wallet-stack__cards {
+  position: relative;
+  // Altura = tarjeta completa + 44px por cada tarjeta extra que asoma
+  // Se sobreescribe dinámicamente con [style.height] en el HTML
+  height: 230px;
+  user-select: none;
+}
+
+// ─────────────────────────────────────────────
+//  TARJETA CREDENCIAL
+// ─────────────────────────────────────────────
+.wallet-carousel {
+  position: relative;
+  margin-left: 0px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 100%; // ← era 380px, quitar el tope
+  overflow: hidden;
+}
+
+// dashboard.scss — AGREGAR
+.carousel-viewport {
+  width: 100%;
+  max-width: 410px;        // ← mismo tope
+  overflow: hidden;
+  padding: 4px 0;
+  cursor: grab;
+  &:active { cursor: grabbing; }
+}
+.carousel-track {
+  display: flex;
+  gap: 16px;
+  transition: transform 0.38s cubic-bezier(.34,1.2,.64,1);
+  will-change: transform;
+  justify-content: flex-start;  // ← alineación normal
+}
+
+.cred-card {
+ position: relative;
+  padding: 28px 36px 24px; // ← sube el padding lateral (era 28px, ponlo más grande)
+
+  width: 100%;   // ancho de pantalla menos el padding del dash-body
+  min-width: 100%;
+  flex-shrink: 0;
+  max-width: 100%;        // ← igual que la col-left del detalle (380px)
+  box-sizing: border-box;
+  background: linear-gradient(140deg, $purple-dark 0%, #5a2878 38%, $blue-dark 100%);
+  background-size: 300% 300%;
+  border-radius: 24px;
+  padding: 28px 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: hidden;
+  animation: gradientShift 14s ease 1s infinite;
+  transition: transform 0.38s cubic-bezier(.34,1.2,.64,1),
+              box-shadow 0.3s ease,
+              filter 0.3s ease,
+              opacity 0.3s ease;
+
+  &::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    z-index: 2; pointer-events: none;
+  }
+  &::after {
+    content: ''; position: absolute; top: 0; left: -120%;
+    width: 70%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: skewX(-20deg); transition: left 0.75s ease;
+    pointer-events: none; z-index: 2;
+  }
+
+    &.is-far {
+    filter: brightness(0.6);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  
+}
+
+// Ocultar flechas en mobile (el swipe las reemplaza)
+.carousel-arrow { display: none; }
+
+.cred-card__noise {
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  &::before {
+    content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 55%, transparent 100%);
+    top: -120px; right: -80px; animation: orbFloat1 14s ease-in-out infinite;
+  }
+  &::after {
+    content: ''; position: absolute; width: 180px; height: 180px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 55%, transparent 100%);
+    bottom: -65px; left: -45px; animation: orbFloat2 10s ease-in-out infinite;
+  }
+}
+
+.cred-card__noise {
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  &::before {
+    content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 55%, transparent 100%);
+    top: -120px; right: -80px; animation: orbFloat1 14s ease-in-out infinite;
+  }
+  &::after {
+    content: ''; position: absolute; width: 180px; height: 180px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 55%, transparent 100%);
+    bottom: -65px; left: -45px; animation: orbFloat2 10s ease-in-out infinite;
+  }
+}
+
+.cred-card__top {
+  display: flex; justify-content: space-between; align-items: center;
+  position: relative; z-index: 3;
+}
+
+.cred-card__chip {
+  width: 40px; height: 30px;
+  background: linear-gradient(135deg, #d4a843 0%, #f0c96a 40%, #d4a843 60%, #f0c96a 100%);
+  background-size: 200% auto; border-radius: 6px;
+  display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 6px 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  .chip-line { height: 2px; background: rgba(0,0,0,0.22); border-radius: 1px; }
+}
+
+.cred-card__badge {
+  font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 50px;
+  animation: badgeIn 0.5s cubic-bezier(.34,1.56,.64,1) 0.45s both;
+  position: relative; z-index: 3; letter-spacing: 0.2px;
+
+  &.activa {
+    background: rgba(46,125,50,0.28); color: #a5d6a7;
+    border: 1px solid rgba(165,214,167,0.5);
+    animation: badgeIn 0.5s cubic-bezier(.34,1.56,.64,1) 0.45s both, pulseGreen 2.8s ease-in-out 1.2s infinite;
+  }
+}
+
+.cred-card__inst {
+  display: flex; align-items: center; gap: 12px;
+  position: relative; z-index: 3;
+  animation: fadeInUp 0.55s ease 0.32s both;
+}
+
+.cred-card__avatar {
+  width: 46px; height: 46px; border-radius: 12px;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 800; color: $white;
+  flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  transition: background 0.3s, transform 0.4s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s;
+}
+
+.cred-card__inst-name {
+  font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 800;
+  color: $white; margin: 0 0 2px;
+}
+.cred-card__inst-tipo {
+  font-size: 11px; color: rgba(255,255,255,0.65); margin: 0; text-transform: capitalize;
+}
+
+// ─────────────────────────────────────────────
+//  BOTTOM CON GRID
+// ─────────────────────────────────────────────
+.cred-card__bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  align-items: start;
+  gap: 0;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  padding-top: 16px;
+  position: relative; z-index: 3;
+  animation: fadeInUp 0.55s ease 0.52s both;
+}
+
+.cred-card__field {
+  display: flex; flex-direction: column; gap: 4px;
+  padding-right: 12px;
+}
+
+.cred-card__field-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: rgba(255,255,255,0.45); margin: 0 0 3px;
+}
+.cred-card__field-val {
+  font-size: 12px; font-weight: 600; color: $white; margin: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;
+}
+
+// ─────────────────────────────────────────────
+//  BOTÓN QR INLINE
+// ─────────────────────────────────────────────
+.btn-qr-inline {
+    margin-left: -30px;  // ← muévelo a la izquierda, ajusta el número
+
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-start; gap: 5px; padding: 0;
+  background: transparent; border: none; color: $white; cursor: pointer;
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
+  min-width: 60px; align-self: start;
+
+  span {
+    font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: rgba(255,255,255,0.85); white-space: nowrap;
+  }
+
+  &:hover { transform: translateY(-3px) scale(1.08); opacity: 0.9; }
+  &:active { transform: translateY(0) scale(0.97); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  &.btn-qr-loading {
+    cursor: default; opacity: 0.6;
+    .qr-icon { animation: girar 1.2s linear infinite; }
+  }
+}
+
+.qr-icon {
+  width: 26px; height: 26px; flex-shrink: 0; color: $white;
+}
+
+// ─────────────────────────────────────────────
+//  DOTS DE NAVEGACIÓN
+// ─────────────────────────────────────────────
+.wallet-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(77,15,96,0.22);
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+    cursor: pointer;
+
+    &:hover { background: rgba(77,15,96,0.45); transform: scale(1.2); }
+
+    &.active {
+      background: $purple-dark;
+      width: 20px;
+      border-radius: 3px;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  COLUMNA DERECHA
+// ─────────────────────────────────────────────
+.dash-right {
+  display: flex; flex-direction: column;
+  animation: slideInRight 0.55s cubic-bezier(.34,1.2,.64,1) 0.2s both;
+}
+
+.panel {
+  background: $white; border: 1.5px solid $border;
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  animation: fadeInUp 0.5s ease 0.3s both;
+}
+
+
+.creds-list {
+  max-height: 500px; overflow-y: auto;
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+}
+
+.cred-mini {
+  border-bottom: 1px solid #f2f2f5; padding: 12px 14px;
+  cursor: pointer; display: flex; align-items: center; gap: 10px;
+  transition: background 0.18s, padding-left 0.2s;
+  border-left: 3px solid transparent;
+  animation: listItemIn 0.3s ease both;
+
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) { animation-delay: #{0.05 * $i + 0.3}s; }
+  }
+
+  &:last-child { border-bottom: none; }
+
+  &:hover {
+    background: #faf5ff; border-left-color: rgba(77,15,96,0.3); padding-left: 16px;
+    .cred-mini__icon { background: #ead5ff; transform: scale(1.08) rotate(-4deg); }
+  }
+
+  &--skeleton {
+    height: 54px;
+    background: linear-gradient(90deg, #f5f5f5 25%, #ebebeb 50%, #f5f5f5 75%) !important;
+    background-size: 200% 100% !important;
+    animation: shimmer 1.4s infinite !important;
+    cursor: default; border-left: none;
+    &:hover { padding-left: 14px; }
+  }
+}
+
+.cred-mini__icon {
+  font-size: 15px; flex-shrink: 0; width: 34px; height: 34px;
+  background: #f3e8ff; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.25s cubic-bezier(.34,1.56,.64,1);
+}
+.cred-mini__info   { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.cred-mini__nombre { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: $text-main; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cred-mini__inst   { font-size: 10px; color: $text-soft; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cred-mini__tipo   { font-size: 9px; font-weight: 700; padding: 2px 0px; border-radius: 7px; display: inline-block; margin-top: 2px; text-transform: capitalize; }
+
+.cred-mini__status {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  &.activa   { background: $success; box-shadow: 0 0 0 3px rgba(46,125,50,0.18); }
+  &.inactiva { background: #ccc; }
+}
+
+.creds-empty {
+  padding: 24px; text-align: center; font-size: 13px; color: $text-soft;
+  a { color: $purple-dark; font-weight: 600; text-decoration: none; &:hover { text-decoration: underline; } }
+}
+
+// ─────────────────────────────────────────────
+//  MODALES
+// ─────────────────────────────────────────────
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(5px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; animation: fadeIn 0.22s ease both;
+}
+
+.modal-card {
+  background: $bg; border-radius: 24px; padding: 44px 40px;
+  max-width: 420px; width: 90%;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 16px; text-align: center; position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.6) inset;
+  animation: slideUp 0.32s cubic-bezier(.34,1.2,.64,1) both;
+
+  h3 { font-family: 'Montserrat', sans-serif; font-size: 22px; font-weight: 700; color: $text-main; margin: 0; }
+  p  { font-size: 14px; color: $text-soft; margin: 0; line-height: 1.6; }
+}
+
+.modal-icon-simple { font-size: 48px; line-height: 1; animation: modalIconPop 0.5s cubic-bezier(.34,1.56,.64,1) both; }
+.modal-icon-warn   { font-size: 48px; line-height: 1; animation: modalIconPop 0.5s cubic-bezier(.34,1.56,.64,1) both; }
+
+.modal-close-btn {
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: none; background: transparent; color: $text-soft;
+  font-size: 16px; font-weight: 900; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.2s, transform 0.22s cubic-bezier(.34,1.56,.64,1);
+  animation: fadeIn 0.3s ease 0.2s both;
+    border: none;                    // ← sin borde
+  background: transparent;         // ← sin fondo
+  color: $text-soft;
+  font-size: 30px;                 // ← más grande
+  font-weight: 9000;                // ← máximo negrita
+
+  &:hover { color: $danger; transform: rotate(90deg) scale(1.15); }
+}
+
+.btn-aceptar-modal {
+  flex: 1; padding: 13px;
+  background: linear-gradient(135deg, $purple-dark 0%, $blue-dark 50%, $purple-mid 100%);
+  background-size: 250% 250%;
+  color: $white; border: none; border-radius: 10px;
+  font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(77,15,96,0.28);
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+  animation: gradientShift 4s ease infinite;
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(77,15,96,0.4); }
+  &:active { transform: translateY(0); }
+}
+.btn-aceptar-solo { width: 100%; }
+
+.btn-cancelar-modal {
+  flex: 1; padding: 13px; background: transparent;
+  border: 1.5px solid #ccc; border-radius: 10px;
+  font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 600; color: $text-soft;
+  cursor: pointer; transition: all 0.2s;
+  &:hover { border-color: $text-soft; background: rgba(0,0,0,0.04); transform: translateY(-1px); }
+}
+
+// QR MODAL
+.qr-loading { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px 0; p { font-size: 13px; color: #888; margin: 0; } }
+
+.qr-spinner {
+  width: 44px; height: 44px;
+  border: 3px solid #f0e8f8; border-top-color: $purple-dark; border-right-color: $purple-mid;
+  border-radius: 50%; animation: girar 0.68s linear infinite;
+  filter: drop-shadow(0 0 7px rgba(77,15,96,0.5));
+}
+
+.qr-imagen-wrap {
+  padding: 14px; background: $white; border-radius: 16px; border: 1.5px solid #f0e8f8;
+  box-shadow: 0 4px 26px rgba(77,15,96,0.16); position: relative; overflow: hidden;
+  transition: box-shadow 0.3s, transform 0.3s cubic-bezier(.34,1.2,.64,1);
+  animation: fadeInScale 0.55s cubic-bezier(.34,1.2,.64,1) 0.1s both;
+
+  &::after {
+    content: ''; position: absolute; left: 14px; right: 14px; height: 2px;
+    background: linear-gradient(90deg, transparent, $purple-dark, $purple-light, $purple-dark, transparent);
+    border-radius: 2px; animation: qrScanLine 2.3s linear infinite;
+    pointer-events: none; filter: drop-shadow(0 0 6px $purple-dark); opacity: 0.8;
+  }
+  &:hover { box-shadow: 0 8px 34px rgba(77,15,96,0.26); transform: scale(1.03); }
+}
+
+.qr-imagen { display: block; width: 200px; height: 200px; border-radius: 4px; }
+
+.qr-timer { width: 100%; display: flex; flex-direction: column; gap: 6px; animation: fadeInUp 0.45s ease 0.22s both; }
+.qr-timer-row   { display: flex; justify-content: space-between; align-items: center; }
+.qr-timer-label { font-family: 'Open Sans', sans-serif; font-size: 13px; color: #888; }
+.qr-timer-num   {
+  font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 800;
+  color: $purple-dark; transition: color 0.3s; min-width: 44px; text-align: right;
+  &.urgente { animation: timerTick 0.65s ease-in-out infinite, timerUrgente 1s ease-in-out infinite; }
+}
+.qr-timer-bar   { height: 7px; background: #f0e8f8; border-radius: 8px; overflow: hidden; }
+.qr-timer-fill  {
+  height: 100%;
+  background: linear-gradient(90deg, $purple-dark, $purple-light);
+  border-radius: 8px; transition: width 1s linear, background 0.45s;
+  position: relative; animation: progressGlow 2.2s ease-in-out infinite;
+  &::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 24px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6)); border-radius: 0 8px 8px 0; }
+  &.urgente { background: linear-gradient(90deg, $danger, #e57373); animation: progressGlow 0.5s ease-in-out infinite; }
+}
+.qr-timer-hint  { font-family: 'Open Sans', sans-serif; font-size: 11px; color: #bbb; margin: 0; text-align: center; letter-spacing: 0.2px; }
+
+// ─────────────────────────────────────────────
+//  RESPONSIVE
+// ─────────────────────────────────────────────
+@media (max-width: 900px) {
+  .dash-body { grid-template-columns: 1fr 260px; }
+}
+
+@media (max-width: 800px) {
+    .dash-body {
+    grid-template-columns: 1fr;
+    padding: 20px 16px;
+    gap: 24px;
+    align-content: start; 
+    align-content: baseline;
+  }
+  .dash-left  { max-width: 520px; margin: 0 auto; width: 100%; animation: fadeInUp 0.5s ease both; }
+  .dash-right { animation: fadeInUp 0.5s ease 0.1s both; }
+}
+
+@media (max-width: 768px) {
+  .dash-header { padding-left: 60px; padding-right: 20px; }
+  .dash-header__name { font-size: 20px; }
+}

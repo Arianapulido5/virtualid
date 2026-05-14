@@ -1,0 +1,82 @@
+<!-- src/app/shared/mapa-selector/mapa-selector.html -->
+<div class="mapa-wrap">
+
+  <!-- TABS -->
+  <div class="modo-tabs">
+    <button type="button" class="modo-tab" [class.activo]="modo === 'mapa'" (click)="setModo('mapa')">
+       Seleccionar en mapa
+    </button>
+    <button type="button" class="modo-tab" [class.activo]="modo === 'actual'" (click)="usarUbicacionActual()">
+       Usar mi ubicación
+    </button>
+    <button type="button" class="modo-tab" [class.activo]="modo === 'manual'" (click)="setModo('manual')">
+       Ingresar coordenadas
+    </button>
+  </div>
+
+  <!-- NINGUNO -->
+  <div class="modo-vacio" *ngIf="modo === 'ninguno'">
+    <span>Selecciona una opción para configurar la ubicación</span>
+  </div>
+
+  <!-- MODO MAPA -->
+  <ng-container *ngIf="modo === 'mapa'">
+    <div class="mapa-cargando" *ngIf="!mapaListo">
+      <div class="geo-spinner"></div>
+      <span>Cargando mapa...</span>
+    </div>
+    <div [id]="'mapbox-' + mapId" class="mapa-container" [class.mapa-cargando-div]="!mapaListo"></div>
+    <p class="mapa-hint" *ngIf="mapaListo">
+      📌 Haz clic en el mapa para marcar · Arrastra el marcador morado para ajustar
+    </p>
+  </ng-container>
+
+  <!-- MODO MANUAL -->
+  <ng-container *ngIf="modo === 'manual'">
+    <div class="manual-row">
+      <div class="manual-field">
+        <label class="manual-label">Latitud</label>
+        <input class="manual-input" type="number" step="any" placeholder="ej. 18.8868000"
+          [(ngModel)]="inputLat" (ngModelChange)="onManualChange()" />
+      </div>
+      <div class="manual-field">
+        <label class="manual-label">Longitud</label>
+        <input class="manual-input" type="number" step="any" placeholder="ej. -97.0917000"
+          [(ngModel)]="inputLng" (ngModelChange)="onManualChange()" />
+      </div>
+    </div>
+    <p class="mapa-hint">
+      Obtén coordenadas en <a href="https://maps.google.com" target="_blank">Google Maps</a>
+      → clic derecho → primer número
+    </p>
+  </ng-container>
+
+  <!-- CARGANDO GEO -->
+  <div class="geo-cargando" *ngIf="modo === 'actual' && cargandoGeo">
+    <div class="geo-spinner"></div>
+    <span>Obteniendo tu ubicación...</span>
+  </div>
+
+  <!-- COORDS GUARDADAS -->
+  <div class="mapa-coords" *ngIf="lat !== null && lng !== null">
+    <span class="coords-check"></span>
+    <div class="coord-item">
+      <span class="coord-label">Lat</span>
+      <span class="coord-val">{{ lat | number:'1.6-6' }}</span>
+    </div>
+    <div class="coord-sep">·</div>
+    <div class="coord-item">
+      <span class="coord-label">Lng</span>
+      <span class="coord-val">{{ lng | number:'1.6-6' }}</span>
+    </div>
+    <button class="btn-quitar" type="button" (click)="limpiar()">🗑 Quitar</button>
+  </div>
+
+  <div class="mapa-sin-coords"
+       *ngIf="(lat === null || lng === null) && modo !== 'ninguno' && !(modo === 'mapa' && !mapaListo)">
+    <span *ngIf="modo === 'mapa'">Haz clic en el mapa para marcar la institución</span>
+    <span *ngIf="modo === 'manual'">Ingresa coordenadas para guardar la ubicación</span>
+    <span *ngIf="modo === 'actual' && !cargandoGeo">No se obtuvo la ubicación</span>
+  </div>
+
+</div>

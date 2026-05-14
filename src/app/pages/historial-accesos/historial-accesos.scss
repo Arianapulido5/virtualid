@@ -1,0 +1,266 @@
+// src/app/pages/historial-accesos/historial-accesos.scss
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap');
+
+:host {
+  --purple:   #4D0F60;
+  --purple-m: #6B2080;
+  --blue:     #32488C;
+  --bg:       #EDF2F4;
+  --dark:     #4A4D56;
+  --red:      #A93845;
+  --black:    #0F0C0C;
+  --white:    #ffffff;
+  --success:  #2e7d32;
+  font-family: 'Open Sans', sans-serif;
+  display: block;
+}
+
+@keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes headerIn { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes rowIn    { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes badgePop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes filterActive { from { transform: scale(0.94); } to { transform: scale(1); } }
+
+// ─── LAYOUT ───────────────────────────────────────────────────────────────────
+.page-layout { min-height: 100vh; background: var(--bg); animation: fadeIn 0.4s ease both; }
+
+.page-body {
+  padding: 28px 24px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 22px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: calc(100vh - 60px);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; flex-shrink: 0;
+  animation: headerIn 0.5s cubic-bezier(.34,1.2,.64,1) 0.05s both;
+}
+
+.page-title {
+  font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 800;
+  color: var(--black); margin: 0;
+}
+
+// ─── BUSCADOR ─────────────────────────────────────────────────────────────────
+.search-row {
+  display: flex; border-radius: 10px; overflow: hidden;
+  box-shadow: 0 2px 10px rgba(77,15,96,0.12);
+  &:focus-within { box-shadow: 0 4px 18px rgba(77,15,96,0.22); }
+}
+.search-input {
+  width: 260px; padding: 10px 16px; border: 2px solid var(--purple); border-right: none;
+  border-radius: 10px 0 0 10px; font-family: 'Open Sans', sans-serif; font-size: 13px;
+  color: var(--black); outline: none; background: var(--white);
+  &::placeholder { color: #bbb; }
+}
+.btn-buscar {
+  background: linear-gradient(135deg, var(--purple), var(--blue)); background-size: 200% 200%;
+  border: 2px solid var(--purple); color: var(--white); font-family: 'Montserrat', sans-serif;
+  font-size: 12px; font-weight: 700; padding: 10px 20px; border-radius: 0 10px 10px 0;
+  cursor: pointer; animation: gradientShift 4s ease infinite;
+  &:hover { opacity: 0.9; }
+}
+
+// ─── FILTROS ──────────────────────────────────────────────────────────────────
+.filter-tabs {
+  display: flex; gap: 4px; background: var(--white); border-radius: 12px; padding: 5px;
+  border: 1.5px solid #e0e4ec; width: fit-content; flex-shrink: 0;
+  animation: fadeInUp 0.45s ease 0.12s both;
+}
+.filter-btn {
+  padding: 8px 20px; background: transparent; border: none; border-radius: 8px;
+  font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); cursor: pointer;
+  &:hover { color: var(--purple); background: rgba(77,15,96,0.06); }
+  &.active {
+    background: linear-gradient(135deg, var(--purple), var(--blue)); background-size: 200% 200%;
+    color: var(--white); font-weight: 700; box-shadow: 0 3px 12px rgba(77,15,96,0.3);
+    animation: gradientShift 4s ease infinite, filterActive 0.25s ease both;
+  }
+}
+
+// ─── TABLA CARD ───────────────────────────────────────────────────────────────
+.tabla-card {
+  background: var(--white); border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0;
+  animation: fadeInUp 0.5s ease 0.2s both;
+}
+.tabla-scroll {
+  overflow-y: auto; flex: 1; min-height: 0;
+  &::-webkit-scrollbar       { width: 5px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(77,15,96,0.2); border-radius: 4px; }
+}
+
+// ─── TABLA ────────────────────────────────────────────────────────────────────
+.tabla {
+  width: 100%; border-collapse: collapse; table-layout: fixed;
+
+  thead {
+    position: sticky; top: 0; z-index: 2; background: var(--white);
+    tr { border-bottom: 2px solid rgba(77,15,96,0.08); background: linear-gradient(90deg, rgba(77,15,96,0.05), rgba(50,72,140,0.04)); }
+  }
+
+  // Anchos fijos en los th — con table-layout:fixed estos SÍ se respetan
+.th-lugar     { width: 16%; }
+.th-inst      { width: 21%; }
+.th-fecha     { width: 25%; }
+.th-resultado { width: 20%; }
+.th-accion    { width: 4%; }
+
+  th {
+    padding: 13px 24px; text-align: left; font-family: 'Montserrat', sans-serif;
+    font-size: 11px; font-weight: 700; color: var(--dark); letter-spacing: 0.5px; white-space: nowrap;
+  }
+}
+
+// ─── FILAS ────────────────────────────────────────────────────────────────────
+.tabla-row {
+  border-bottom: 1px solid var(--bg); position: relative; cursor: pointer;
+  animation: rowIn 0.38s ease both; transition: background 0.18s;
+
+  @for $i from 1 through 30 { &:nth-child(#{$i}) { animation-delay: #{0.04 * $i + 0.25}s; } }
+  &:last-child { border-bottom: none; }
+
+  &::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(180deg, var(--purple), var(--blue));
+    transform: scaleY(0); transform-origin: center;
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  &:hover {
+    background: rgba(77,15,96,0.04);
+    &::before      { transform: scaleY(1); }
+    .nombre-lugar  { color: var(--purple); }
+    .icono-lugar   { background: #ead5ff; }
+    .td-accion     { opacity: 1; }
+  }
+
+  td { padding: 14px 24px; vertical-align: middle; overflow: hidden; }
+}
+
+// ─── CELDA LUGAR — CSS Grid dentro del td, sin tocar display del td ───────────
+.td-lugar {
+  // CSS Grid dentro — el td sigue siendo table-cell
+  // Columna 1: icono (40px), Columna 2: nombre y tipo apilados
+  display: grid;
+  grid-template-rows: auto auto;
+  align-items: center;
+}
+
+.fecha-dia  { display: block; font-size: 12px; color: #888; }
+.fecha-hora { display: block; font-size: 11px; color: #bbb; margin-top: 2px; }
+
+
+.nombre-lugar {
+  grid-column: 2; grid-row: 1;
+  font-family: 'Open Sans', sans-serif; font-size: 13px; font-weight: 700; color: var(--black);
+  transition: color 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.tipo-lugar {
+  grid-column: 2; grid-row: 2;
+  font-size: 11px; color: #aaa;
+}
+
+// ─── CELDA INSTITUCIÓN ────────────────────────────────────────────────────────
+// td sigue siendo table-cell — los span con display:block van uno abajo del otro
+.td-inst { }
+
+.nombre-inst {
+  display: block; font-family: 'Open Sans', sans-serif; font-size: 13px;
+  font-weight: 600; color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ciudad-inst { display: block; font-size: 11px; color: #aaa; margin-top: 2px; }
+
+// ─── CELDA FECHA ──────────────────────────────────────────────────────────────
+.td-fecha { font-family: 'Open Sans', sans-serif; font-size: 12px; color: #888; white-space: nowrap; }
+
+// ─── CELDA RESULTADO ──────────────────────────────────────────────────────────
+.badge-resultado {
+  font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
+  padding: 4px 12px; border-radius: 50px; display: inline-block; white-space: nowrap;
+  animation: badgePop 0.35s cubic-bezier(.34,1.56,.64,1) both;
+  &.exitoso  { color: var(--success); background: rgba(46,125,50,0.1); }
+  &.denegado { color: var(--red);     background: rgba(169,56,69,0.1); }
+}
+
+// ─── CELDA ACCIÓN ─────────────────────────────────────────────────────────────
+.td-accion {
+  text-align: left; font-family: 'Montserrat', sans-serif; font-size: 12px;
+  font-weight: 700; color: var(--purple); opacity: 0; transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+// ─── ESTADOS ──────────────────────────────────────────────────────────────────
+.estado-msg {
+  font-family: 'Open Sans', sans-serif; font-size: 14px; color: var(--dark);
+  background: var(--white); border-radius: 14px; padding: 24px; text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-shrink: 0; animation: fadeIn 0.4s ease both;
+  &.error { color: var(--red); background: #fff8f8; border-left: 4px solid var(--red); }
+}
+.empty-state { padding: 48px 20px; text-align: center; animation: fadeIn 0.4s ease both; }
+.empty-state p { font-family: 'Open Sans', sans-serif; font-size: 14px; color: #bbb; margin: 0; }
+
+@media (max-width: 768px) {
+  .search-row {
+    width: calc(100% + 44px);
+    margin-left: -44px;
+    margin-top: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 44px;
+    gap: 16px;
+  }
+
+  .page-title { font-size: 20px !important; }
+
+  .search-input { flex: 1; width: auto !important; }
+
+  .filter-tabs {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: stretch;
+
+    .filter-btn {
+      flex: 1;
+      text-align: center;
+      padding: 8px 4px;
+    }
+  }
+
+  .td-accion { opacity: 1 !important; }
+}
+
+@media (max-width: 480px) {
+  .page-body { padding: 0 22px 22px; padding-top: calc(env(safe-area-inset-top, 0px) + 22px); }
+  .page-title { font-size: 18px !important; }
+
+  .filter-tabs {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+
+    .filter-btn {
+      flex: 1;
+      text-align: center;
+      padding: 8px 4px;
+      font-size: 11px;
+    }
+  }
+}

@@ -1,0 +1,152 @@
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="credenciales" />
+
+  <!-- ══ MODAL CONFIRMACIÓN ══ -->
+  <div class="modal-overlay" *ngIf="confirmVisible">
+    <div class="modal-card">
+      <div class="modal-icon confirm-icon">?</div>
+      <h3>{{ confirmTitulo }}</h3>
+      <p>{{ confirmMensaje }}</p>
+      <div class="modal-btns">
+        <button class="btn-cancelar-modal" (click)="cancelarConfirmacion()">Cancelar</button>
+        <button class="btn-aceptar" (click)="confirmarAccion()">Sí, continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL RESULTADO ══ -->
+  <div class="modal-overlay" *ngIf="modalVisible">
+    <div class="modal-card">
+      <div class="modal-icon" [ngClass]="modalTipo">
+        {{ modalTipo === 'exito' ? '✓' : '!' }}
+      </div>
+      <h3>{{ modalTitulo }}</h3>
+      <p>{{ modalMensaje }}</p>
+      <button class="btn-aceptar" (click)="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <!-- FLECHA REGRESO -->
+      <a class="back-link" routerLink="/admin/credenciales">
+        <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </a>
+
+      <!-- CARGANDO -->
+      <div *ngIf="cargando" style="padding:40px;text-align:center;color:#4A4D56">
+        Cargando credencial...
+      </div>
+
+      <div class="validar-grid" *ngIf="!cargando && credencial">
+
+        <!-- ── CARD DATOS SOLICITADOS ── -->
+        <div class="card datos-card">
+          <h3 class="card-title">Datos Solicitados</h3>
+
+          <div class="solicitante-box">
+            <p class="solicitante-label">INFORMACIÓN DEL SOLICITANTE</p>
+
+            <div class="dato-row">
+              <span class="dato-key">Nombre</span>
+              <span class="dato-val bold">{{ credencial.nombre_completo }}</span>
+            </div>
+            <div class="dato-row">
+              <span class="dato-key">No. Empleado</span>
+              <span class="dato-val">{{ credencial.numero_empleado }}</span>
+            </div>
+            <div class="dato-row">
+              <span class="dato-key">No. ID credencial</span>
+              <span class="dato-val">{{ credencial.numero_id || '—' }}</span>
+            </div>
+            <div class="dato-row">
+              <span class="dato-key">Correo institucional</span>
+              <span class="dato-val link">{{ credencial.correo }}</span>
+            </div>
+            <div class="dato-row">
+              <span class="dato-key">Tipo de usuario</span>
+              <span class="dato-val" style="text-transform:capitalize">{{ credencial.tipo_usuario }}</span>
+            </div>
+            <div class="dato-row">
+              <span class="dato-key">Institución</span>
+              <span class="dato-val">{{ credencial.institucion_nombre }}</span>
+            </div>
+            <div class="dato-row">
+              <span class="dato-key">Punto de acceso</span>
+              <span class="dato-val">{{ credencial.punto_nombre }}</span>
+            </div>
+            <div class="dato-row">
+              <span class="dato-key">Estado actual</span>
+              <span class="dato-val" style="text-transform:capitalize"
+                    [style.color]="credencial.estado === 'activa' ? '#2e7d32' :
+                                   credencial.estado === 'revocada' ? '#A93845' : '#e65100'">
+                ● {{ credencial.estado }}
+              </span>
+            </div>
+          </div>
+
+          <div class="notas-section">
+            <label class="notas-label">Notas / motivo (opcional)</label>
+            <textarea
+              class="notas-input"
+              placeholder="Agregar nota para el registro o motivo de rechazo..."
+              [(ngModel)]="notas"
+            ></textarea>
+          </div>
+
+          <!-- BOTONES según estado -->
+          <div class="acciones-row">
+
+            <!-- Estado pendiente: Rechazar + Aprobar -->
+            <ng-container *ngIf="credencial.estado === 'pendiente'">
+              <button class="btn-rechazar" (click)="revocar()" [disabled]="procesando">
+                Rechazar
+              </button>
+              <button class="btn-aprobar" (click)="aprobar()" [disabled]="procesando">
+                {{ procesando ? 'Procesando…' : ' Aprobar Credencial' }}
+              </button>
+            </ng-container>
+
+            <!-- Estado activa: solo Revocar -->
+            <ng-container *ngIf="credencial.estado === 'activa'">
+              <button class="btn-rechazar" (click)="revocar()" [disabled]="procesando">
+                Revocar Credencial
+              </button>
+            </ng-container>
+
+            <!-- Estado revocada: solo Rehabilitar -->
+            <ng-container *ngIf="credencial.estado === 'revocada'">
+              <button class="btn-rehabilitar" (click)="rehabilitar()" [disabled]="procesando">
+                {{ procesando ? 'Procesando…' : '↺ Rehabilitar Credencial' }}
+              </button>
+            </ng-container>
+
+          </div>
+        </div>
+
+        <!-- ── CARD VERIFICACIÓN ── -->
+        <div class="card verificacion-card">
+          <h3 class="card-title">Verificación de Datos</h3>
+
+          <div class="verificacion-lista">
+            <div class="verif-row" *ngFor="let v of verificacion">
+              <span class="verif-label">{{ v.label }}</span>
+              <span class="verif-resultado" [ngClass]="v.tipo">
+                {{ v.tipo === 'ok' ? '' : v.tipo === 'warn' ? '—' : '' }}
+                {{ v.resultado }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>

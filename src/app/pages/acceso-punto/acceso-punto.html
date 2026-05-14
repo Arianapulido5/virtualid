@@ -1,0 +1,60 @@
+<div class="acceso-container" [ngClass]="estado">
+
+  <div class="acceso-header">
+    <div class="acceso-logo">VID</div>
+    <h1 class="acceso-titulo">Punto de Acceso</h1>
+    <p class="acceso-sub" *ngIf="puntoId > 0">ID: {{ puntoId }}</p>
+  </div>
+
+  <!-- PANTALLA INICIO -->
+  <div class="resultado-card procesando" *ngIf="estado === 'inicio'">
+    <div class="resultado-icono">📷</div>
+    <p class="resultado-nombre">Listo para escanear</p>
+    <p class="resultado-motivo" *ngIf="errorCamara">{{ errorCamara }}</p>
+    <button class="btn-iniciar" (click)="iniciarDesdeBoton()">
+      {{ errorCamara ? 'Reintentar' : 'Iniciar cámara' }}
+    </button>
+  </div>
+
+  <!-- CÁMARA -->
+  <div class="camara-wrap" *ngIf="estado === 'escaneando'">
+    <video #video playsinline autoplay muted class="camara-video"></video>
+    <canvas #canvas class="camara-canvas"></canvas>
+    <div class="scan-frame">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+      <div class="scan-line"></div>
+    </div>
+    <p class="scan-hint">Apunta al código QR de la credencial</p>
+  </div>
+
+  <!-- PROCESANDO -->
+  <div class="resultado-card procesando" *ngIf="estado === 'procesando'">
+    <div class="resultado-icono spinner">⏳</div>
+    <p class="resultado-texto">Validando credencial...</p>
+  </div>
+
+  <!-- EXITOSO -->
+  <div class="resultado-card exitoso" *ngIf="estado === 'exitoso'">
+    <div class="resultado-icono">✅</div>
+    <p class="resultado-nombre">{{ usuario }}</p>
+    <p class="resultado-tipo">{{ tipoUsuario | titlecase }}</p>
+    <p class="resultado-texto acceso-ok">Acceso permitido</p>
+    <button class="btn-siguiente" (click)="siguienteEscaneo()">
+      Escanear siguiente
+    </button>
+  </div>
+
+  <!-- DENEGADO -->
+  <div class="resultado-card denegado" *ngIf="estado === 'denegado'">
+    <div class="resultado-icono">❌</div>
+    <p class="resultado-texto acceso-no">Acceso denegado</p>
+    <p class="resultado-motivo">{{ mensaje }}</p>
+    <button class="btn-reintentar" (click)="escanearOtro()">
+      Escanear de nuevo
+    </button>
+  </div>
+
+</div>

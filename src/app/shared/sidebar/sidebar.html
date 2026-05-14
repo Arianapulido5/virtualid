@@ -1,0 +1,34 @@
+
+
+<!-- Overlay -->
+<div class="sidebar-overlay"
+     [class.hidden]="!(sidebarState.isOpen$ | async)"
+     (click)="sidebarState.close()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" [class.open]="sidebarState.isOpen$ | async">
+
+  <div class="sidebar-brand">
+    <div class="logo-circle"><span>VID</span></div>
+    <p class="brand-name">VIRTUALID</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    @for (item of menuItems; track item.route) {
+      <a class="nav-link"
+         [routerLink]="item.route"
+         routerLinkActive="active"
+         (click)="closeOnMobile()">
+        <span>{{ item.label }}</span>
+        <span class="notif-badge" *ngIf="item.route === '/mensajes' && noLeidos > 0">
+          {{ noLeidos }}
+        </span>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" (click)="cerrarSesion()">Cerrar Sesión</button>
+  </div>
+
+</aside>

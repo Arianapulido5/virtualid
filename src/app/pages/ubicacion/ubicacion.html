@@ -1,0 +1,100 @@
+<!-- src/app/pages/ubicacion/ubicacion.html -->
+<div class="ubicacion-container">
+
+  <!-- HEADER -->
+  <div class="ubi-header">
+    <h1 class="page-title">Ubicación</h1>
+  </div>
+
+  <a class="back-link" routerLink="/configuracion">
+      <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+    </a>
+
+  <!-- CARGANDO -->
+  <div class="ubi-card skeleton-card" *ngIf="cargando">
+    <div class="skeleton-icon"></div>
+    <div class="skeleton-body">
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+      <div class="skeleton-line xshort"></div>
+    </div>
+  </div>
+
+  <!-- SIN CREDENCIALES -->
+  <div class="ubi-empty" *ngIf="!cargando && !institucionNombre">
+    <span class="empty-icon">📍</span>
+    <p class="empty-title">Sin institución registrada</p>
+    <p class="empty-sub">No tienes credenciales activas que contengan información de ubicación.</p>
+  </div>
+
+  <!-- CONTENIDO -->
+  <ng-container *ngIf="!cargando && institucionNombre">
+
+    <!-- Card principal -->
+    <div class="ubi-card main-card">
+
+      <div class="card-top">
+        <div class="inst-icon-wrap">
+          <span class="inst-icon">🏫</span>
+        </div>
+        <div class="inst-info">
+          <span class="inst-nombre">{{ institucionNombre }}</span>
+          <span class="ubi-badge" [class.activa]="tieneUbicacion" [class.inactiva]="!tieneUbicacion">
+            {{ tieneUbicacion ? '● Validación activa' : '● Sin validación' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <!-- Dirección -->
+      <div class="dato-row">
+        <span class="dato-label">Dirección</span>
+        <div class="dato-val-col">
+          <div class="geo-skeleton" *ngIf="cargandoGeo">
+            <div class="skeleton-line short"></div>
+          </div>
+          <span class="dato-valor" *ngIf="!cargandoGeo && direccionGeo">{{ direccionGeo }}</span>
+          <span class="dato-valor sin-dato" *ngIf="!cargandoGeo && !direccionGeo && tieneUbicacion">Coordenadas registradas</span>
+          <span class="dato-valor sin-dato" *ngIf="!tieneUbicacion">No configurada</span>
+        </div>
+      </div>
+
+      <!-- Coordenadas -->
+      <div class="dato-row" *ngIf="tieneUbicacion">
+        <span class="dato-label">Latitud</span>
+        <span class="dato-valor mono">{{ latitud | number:'1.6-6' }}</span>
+      </div>
+
+      <div class="dato-row" *ngIf="tieneUbicacion">
+        <span class="dato-label">Longitud</span>
+        <span class="dato-valor mono">{{ longitud | number:'1.6-6' }}</span>
+      </div>
+
+      <!-- Radio -->
+      <div class="dato-row" *ngIf="tieneUbicacion">
+        <span class="dato-label">Radio de validación</span>
+        <span class="dato-valor">{{ radioMetros || 200 }} metros</span>
+      </div>
+
+    </div>
+
+    <!-- Nota informativa -->
+    <div class="ubi-nota" *ngIf="tieneUbicacion">
+      <span class="nota-icon">ℹ️</span>
+      <p class="nota-txt">Tu institución tiene validación geográfica activa. Solo podrás generar tu QR cuando te encuentres dentro del área permitida.</p>
+    </div>
+
+    <div class="ubi-nota inactiva" *ngIf="!tieneUbicacion">
+      <span class="nota-icon">ℹ️</span>
+      <p class="nota-txt">Tu institución no tiene validación geográfica activa. Puedes generar tu QR desde cualquier lugar.</p>
+    </div>
+
+  </ng-container>
+
+</div>

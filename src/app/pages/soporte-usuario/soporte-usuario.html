@@ -1,0 +1,175 @@
+<div class="notificaciones-container">
+
+  <!-- MODAL ÉXITO -->
+  <div class="modal-overlay" *ngIf="mostrarModal">
+    <div class="modal-card">
+      <div class="modal-icon">✓</div>
+      <h3>¡Mensaje enviado!</h3>
+      <p>Tu mensaje fue enviado correctamente. El administrador te responderá pronto.</p>
+      <button class="btn-aceptar" (click)="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+
+  <ng-container *ngIf="vista === 'lista'">
+    <div class="page-header">
+      <h1 class="page-title">Soporte</h1>
+    </div>
+    <div class="search-bar">
+      <input type="text" class="search-input" placeholder="Buscar mensaje" [(ngModel)]="busqueda" />
+      <button class="btn-buscar">BUSCAR</button>
+    </div>
+  </ng-container>
+
+  <div class="toast-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <!-- ═══ LISTA ═══ -->
+  <ng-container *ngIf="vista === 'lista'">
+
+    <div class="nuevo-btn-row">
+      <button class="btn-nuevo-msg" (click)="vista = 'nuevo'">+ Nuevo mensaje</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab" [class.active]="filtroActivo === 'Todos'" (click)="filtroActivo = 'Todos'">
+        Todos ({{ tickets.length }})
+      </button>
+      <button class="tab" [class.active]="filtroActivo === 'Enviados'" (click)="filtroActivo = 'Enviados'">
+        Enviados
+      </button>
+      <button class="tab" [class.active]="filtroActivo === 'Recibidos'" (click)="filtroActivo = 'Recibidos'">
+        Recibidos
+      </button>
+      <button class="tab" [class.active]="filtroActivo === 'Abierto'" (click)="filtroActivo = 'Abierto'">
+        Abiertos
+      </button>
+      <button class="tab" [class.active]="filtroActivo === 'Resuelto'" (click)="filtroActivo = 'Resuelto'">
+        Resueltos
+      </button>
+    </div>
+
+    <div class="estado-txt" *ngIf="cargando">Cargando mensajes...</div>
+
+    <div class="notificaciones-list" *ngIf="!cargando">
+
+      <div class="notificacion-item"
+        *ngFor="let t of ticketsFiltrados"
+        (click)="abrirDetalle(t)"
+        [class.no-leida]="+t.mensajes_nuevos_admin > 0">
+
+        <div class="avatar" [style.background-color]="colorTipo(t.tipo)">
+          {{ inicialTipo(t.tipo) }}
+        </div>
+
+        <div class="notif-info">
+          <span class="notif-nombre">{{ t.asunto }}</span>
+          <span class="notif-rol">{{ t.tipo }}</span>
+        </div>
+
+        <div class="notif-meta">
+          <span class="hora">{{ fechaUltimoMensaje(t.ultimo_mensaje_en || t.creado_en) }}</span>
+          <span class="counter-nuevos" *ngIf="+t.mensajes_nuevos_admin > 0">
+            {{ t.mensajes_nuevos_admin }}
+          </span>
+        </div>
+
+      </div>
+
+      <div class="empty-state" *ngIf="ticketsFiltrados.length === 0">
+        <p>{{ mensajeEmpty() }}</p>
+        <button class="btn-nuevo-lg"
+          *ngIf="filtroActivo === 'Todos' || filtroActivo === 'Enviados'"
+          (click)="vista = 'nuevo'">
+          Enviar mi primer mensaje
+        </button>
+      </div>
+
+    </div>
+  </ng-container>
+
+  <!-- ═══ NUEVO MENSAJE ═══ -->
+  <ng-container *ngIf="vista === 'nuevo'">
+    <div class="notif-detalle vista-nuevo">
+      <div class="detalle-header">
+        <h2 class="detalle-tipo">Nuevo Mensaje</h2>
+        <p class="detalle-meta">Envía un mensaje al administrador</p>
+      </div>
+      <div class="form-card">
+        <div class="field">
+          <label class="field-label">Asunto *</label>
+          <input class="field-input" type="text" placeholder="Describe brevemente tu problema" [(ngModel)]="form.asunto" />
+        </div>
+        <div class="field">
+          <label class="field-label">Categoría</label>
+          <select class="field-input" [(ngModel)]="form.tipo">
+            <option *ngFor="let t of tipos" [value]="t">{{ t }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Mensaje *</label>
+          <textarea class="field-textarea" rows="5" placeholder="Explica con detalle tu problema..." [(ngModel)]="form.mensaje"></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancelar" (click)="vista = 'lista'">Cancelar</button>
+          <button class="btn-enviar" [disabled]="enviando" (click)="crearTicket()">
+            <span *ngIf="!enviando">Enviar mensaje</span>
+            <span *ngIf="enviando" class="spinner"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ═══ DETALLE ═══ -->
+  <ng-container *ngIf="vista === 'detalle' && detalle">
+    <div class="notif-detalle vista-detalle">
+      <button class="btn-volver" (click)="volverALista()">
+        <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </button>
+      <div class="detalle-header">
+        <h2 class="detalle-tipo">{{ detalle.tipo | uppercase }}</h2>
+        <p class="detalle-meta">#T-{{ detalle.id }} · {{ detalle.asunto }}</p>
+        <p class="detalle-tiempo-texto">{{ tiempoRelativo(detalle.creado_en) }}</p>
+      </div>
+
+      <div class="estado-info-bar">
+        <span class="badge-estado" [ngClass]="badgeClass(detalle)">{{ labelEstado(detalle) }}</span>
+        <span class="estado-descripcion">{{ descripcionEstado(detalle) }}</span>
+      </div>
+
+      <div class="chat-wrapper">
+        <div class="mensajes-scroll" #chatScroll>
+          <div *ngFor="let m of detalle.mensajes"
+            class="mensaje"
+            [class.mensaje--admin]="m.es_admin"
+            [class.mensaje--usuario]="!m.es_admin">
+            <div class="mensaje-burbuja-chat">
+              <p>{{ m.texto }}</p>
+            </div>
+            <span class="detalle-autor">
+              {{ m.es_admin ? 'Administrador' : 'Tú' }} · {{ tiempoRelativo(m.creado_en) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="respuesta-bar" *ngIf="detalle.estado !== 'Resuelto'">
+          <input class="respuesta-input" type="text"
+            placeholder="Escribe un mensaje..."
+            [(ngModel)]="nuevoMsg"
+            (keyup.enter)="enviarRespuesta()" />
+          <button class="btn-enviar-msg" (click)="enviarRespuesta()">Enviar</button>
+        </div>
+
+        <div class="resuelto-notice" *ngIf="detalle.estado === 'Resuelto'">
+          ✓ Este mensaje fue marcado como resuelto
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+
+</div>

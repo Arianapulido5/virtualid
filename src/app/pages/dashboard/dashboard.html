@@ -1,0 +1,278 @@
+<div class="dashboard-container">
+
+  <!-- ══ HEADER ══ -->
+  <div class="dash-header">
+    <div class="dash-header__text">
+      <p class="dash-header__greeting">Bienvenido de nuevo</p>
+      <h1 class="dash-header__name">
+        <ng-container *ngIf="cargandoNombre">…</ng-container>
+        <ng-container *ngIf="!cargandoNombre">{{ nombreUsuario }}</ng-container>
+      </h1>
+    </div>
+  </div>
+
+  <!-- ══ BODY ══ -->
+  <div class="dash-body">
+
+    <!-- ══ COLUMNA IZQUIERDA: WALLET CARRUSEL ══ -->
+    <div class="dash-left">
+
+      <!-- Skeleton cargando -->
+      <div class="wallet-skeleton" *ngIf="cargandoCreds"></div>
+
+      <!-- Sin credenciales -->
+      <div class="cred-empty" *ngIf="!cargandoCreds && credencialesActivas.length === 0">
+        <p class="cred-empty__text">No tienes credenciales activas</p>
+        <button class="cred-empty__btn" routerLink="/agregar-credencial">
+          + Agregar credencial
+        </button>
+      </div>
+
+      <!-- ══ WALLET CAROUSEL ══ -->
+      <div class="wallet-carousel" *ngIf="!cargandoCreds && credencialesActivas.length > 0">
+
+        <!-- Flecha izquierda -->
+        <button class="carousel-arrow carousel-arrow--prev"
+                *ngIf="credencialesActivas.length > 1"
+                [disabled]="activeCardIndex === 0"
+                (click)="prevCard()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+
+        <!-- Viewport con overflow hidden -->
+        <div class="carousel-viewport"
+             (touchstart)="onTouchStart($event)"
+             (touchend)="onTouchEnd($event)"
+             (mousedown)="onMouseDown($event)"
+             (mousemove)="onMouseMove($event)"
+             (mouseup)="onMouseUp($event)"
+             (mouseleave)="onMouseLeave()">
+
+          <!-- Track deslizante -->
+          <div class="carousel-track" [style.transform]="trackTransform">
+
+            <div
+              *ngFor="let cred of credencialesActivas; let i = index"
+              class="cred-card"
+              [ngClass]="getCardClass(i)"
+              (click)="i !== activeCardIndex && setActiveCard(i)">
+
+              <div class="cred-card__noise"></div>
+
+              <div class="cred-card__top">
+                <div class="cred-card__chip">
+                  <div class="chip-line"></div>
+                  <div class="chip-line"></div>
+                  <div class="chip-line"></div>
+                </div>
+                <div class="cred-card__badge activa">● Activa</div>
+              </div>
+
+              <div class="cred-card__inst">
+                <div class="cred-card__avatar">{{ getIniciales(cred.institucion_nombre) }}</div>
+                <div>
+                  <p class="cred-card__inst-name">{{ cred.institucion_nombre }}</p>
+                  <p class="cred-card__inst-tipo">{{ cred.institucion_tipo }}</p>
+                </div>
+              </div>
+
+              <div class="cred-card__bottom">
+                <div class="cred-card__field">
+                  <p class="cred-card__field-label">Titular</p>
+                  <p class="cred-card__field-val">{{ cred.numero_id || '—' }}</p>
+                </div>
+                <div class="cred-card__field">
+                  <p class="cred-card__field-label">Tipo</p>
+                  <p class="cred-card__field-val" style="text-transform:capitalize">{{ cred.tipo_usuario }}</p>
+                </div>
+                <div class="cred-card__field">
+                  <p class="cred-card__field-label">Desde</p>
+                  <p class="cred-card__field-val">{{ formatFechaCorta(cred.creado_en) }}</p>
+                </div>
+                <button class="btn-qr-inline"
+                  [disabled]="geoSolicitando"
+                  (click)="mostrarQR(cred); $event.stopPropagation()">
+                  <svg class="qr-icon" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/>
+                    <rect x="5.5" y="5.5" width="2" height="2" fill="currentColor"/>
+                    <rect x="16.5" y="5.5" width="2" height="2" fill="currentColor"/>
+                    <rect x="5.5" y="16.5" width="2" height="2" fill="currentColor"/>
+                    <path d="M14 14h2v2h-2zM16 16h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z" fill="currentColor"/>
+                  </svg>
+                  <span>Generar QR</span>
+                </button>
+                <div class="btn-qr-inline btn-qr-loading"
+                     *ngIf="geoSolicitando && credencialQR?.id === cred.id">
+                  <svg class="qr-icon" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" stroke-dasharray="4 2"/>
+                  </svg>
+                  <span>Obteniendo...</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Flecha derecha -->
+        <button class="carousel-arrow carousel-arrow--next"
+                *ngIf="credencialesActivas.length > 1"
+                [disabled]="activeCardIndex === credencialesActivas.length - 1"
+                (click)="nextCard()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+
+        <!-- Dots de navegación -->
+        <div class="wallet-dots" *ngIf="credencialesActivas.length > 1">
+          <div class="dot"
+               *ngFor="let cred of credencialesActivas; let i = index"
+               [class.active]="i === activeCardIndex"
+               (click)="setActiveCard(i)">
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+<!-- ══ COLUMNA DERECHA ══ -->
+<div class="dash-right">
+  <div class="panel">
+
+    <!-- Acciones rápidas -->
+    <div class="quick-actions">
+      <button class="quick-btn" (click)="irAHistorial()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Historial
+      </button>
+      <button class="quick-btn" routerLink="/soporte">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Soporte
+      </button>
+      <button class="quick-btn" routerLink="/configuracion">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        Ajustes
+      </button>
+    </div>
+
+    <!-- Últimos 5 accesos -->
+    <div class="creds-list" *ngIf="!cargandoHistorial && ultimosAccesos.length > 0">
+      <div class="cred-mini"
+           *ngFor="let a of ultimosAccesos"
+           (click)="verDetalleAcceso(a.id)">
+        <div class="cred-mini__icon">
+<div class="cred-mini__icon">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+       width="18" height="18"
+       [style.color]="a.exitoso ? '#2e7d32' : '#A93845'">
+    <ng-container *ngIf="a.exitoso">
+      <!-- Puerta abierta / acceso exitoso -->
+      <path d="M13 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7"/>
+      <polyline points="16 17 21 12 16 7"/>
+      <line x1="21" y1="12" x2="9" y2="12"/>
+    </ng-container>
+    <ng-container *ngIf="!a.exitoso">
+      <!-- Candado cerrado / acceso denegado -->
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </ng-container>
+  </svg>
+</div>        </div>
+        <div class="cred-mini__info">
+          <p class="cred-mini__nombre">{{ a.punto_nombre }}</p>
+          <p class="cred-mini__inst">{{ a.institucion_nombre }}</p>
+          <span class="cred-mini__tipo">{{ formatFechaCorta(a.creado_en) }}</span>
+        </div>
+        <div class="cred-mini__status"
+             [class.activa]="a.exitoso"
+             [class.inactiva]="!a.exitoso">
+        </div>
+      </div>
+    </div>
+
+    <!-- Skeleton -->
+    <div class="creds-list" *ngIf="cargandoHistorial">
+      <div class="cred-mini cred-mini--skeleton" *ngFor="let i of [1,2,3,4,5]"></div>
+    </div>
+
+    <!-- Sin historial -->
+    <div class="creds-empty" *ngIf="!cargandoHistorial && ultimosAccesos.length === 0">
+      <p>Sin registros de acceso aún.</p>
+    </div>
+
+  </div>
+</div>
+
+  <!-- ══ MODAL SOLICITANDO UBICACIÓN ══ -->
+  <div class="modal-overlay" *ngIf="geoSolicitando && !qrVisible" (click)="cancelarGeo()">
+    <div class="modal-card qr-modal-card" (click)="$event.stopPropagation()">
+      <button class="modal-close-btn" (click)="cancelarGeo()">✕</button>
+      <div class="modal-icon-simple">📍</div>
+      <h3>Obteniendo ubicación...</h3>
+      <p>Por favor acepta el permiso de ubicación para continuar.</p>
+    </div>
+  </div>
+
+  <!-- ══ MODAL ERROR GEO ══ -->
+  <div class="modal-overlay" *ngIf="geoError && !qrVisible && !geoSolicitando" (click)="cerrarGeoError()">
+    <div class="modal-card qr-modal-card" (click)="$event.stopPropagation()">
+      <button class="modal-close-btn" (click)="cerrarGeoError()">✕</button>
+      <div class="modal-icon-warn">⚠️</div>
+      <h3>No se pudo generar el QR</h3>
+      <p>{{ geoError }}</p>
+      <button class="btn-aceptar-modal btn-aceptar-solo" (click)="reintentarQR()">Reintentar</button>
+    </div>
+  </div>
+
+  <!-- ══ MODAL QR ══ -->
+  <div class="modal-overlay"
+       *ngIf="qrVisible && credencialQR && credencialQR.activa && credencialQR.estado === 'activa'"
+       (click)="ocultarQR()">
+    <div class="modal-card qr-modal-card" (click)="$event.stopPropagation()">
+      <button class="modal-close-btn" (click)="ocultarQR()">✕</button>
+
+      <div class="qr-loading" *ngIf="!qrDataUrl">
+        <div class="qr-spinner"></div>
+        <p>Generando QR...</p>
+      </div>
+
+      <ng-container *ngIf="qrDataUrl">
+        <div class="qr-imagen-wrap">
+          <img [src]="qrDataUrl" alt="Código QR" class="qr-imagen" />
+        </div>
+
+        <div class="qr-timer">
+          <div class="qr-timer-row">
+            <span class="qr-timer-label">Válido por</span>
+            <span class="qr-timer-num" [class.urgente]="countdown <= 10">{{ countdown }}s</span>
+          </div>
+          <div class="qr-timer-bar">
+            <div class="qr-timer-fill"
+                 [style.width.%]="timerPercent"
+                 [class.urgente]="countdown <= 10">
+            </div>
+          </div>
+          <p class="qr-timer-hint">Uso único · se regenera automáticamente</p>
+        </div>
+      </ng-container>
+
+      <button class="btn-cancelar-modal" style="width:100%" (click)="ocultarQR()">
+        Cerrar
+      </button>
+    </div>
+  </div>
+
+</div>

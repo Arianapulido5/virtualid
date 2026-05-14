@@ -1,0 +1,404 @@
+/* puntos-acceso.scss — REDISEÑO con paleta morada/azul */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap');
+
+:host {
+  --purple:    #4D0F60;
+  --purple-m:  #6B2080;
+  --purple-l:  #9C27B0;
+  --blue:      #32488C;
+  --blue-m:    #3F5BA9;
+  --bg:        #EDF2F4;
+  --dark:      #4A4D56;
+  --black:     #0F0C0C;
+  --white:     #ffffff;
+  --success:   #2e7d32;
+  --red:       #A93845;
+  display: block;
+}
+
+// ─────────────────────────────────────────────
+//  KEYFRAMES
+// ─────────────────────────────────────────────
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardReveal {
+  from { opacity: 0; transform: translateY(30px) scale(0.93); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(12px, -16px) scale(1.07); }
+}
+
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(-10px, 10px) scale(0.94); }
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-5px) scale(1.1); }
+}
+
+@keyframes badgePop {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes btnHistorialIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes headerIn {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-verde {
+  0%   { box-shadow: 0 0 0 0 rgba(46,125,50,0.5); }
+  70%  { box-shadow: 0 0 0 6px rgba(46,125,50,0); }
+  100% { box-shadow: 0 0 0 0 rgba(46,125,50,0); }
+}
+
+@keyframes addBtnBreath {
+  0%, 100% { box-shadow: 0 4px 16px rgba(77,15,96,0.3); }
+  50%       { box-shadow: 0 8px 28px rgba(77,15,96,0.5); }
+}
+
+// ─────────────────────────────────────────────
+//  LAYOUT
+// ─────────────────────────────────────────────
+.admin-layout {
+  display: flex; min-height: 100vh;
+  background: var(--bg); width: 100%; overflow-x: hidden;
+}
+
+.main-content {
+  margin-left: 210px; margin-top: 52px; flex: 1; overflow-y: auto;
+  min-height: calc(100vh - 52px);
+  width: calc(100% - 210px); box-sizing: border-box; min-width: 0;
+  animation: fadeIn 0.4s ease both;
+}
+
+.page-body {
+  padding: 28px 32px; display: flex; flex-direction: column; gap: 28px;
+}
+
+// ─────────────────────────────────────────────
+//  HEADER
+// ─────────────────────────────────────────────
+.page-header {
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  animation: headerIn 0.5s cubic-bezier(.34,1.2,.64,1) 0.05s both;
+}
+
+.page-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 26px; font-weight: 800; color: var(--black); margin: 0;
+}
+
+.btn-agregar {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--blue) 50%, var(--purple-m) 100%);
+  background-size: 250% 250%;
+  border: none; color: var(--white);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px; font-weight: 700;
+  padding: 11px 24px; border-radius: 12px;
+  cursor: pointer; white-space: nowrap;
+  position: relative; overflow: hidden;
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s;
+  animation: gradientShift 5s ease infinite, addBtnBreath 3s ease-in-out infinite;
+
+  &::before {
+    content: ''; position: absolute; top: 0; left: -80%;
+    width: 55%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+    transform: skewX(-20deg); transition: left 0.55s ease; pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 30px rgba(77,15,96,0.45);
+    &::before { left: 130%; }
+  }
+  &:active { transform: translateY(0) scale(0.97); }
+}
+
+// ─────────────────────────────────────────────
+//  ESTADOS
+// ─────────────────────────────────────────────
+.estado-msg {
+  font-family: 'Open Sans', sans-serif; font-size: 14px; color: var(--dark);
+  padding: 24px; text-align: center;
+  background: var(--white); border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  animation: fadeIn 0.4s ease both;
+
+  &.estado-error {
+    color: var(--red); background: #fff8f8;
+    border-left: 4px solid var(--red);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  GRID
+// ─────────────────────────────────────────────
+.puntos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+// ─────────────────────────────────────────────
+//  PUNTO CARD — paleta morada/azul
+// ─────────────────────────────────────────────
+.punto-card {
+  border-radius: 22px; overflow: hidden;
+  background: var(--white);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+  display: flex; flex-direction: column;
+  animation: cardReveal 0.55s cubic-bezier(.34,1.2,.64,1) both;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s;
+
+  @for $i from 1 through 9 { &:nth-child(#{$i}) { animation-delay: #{0.07 * $i + 0.05}s; } }
+
+  &:hover {
+    transform: translateY(-8px) scale(1.015);
+    box-shadow: 0 20px 60px rgba(77,15,96,0.25);
+
+    .punto-header::after { left: 140%; }
+    .punto-icon { animation: iconFloat 1.5s ease-in-out infinite; }
+    .btn-historial {
+      border-color: var(--purple);
+      color: var(--purple);
+      box-shadow: 0 4px 14px rgba(77,15,96,0.2);
+    }
+  }
+
+  &:active { transform: translateY(-3px) scale(0.998); }
+}
+
+// ─────────────────────────────────────────────
+//  HEADER VARIANTES — TODOS CON PALETA MORADA/AZUL
+// ─────────────────────────────────────────────
+.punto-header {
+  padding: 24px 22px 20px;
+  display: flex; align-items: flex-start; gap: 14px;
+  color: var(--white); min-height: 105px;
+  position: relative; overflow: hidden;
+
+  // Orb 1
+  &::before {
+    content: ''; position: absolute;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+    top: -90px; right: -70px; pointer-events: none;
+    animation: orbFloat1 12s ease-in-out infinite;
+  }
+
+  // Sweep de luz
+  &::after {
+    content: ''; position: absolute; top: 0; left: -120%;
+    width: 70%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    transform: skewX(-20deg); transition: left 0.7s ease; pointer-events: none;
+    z-index: 2;
+  }
+}
+
+// Orb 2 vía pseudo del .punto-titulo
+.punto-titulo::before {
+  content: ''; position: absolute;
+  width: 140px; height: 140px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%);
+  bottom: -55px; left: -35px; pointer-events: none;
+  animation: orbFloat2 9s ease-in-out infinite;
+}
+
+// VARIANTE 1 — purple → blue (edificio, biblioteca)
+.punto-card.card-blue .punto-header {
+  background: linear-gradient(140deg, var(--purple) 0%, #5a2878 35%, var(--blue) 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 12s ease infinite;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+// VARIANTE 2 — blue → purple (laboratorio, cafeteria)
+.punto-card.card-blue2 .punto-header {
+  background: linear-gradient(140deg, var(--blue) 0%, #2a3e7a 35%, var(--purple-m) 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 14s ease infinite;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+// VARIANTE 3 — purple deep → blue (deportiva)
+.punto-card.card-red .punto-header {
+  background: linear-gradient(140deg, #380a4a 0%, var(--purple) 40%, #1e3070 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 11s ease infinite;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+// VARIANTE 4 — blue deep → purple-m
+.punto-card.card-green .punto-header {
+  background: linear-gradient(140deg, #1a2a60 0%, var(--blue-m) 40%, var(--purple-m) 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 13s ease infinite;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+// VARIANTE 5 — purple-m → blue-m
+.punto-card.card-orange .punto-header {
+  background: linear-gradient(140deg, var(--purple-m) 0%, #4a1e62 35%, var(--blue-m) 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 10s ease infinite;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+// DEFAULT
+.punto-card.card-default .punto-header {
+  background: linear-gradient(140deg, var(--purple) 0%, var(--purple-m) 40%, var(--blue) 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 10s ease infinite;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.punto-icon {
+  font-size: 26px; flex-shrink: 0; margin-top: 2px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+  z-index: 1; position: relative;
+}
+
+.punto-titulo {
+  display: flex; flex-direction: column; gap: 5px;
+  z-index: 1; position: relative; min-width: 0;
+}
+
+.punto-nombre {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800; font-size: 15px; color: var(--white); line-height: 1.2;
+}
+
+.punto-desc {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px; color: rgba(255,255,255,0.7); text-transform: capitalize;
+}
+
+// ─────────────────────────────────────────────
+//  STATS BODY
+// ─────────────────────────────────────────────
+.punto-stats {
+  padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; flex: 1;
+}
+
+.stat-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 8px; border-bottom: 1px solid #f3f0f8;
+  border-radius: 6px;
+  transition: background 0.15s, padding-left 0.2s cubic-bezier(.34,1.2,.64,1);
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: rgba(77,15,96,0.04); padding-left: 12px; }
+}
+
+.stat-label { font-family: 'Open Sans', sans-serif; font-size: 12px; color: #aaa; }
+
+.stat-num {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px; font-weight: 800; color: var(--black);
+}
+
+// Badges de estado con paleta correcta
+.estado-badge {
+  font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 50px;
+  animation: badgePop 0.35s cubic-bezier(.34,1.56,.64,1) both;
+
+  &.activo {
+    color: var(--success); background: rgba(46,125,50,0.1);
+    animation: badgePop 0.35s cubic-bezier(.34,1.56,.64,1) both, pulse-verde 2.8s ease-in-out infinite;
+  }
+  &.restringido {
+    color: var(--purple); background: rgba(77,15,96,0.1);
+    border: 1px solid rgba(77,15,96,0.2);
+  }
+  &.inactivo {
+    color: #888; background: rgba(0,0,0,0.06);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  BTN HISTORIAL
+// ─────────────────────────────────────────────
+.btn-historial {
+  margin: 0 16px 18px;
+  padding: 11px;
+  background: var(--white);
+  border: 1.5px solid #e0e4ec; border-radius: 12px;
+  font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700;
+  color: var(--dark); cursor: pointer;
+  transition: all 0.25s cubic-bezier(.34,1.2,.64,1);
+  animation: btnHistorialIn 0.45s ease both;
+  position: relative; overflow: hidden;
+
+  &::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(77,15,96,0.07), rgba(50,72,140,0.05));
+    transform: scale(0); transition: transform 0.3s ease; border-radius: 10px;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    &::before { transform: scale(1); }
+  }
+  &:active { transform: translateY(0); }
+}
+
+// ─────────────────────────────────────────────
+//  RESPONSIVE
+// ─────────────────────────────────────────────
+@media (max-width: 1200px) {
+  .puntos-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (max-width: 1024px) {
+  .main-content { margin-left: 0 !important; width: 100% !important; }
+  .puntos-grid  { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (max-width: 768px) {
+  .admin-layout { flex-direction: column !important; }
+  .main-content { margin-left: 0 !important; margin-top: 52px !important; width: 100% !important; }
+  .page-body    { padding: 16px 14px !important; gap: 18px !important; }
+  .page-header  { flex-direction: column !important; align-items: flex-start !important; }
+  .page-title   { font-size: 20px !important; }
+  .btn-agregar  { width: 100% !important; text-align: center; }
+  .puntos-grid  { grid-template-columns: 1fr !important; }
+  .punto-card:hover { transform: translateY(-4px) !important; }
+}
+
+@media (max-width: 480px) {
+  .main-content  { margin-left: 0 !important; width: 100% !important; }
+  .page-body     { padding: 12px 10px !important; }
+  .page-title    { font-size: 18px !important; }
+  .punto-header  { min-height: 82px !important; padding: 16px !important; }
+  .punto-nombre  { font-size: 14px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.1ms !important; }
+}

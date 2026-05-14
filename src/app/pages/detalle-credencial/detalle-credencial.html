@@ -1,0 +1,298 @@
+<div class="detalle-container">
+
+  <!-- ══ MODAL CONFIRMACIÓN ══ -->
+  <div class="modal-overlay" *ngIf="confirmVisible">
+    <div class="modal-card">
+      <div class="modal-icon confirm-icon">?</div>
+      <h3>{{ confirmTitulo }}</h3>
+      <p>{{ confirmMensaje }}</p>
+      <div class="modal-btns">
+        <button class="btn-cancelar-modal" (click)="cancelarConfirmacion()">Cancelar</button>
+        <button class="btn-aceptar-modal" (click)="confirmarAccion()">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL RESULTADO ══ -->
+  <div class="modal-overlay" *ngIf="modalVisible">
+    <div class="modal-card">
+      <div class="modal-icon" [ngClass]="modalTipo">
+        {{ modalTipo === 'exito' ? '✓' : '!' }}
+      </div>
+      <h3>{{ modalTitulo }}</h3>
+      <p>{{ modalMensaje }}</p>
+      <button class="btn-aceptar-modal btn-aceptar-solo" (click)="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+
+<!-- ══ MODAL SOLICITANDO UBICACIÓN ══ -->
+<div class="modal-overlay" *ngIf="geoSolicitando && !qrVisible" (click)="cancelarGeo()">
+  <div class="modal-card qr-modal-card" (click)="$event.stopPropagation()">
+    <button class="modal-close-btn" (click)="cancelarGeo()">✕</button>
+    <div class="modal-icon" style="background: linear-gradient(135deg, #32488C, #6B2080); font-size:28px;">
+      📍
+    </div>
+    <h3>Obteniendo ubicación...</h3>
+    <p>Por favor acepta el permiso de ubicación para continuar.</p>
+  </div>
+</div>
+
+<!-- ══ MODAL ERROR GEO ══ -->
+<div class="modal-overlay" *ngIf="geoError && !qrVisible && !geoSolicitando" (click)="cerrarGeoError()">
+  <div class="modal-card qr-modal-card" (click)="$event.stopPropagation()">
+    <button class="modal-close-btn" (click)="cerrarGeoError()">✕</button>
+    <div class="modal-icon modal-icon--warn">!</div>
+    <h3>No se pudo generar el QR</h3>
+    <p>{{ geoError }}</p>
+    <button class="btn-aceptar-modal btn-aceptar-solo" (click)="mostrarQR()">Reintentar</button>
+  </div>
+</div>
+
+
+
+<!-- ══ MODAL QR ══ -->
+<div class="modal-overlay" *ngIf="qrVisible && credencial && credencial.activa && credencial.estado === 'activa'" (click)="ocultarQR()">
+  <div class="modal-card qr-modal-card" (click)="$event.stopPropagation()">
+    <button class="modal-close-btn" (click)="ocultarQR()">✕</button>
+
+      <div class="qr-loading" *ngIf="!qrDataUrl">
+        <div class="qr-spinner"></div>
+        <p>Generando QR...</p>
+      </div>
+
+      <ng-container *ngIf="qrDataUrl">
+        <div class="qr-imagen-wrap">
+          <img [src]="qrDataUrl" alt="Código QR" class="qr-imagen" />
+        </div>
+
+        <div class="qr-timer">
+          <div class="qr-timer-row">
+            <span class="qr-timer-label">Válido por</span>
+            <span class="qr-timer-num" [class.urgente]="countdown <= 10">{{ countdown }}s</span>
+          </div>
+          <div class="qr-timer-bar">
+            <div class="qr-timer-fill"
+                 [style.width.%]="timerPercent"
+                 [class.urgente]="countdown <= 10">
+            </div>
+          </div>
+          <p class="qr-timer-hint">Uso único · se regenera automáticamente</p>
+        </div>
+      </ng-container>
+
+      <button class="btn-cancelar-modal" style="width:100%" (click)="ocultarQR()">
+        Cerrar
+      </button>
+    </div>
+  </div>
+
+  <a class="back-link" routerLink="/tarjetas">
+    <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2.5"
+         stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"/>
+      <polyline points="12 19 5 12 12 5"/>
+    </svg>
+  </a>
+
+  <div class="estado-msg" *ngIf="cargando">Cargando credencial…</div>
+  <div class="estado-msg error" *ngIf="!cargando && error">{{ error }}</div>
+
+  <ng-container *ngIf="!cargando && credencial">
+
+    <div class="layout">
+
+      <!-- ══ COLUMNA IZQUIERDA ══ -->
+      <div class="col-left">
+
+        <!-- Tarjeta física -->
+        <div class="cred-card">
+          <div class="cred-card__noise"></div>
+
+          <div class="cred-card__top">
+            <div class="cred-card__chip">
+              <div class="chip-line"></div>
+              <div class="chip-line"></div>
+              <div class="chip-line"></div>
+            </div>
+            <div class="cred-card__badge"
+                 [class.activa]="credencial.activa"
+                 [class.inactiva]="!credencial.activa">
+              {{ credencial.activa ? '● Activa' : '○ Inactiva' }}
+            </div>
+          </div>
+
+          <div class="cred-card__inst">
+            <div class="cred-card__avatar">
+              {{ getIniciales(credencial.institucion_nombre) }}
+            </div>
+            <div>
+              <p class="cred-card__inst-name">{{ credencial.institucion_nombre }}</p>
+              <p class="cred-card__inst-tipo">{{ credencial.institucion_tipo }}</p>
+            </div>
+          </div>
+
+         <div class="cred-card__bottom">
+  <div class="cred-card__field">
+    <p class="cred-card__field-label">Titular</p>
+    <p class="cred-card__field-val">{{ credencial.numero_id || '—' }}</p>
+  </div>
+  <div class="cred-card__field">
+    <p class="cred-card__field-label">Tipo</p>
+    <p class="cred-card__field-val" style="text-transform:capitalize">
+      {{ credencial.tipo_usuario }}
+    </p>
+  </div>
+  <div class="cred-card__field">
+    <p class="cred-card__field-label">Desde</p>
+    <p class="cred-card__field-val">{{ formatFechaCorta(credencial.creado_en) }}</p>
+  </div>
+
+  <!-- Botón QR rediseñado -->
+  <button
+    class="btn-qr-inline"
+    *ngIf="credencial.activa && credencial.estado === 'activa' && !qrVisible && !geoSolicitando"
+    (click)="mostrarQR()">
+    <svg class="qr-icon" viewBox="0 0 24 24" fill="none"
+         xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="5.5" y="5.5" width="2" height="2" fill="currentColor"/>
+      <rect x="16.5" y="5.5" width="2" height="2" fill="currentColor"/>
+      <rect x="5.5" y="16.5" width="2" height="2" fill="currentColor"/>
+      <path d="M14 14h2v2h-2zM16 16h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z"
+            fill="currentColor"/>
+    </svg>
+    <span>Generar QR</span>
+  </button>
+  <!-- Solicitando geo -->
+  <div class="btn-qr-inline btn-qr-loading" *ngIf="geoSolicitando && !qrVisible">
+    <svg class="qr-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" stroke-dasharray="4 2"/>
+    </svg>
+    <span>Obteniendo...</span>
+  </div>
+  </div>
+</div>
+
+        <!-- QR NO DISPONIBLE -->
+        <div class="qr-block"
+             *ngIf="!credencial.activa || credencial.estado !== 'activa'">
+          <div class="qr-graphic"><span>🔒</span></div>
+          <div class="qr-info">
+            <p class="qr-title">QR no disponible</p>
+            <p class="qr-sub">La credencial debe estar activa para generar QR</p>
+          </div>
+        </div>
+
+        <!-- Chips -->
+        <div class="accesos-row">
+          <div class="acceso-chip permitido">
+            {{ credencial.tipo_usuario === 'estudiante' ? ' Estudiante' : ' Empleado' }}
+          </div>
+          <div class="acceso-chip nivel"
+               [style.background]="getNivelColor(credencial.nivel_acceso) + '18'"
+               [style.color]="getNivelColor(credencial.nivel_acceso)"
+               [style.border-color]="getNivelColor(credencial.nivel_acceso) + '55'">
+            Nivel {{ credencial.nivel_acceso }}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══ COLUMNA DERECHA ══ -->
+      <div class="col-right">
+
+        <!-- HEADER con título + botón eliminar alineados -->
+        <div class="right-header">
+          <div class="right-header__left">
+            <h1 class="right-title">{{ credencial.institucion_nombre }}</h1>
+            <p class="right-loc">📍 {{ credencial.ciudad }}, {{ credencial.estado_inst }}</p>
+          </div>
+          <button
+            class="btn-eliminar-credencial"
+            (click)="pedirEliminarCredencial()"
+            [disabled]="procesando">
+             Eliminar
+          </button>
+        </div>
+
+        <!-- Punto de acceso -->
+        <div class="info-section">
+          <p class="section-label">Punto de acceso</p>
+          <div class="punto-card">
+            <span class="punto-icon">{{ getIcon(credencial.punto_tipo) }}</span>
+            <div class="punto-body">
+              <p class="punto-nombre">{{ credencial.punto_nombre }}</p>
+              <p class="punto-desc">{{ credencial.punto_descripcion || credencial.punto_tipo }}</p>
+              <div class="punto-badges">
+                <span class="badge-tipo">{{ credencial.punto_tipo }}</span>
+                <span class="badge-nivel" [style.color]="getNivelColor(credencial.nivel_acceso)">
+                  ● {{ credencial.nivel_acceso }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos de la credencial -->
+        <div class="info-section">
+          <p class="section-label">Datos de la credencial</p>
+          <div class="datos-card">
+            <div class="dato-row">
+              <span class="dato-label">Tipo de usuario</span>
+              <span class="dato-val" style="text-transform:capitalize">{{ credencial.tipo_usuario }}</span>
+            </div>
+            <div class="dato-row" *ngIf="credencial.numero_id">
+              <span class="dato-label">Número de ID</span>
+              <span class="dato-val">{{ credencial.numero_id }}</span>
+            </div>
+            <div class="dato-row" *ngIf="credencial.correo">
+              <span class="dato-label">Correo</span>
+              <span class="dato-val">{{ credencial.correo }}</span>
+            </div>
+
+            <!-- Ubicación inline -->
+            <div class="dato-row ubi-row" *ngIf="tieneUbicacion">
+              <span class="dato-label">Ubicación</span>
+              <div class="ubi-inline-val">
+                <div class="ubi-skeleton" *ngIf="cargandoGeo">
+                  <div class="ubi-skeleton-line short"></div>
+                </div>
+                <span class="dato-val" *ngIf="!cargandoGeo && direccionGeo">{{ direccionGeo }}</span>
+                <span class="dato-val sin-dir" *ngIf="!cargandoGeo && !direccionGeo">Coordenadas registradas</span>
+                <span class="ubi-meta" *ngIf="!cargandoGeo">
+                  <span class="ubi-radio-txt" *ngIf="credencial.inst_radio">Radio: <strong>{{ credencial.inst_radio }} m</strong></span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dato-row ubi-row" *ngIf="!tieneUbicacion">
+              <span class="dato-label">Ubicación</span>
+              <div class="ubi-inline-val">
+                <span class="dato-val sin-dir">Sin restricción</span>
+                <span class="ubi-meta">
+                  <span class="ubi-badge-inline inactiva">Sin validación</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="dato-row">
+              <span class="dato-label">Estado</span>
+              <span class="dato-val estado-val" [class.activa]="credencial.activa">
+                {{ credencial.activa ? 'Activa' : 'Inactiva' }}
+              </span>
+            </div>
+            <div class="dato-row">
+              <span class="dato-label">Registrada el</span>
+              <span class="dato-val">{{ formatFecha(credencial.creado_en) }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </ng-container>
+</div>

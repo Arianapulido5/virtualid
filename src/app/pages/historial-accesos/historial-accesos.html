@@ -1,0 +1,78 @@
+<!-- src/app/pages/historial-accesos/historial-accesos.html -->
+<div class="page-layout">
+  <div class="page-body">
+
+    <!-- HEADER -->
+    <div class="page-header">
+      <h1 class="page-title">Historial de Accesos</h1>
+      <div class="search-row">
+        <input class="search-input" type="text" placeholder="Buscar lugar, institución..."
+          [(ngModel)]="busqueda" (input)="onBusqueda()" />
+        <button class="btn-buscar" (click)="onBusqueda()">BUSCAR</button>
+      </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filter-tabs">
+      <button class="filter-btn" [class.active]="filtroActivo === 'todos'"  (click)="setFiltro('todos')">Todos</button>
+      <button class="filter-btn" [class.active]="filtroActivo === 'semana'" (click)="setFiltro('semana')">Esta semana</button>
+      <button class="filter-btn" [class.active]="filtroActivo === 'mes'"    (click)="setFiltro('mes')">Este mes</button>
+    </div>
+
+    <!-- CARGANDO -->
+    <div class="estado-msg" *ngIf="cargando">Cargando historial…</div>
+
+    <!-- ERROR -->
+    <div class="estado-msg error" *ngIf="!cargando && error">{{ error }}</div>
+
+    <!-- TABLA -->
+    <div class="tabla-card" *ngIf="!cargando && !error">
+      <div class="tabla-scroll">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th class="th-lugar">LUGAR</th>
+              <th class="th-inst">INSTITUCIÓN</th>
+              <th class="th-fecha">FECHA Y HORA</th>
+              <th class="th-resultado">RESULTADO</th>
+              <th class="th-accion"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="tabla-row" *ngFor="let a of accesosFiltrados" (click)="verDetalle(a)">
+
+              <td class="td-lugar">
+                <span class="nombre-lugar">{{ a.punto_nombre }}</span>
+                <span class="tipo-lugar">{{ a.punto_tipo | titlecase }}</span>
+              </td>
+
+              <td class="td-inst">
+                <span class="nombre-inst">{{ a.institucion_nombre }}</span>
+                <span class="ciudad-inst">{{ a.ciudad }}, {{ a.estado }}</span>
+              </td>
+
+              <td class="td-fecha">
+                <span class="fecha-dia">{{ formatFecha(a.creado_en) }}</span>
+                <span class="fecha-hora">{{ formatHora(a.creado_en) }}</span>
+              </td>
+              
+              <td class="td-resultado">
+                <span class="badge-resultado" [class.exitoso]="a.exitoso" [class.denegado]="!a.exitoso">
+                  {{ a.exitoso ? 'Exitoso' : 'Denegado' }}
+                </span>
+              </td>
+
+              <td class="td-accion">Ver</td>
+
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="empty-state" *ngIf="accesosFiltrados.length === 0">
+          <p>No se encontraron accesos{{ busqueda ? ' para "' + busqueda + '"' : '' }}.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

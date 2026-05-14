@@ -1,0 +1,76 @@
+<div class="modal-overlay" (click)="cerrar()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <div class="header-left">
+        <div class="header-icon">✉</div>
+        <div class="header-text">
+          <span class="header-title">Enviar Mensaje</span>
+          <span class="header-sub">El usuario recibirá una notificación en su app</span>
+        </div>
+      </div>
+      <button class="btn-close" (click)="cerrar()">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="para-row">
+        <span class="para-label">PARA</span>
+        <div class="para-info">
+          <span class="para-nombre">{{ usuario.nombre }}</span>
+          <span class="para-correo">{{ usuario.correo }}</span>
+          <span class="para-tipo">{{ usuario.tipo }}</span>
+        </div>
+      </div>
+
+      <div class="tipo-section">
+        <label class="section-label">Tipo de mensaje</label>
+        <div class="tipo-grid">
+          <button class="tipo-btn" [class.active]="tipoSeleccionado === 'notificacion'" (click)="seleccionarTipo('notificacion')">
+            <span class="tipo-icon">🔔</span>
+            <div class="tipo-text">
+              <span class="tipo-nombre">Notificación</span>
+              <span class="tipo-desc">Aviso informativo</span>
+            </div>
+          </button>
+          <button class="tipo-btn" [class.active]="tipoSeleccionado === 'advertencia'" (click)="seleccionarTipo('advertencia')">
+            <span class="tipo-icon">⚠️</span>
+            <div class="tipo-text">
+              <span class="tipo-nombre">Advertencia</span>
+              <span class="tipo-desc">Requiere atención</span>
+            </div>
+          </button>
+          <button class="tipo-btn" [class.active]="tipoSeleccionado === 'restriccion'" (click)="seleccionarTipo('restriccion')">
+            <span class="tipo-icon">🚫</span>
+            <div class="tipo-text">
+              <span class="tipo-nombre">Restricción</span>
+              <span class="tipo-desc">Bloqueo o suspensión</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Asunto *</label>
+        <input class="field-input" type="text" placeholder="Ej. Información sobre tu credencial"
+          [(ngModel)]="asunto" maxlength="100" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Mensaje *</label>
+        <textarea class="field-textarea" placeholder="Escribe aquí tu mensaje para el usuario..."
+          [(ngModel)]="mensaje" maxlength="500" (input)="contarCaracteres()"></textarea>
+        <span class="char-count">{{ mensaje.length }} / 500 caracteres</span>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrar()">Cancelar</button>
+      <button class="btn-enviar" [disabled]="!asunto.trim() || !mensaje.trim()" (click)="enviar()">
+        Enviar mensaje
+      </button>
+    </div>
+
+  </div>
+</div>

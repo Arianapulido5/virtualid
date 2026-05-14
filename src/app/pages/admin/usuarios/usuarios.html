@@ -1,0 +1,81 @@
+<div class="admin-layout">
+  <app-sidebar-admin paginaActiva="usuarios" />
+  <main class="main-content">
+    <div class="page-body">
+
+      <h2 class="page-title">Usuarios</h2>
+
+      <!-- BUSCADOR -->
+      <div class="search-row">
+        <input
+          class="search-input"
+          type="text"
+          placeholder="Buscar usuario..."
+          [(ngModel)]="searchTerm"
+          (input)="filtrar()"
+        />
+        <button class="btn-buscar" (click)="filtrar()">BUSCAR</button>
+      </div>
+
+      <!-- FILTROS -->
+      <div class="filtros-row">
+        <button class="filtro-btn" [class.active]="filtroActivo === 'todos'" (click)="setFiltro('todos')">
+          Todos ({{ totalUsuarios }})
+        </button>
+        <button class="filtro-btn" [class.active]="filtroActivo === 'estudiantes'" (click)="setFiltro('estudiantes')">
+          Estudiantes
+        </button>
+        <button class="filtro-btn" [class.active]="filtroActivo === 'empleados'" (click)="setFiltro('empleados')">
+          Empleados
+        </button>
+      </div>
+
+      <!-- CARGANDO -->
+      <div class="tabla-empty" *ngIf="cargando">
+        <p>Cargando usuarios...</p>
+      </div>
+
+      <!-- TABLA -->
+      <div class="tabla-card" *ngIf="!cargando">
+        <div class="tabla-scroll">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>USUARIO</th>
+                <th>NO. ID</th>
+                <th>TIPO</th>
+                <th>ÚLTIMO ACCESO</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of usuariosFiltrados" class="tabla-row">
+                <td class="col-usuario">
+                  <div class="user-info">
+                    <div class="user-avatar" [ngClass]="u.avatarColor">{{ u.iniciales }}</div>
+                    <div class="user-datos">
+                      <span class="user-nombre">{{ u.nombre }}</span>
+                      <span class="user-correo">{{ u.correo }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="col-id">{{ u.noId }}</td>
+                <td class="col-tipo">
+                  <span class="tipo-badge" [ngClass]="u.tipo.toLowerCase()">{{ u.tipo }}</span>
+                </td>
+                <td class="col-acceso">{{ u.ultimoAcceso }}</td>
+                <td class="col-accion">
+                  <button class="btn-ver" [routerLink]="['/admin/usuarios', u.id]">Ver</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="tabla-empty" *ngIf="usuariosFiltrados.length === 0">
+            <p>No se encontraron usuarios.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

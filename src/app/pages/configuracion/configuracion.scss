@@ -1,0 +1,480 @@
+// src/app/pages/configuracion/configuracion.scss
+@use 'sass:color';
+
+$purple-dark:  #4D0F60;
+$purple-mid:   #6B2080;
+$blue-dark:    #32488C;
+$bg:           #EDF2F4;
+$white:        #ffffff;
+$text-main:    #111118;
+$text-soft:    #4A4D56;
+$border:       #e0e0e0;
+$danger:       #A93845;
+$success:      #1a7a4a;
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes sectionIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toggleOn {
+  0%   { transform: translateX(22px) scale(1.2); }
+  60%  { transform: translateX(22px) scale(0.9); }
+  100% { transform: translateX(22px) scale(1); }
+}
+@keyframes arrowPulse {
+  0%, 100% { transform: translateX(0); opacity: 0.5; }
+  50%       { transform: translateX(3px); opacity: 0.9; }
+}
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes badgePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
+}
+
+// ─────────────────────────────────────────────
+//  CONTAINER
+// ─────────────────────────────────────────────
+.config-container {
+  padding: 32px;
+  min-height: 100vh;
+  background-color: $bg;
+  font-family: 'Open Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 95%;
+  box-sizing: border-box;
+  animation: fadeIn 0.4s ease both;
+}
+
+.page-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: $text-main;
+  margin: 0;
+  animation: fadeInUp 0.45s ease 0.1s both;
+}
+
+// ─────────────────────────────────────────────
+//  SECCIÓN
+// ─────────────────────────────────────────────
+.config-section {
+  background: $white;
+  border-radius: 14px;
+  border: 1.5px solid $border;
+  overflow: hidden;
+  width: 100%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  animation: sectionIn 0.45s cubic-bezier(.34,1.2,.64,1) both;
+  transition: box-shadow 0.25s, transform 0.25s;
+
+  @for $i from 1 through 6 {
+    &:nth-child(#{$i + 1}) { animation-delay: #{0.08 * $i + 0.1}s; }
+  }
+
+  &:hover {
+    box-shadow: 0 6px 22px rgba(77,15,96,0.09);
+    transform: translateY(-1px);
+  }
+}
+
+.section-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: $text-main;
+  padding: 16px 20px 12px;
+  margin: 0;
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, $purple-dark, $blue-dark);
+    border-radius: 0 2px 2px 0;
+  }
+}
+
+.section-body { padding: 4px 0; }
+
+// ─────────────────────────────────────────────
+//  CONFIG ITEM
+// ─────────────────────────────────────────────
+.config-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  font-size: 14px;
+  color: $text-soft;
+  font-family: 'Open Sans', sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.18s ease, padding-left 0.2s cubic-bezier(.34,1.2,.64,1), color 0.18s;
+  position: relative;
+  border-left: 3px solid transparent;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(77,15,96,0.05) 0%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    pointer-events: none;
+  }
+
+  &:hover {
+    background-color: #fafafa;
+    padding-left: 24px;
+    border-left-color: rgba(77,15,96,0.3);
+    color: $purple-dark;
+    &::before { transform: translateX(0); }
+    .item-arrow { animation: arrowPulse 0.6s ease infinite; }
+  }
+}
+
+.item-arrow {
+  font-size: 20px;
+  color: #aaa;
+  font-weight: 300;
+  transition: color 0.2s;
+}
+
+.item-divider {
+  height: 1px;
+  background-color: #f0f0f0;
+  margin: 0 20px;
+}
+
+// ─────────────────────────────────────────────
+//  TOGGLE
+// ─────────────────────────────────────────────
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  flex-shrink: 0;
+
+  input { opacity: 0; width: 0; height: 0; }
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background-color: #ccc;
+  border-radius: 28px;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 22px; height: 22px;
+    left: 3px; top: 3px;
+    background: $white;
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+
+  &:hover { box-shadow: 0 0 0 4px rgba(77,15,96,0.12); }
+}
+
+.toggle input:checked + .toggle-slider {
+  background: linear-gradient(135deg, $purple-dark, $purple-mid);
+  box-shadow: 0 2px 10px rgba(77,15,96,0.3);
+
+  &::before {
+    transform: translateX(22px);
+    animation: toggleOn 0.35s cubic-bezier(.34,1.56,.64,1) both;
+  }
+}
+
+// ─────────────────────────────────────────────
+//  SECCIÓN UBICACIÓN
+// ─────────────────────────────────────────────
+
+// Item de ubicación dentro del section-body
+.ubicacion-cargando {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+}
+
+.ubi-skeleton-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.3s infinite;
+  flex-shrink: 0;
+}
+
+.ubi-skeleton-body {
+  display: flex; flex-direction: column; gap: 8px; flex: 1;
+}
+
+.ubi-skeleton-line {
+  height: 13px; border-radius: 6px;
+  background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.3s infinite;
+  width: 100%;
+
+  &.short { width: 60%; }
+}
+
+.ubicacion-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  transition: background 0.18s, padding-left 0.2s cubic-bezier(.34,1.2,.64,1);
+  border-left: 3px solid transparent;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(77,15,96,0.04) 0%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    pointer-events: none;
+  }
+
+  &:hover {
+    background: #fafafa;
+    padding-left: 24px;
+    border-left-color: rgba(77,15,96,0.25);
+    &::before { transform: translateX(0); }
+  }
+}
+
+.ubi-icon-wrap {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, $purple-dark, $blue-dark);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  box-shadow: 0 3px 12px rgba(77,15,96,0.22);
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+
+  .ubicacion-item:hover & { transform: scale(1.1) rotate(-4deg); }
+}
+
+.ubi-icono { line-height: 1; }
+
+.ubi-info {
+  display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0;
+}
+
+.ubi-institucion {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px; font-weight: 700; color: $text-main;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.ubi-direccion {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px; color: $text-soft;
+  line-height: 1.4; display: block;
+}
+
+.ubi-sin-geo {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px; color: #aaa; font-style: italic;
+}
+
+.ubi-radio {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11.5px; color: #888;
+
+  strong { color: $purple-dark; font-weight: 700; }
+}
+
+// Skeleton de dirección (solo la línea pequeña)
+.ubi-dir-skeleton {
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.ubi-badge {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px; font-weight: 700;
+  padding: 4px 12px; border-radius: 50px;
+  flex-shrink: 0;
+
+  &.activa {
+    color: $success;
+    background: rgba(26,122,74,0.1);
+    animation: badgePulse 3s ease-in-out infinite;
+  }
+  &.sin-geo {
+    color: #aaa;
+    background: rgba(0,0,0,0.06);
+  }
+}
+
+.ubicacion-vacia {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+.ubi-icono-vacio { font-size: 24px; opacity: 0.3; flex-shrink: 0; }
+
+.ubi-vacio-txt {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px; color: #bbb;
+}
+
+// ─────────────────────────────────────────────
+//  FOOTER
+// ─────────────────────────────────────────────
+.config-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0 20px;
+  width: 100%;
+  animation: fadeInUp 0.5s ease 0.5s both;
+}
+
+.footer-link {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: $text-soft;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  transition: color 0.2s, background 0.2s, transform 0.2s cubic-bezier(.34,1.56,.64,1);
+
+  &:hover {
+    color: $purple-dark;
+    background: rgba(77,15,96,0.06);
+    transform: translateY(-1px);
+  }
+
+  &.danger {
+    color: $danger;
+    &:hover {
+      color: color.adjust($danger, $lightness: -10%);
+      background: rgba(169,56,69,0.07);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  IDIOMA
+// ─────────────────────────────────────────────
+.idioma-item { cursor: pointer; user-select: none; transition: background 0.18s; &:hover { background: #fafafa; } }
+
+.idioma-selector { display: flex; align-items: center; gap: 6px; }
+.idioma-actual   { font-size: 13px; color: $text-soft; opacity: 0.8; }
+
+.idioma-arrow {
+  width: 16px; height: 16px; color: #aaa;
+  transition: transform 0.25s cubic-bezier(.34,1.2,.64,1);
+  &.rotated { transform: rotate(180deg); }
+}
+
+.idioma-dropdown {
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+  animation: slideDown 0.22s cubic-bezier(.34,1.2,.64,1) both;
+}
+
+.idioma-option {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 14px; color: $text-soft;
+  font-family: 'Open Sans', sans-serif;
+  transition: background 0.15s, padding-left 0.2s, color 0.15s;
+  animation: slideInRight 0.25s ease both;
+
+  @for $i from 1 through 8 {
+    &:nth-child(#{$i}) { animation-delay: #{0.03 * $i}s; }
+  }
+
+  &:hover { background-color: #f0eef5; padding-left: 26px; color: $purple-dark; }
+  &.selected { background-color: rgba(77,15,96,0.06); font-weight: 600; color: $purple-dark; padding-left: 26px; }
+}
+
+.idioma-nombre { flex: 1; }
+.idioma-check  { color: $purple-dark; font-weight: 700; font-size: 14px; animation: fadeIn 0.2s ease both; }
+
+// ─────────────────────────────────────────────
+//  RESPONSIVE
+// ─────────────────────────────────────────────
+@media (max-width: 768px) {
+  .config-container {
+    padding: 0 20px 20px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 22px);
+    max-width: 100%;
+  }
+
+  .page-title {
+    font-size: 22px;
+    padding-left: 44px;
+    margin-bottom: 24px;
+  }
+
+  .ubicacion-item { flex-wrap: wrap; gap: 10px; }
+  .ubi-badge { margin-left: auto; }
+}
+
+@media (max-width: 480px) {
+  .config-container {
+    padding: 0 22px 22px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 22px);
+  }
+
+  .page-title {
+    font-size: 20px;
+    padding-left: 44px;
+    margin-bottom: 24px;
+  }
+
+  .config-item { padding: 12px 16px; }
+  .section-title { padding: 14px 16px 10px; }
+}

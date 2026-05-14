@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@300;400;600&display=swap');
+
+:host { display: block; }
+
+.sidebar {
+  width: 210px;
+  min-height: 100vh;
+  background-color: #4D0F60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+padding-top: calc(env(safe-area-inset-top, 0px) + 48px);
+padding-bottom: 20px;
+padding-left: 0;
+padding-right: 0;
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 100;
+  font-family: 'Open Sans', sans-serif;
+  transition: transform 0.32s cubic-bezier(.4,0,.2,1);
+}
+
+.sidebar-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.logo-circle {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #32488C, #6a1a80);
+  border: 2px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+
+  span {
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px; font-weight: 800; letter-spacing: 2px;
+  }
+}
+
+.brand-name {
+  margin-top: 10px; color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 3.5px; text-transform: uppercase;
+}
+
+.sidebar-nav {
+  display: flex; flex-direction: column;
+  width: 100%; flex: 1;
+  padding: 0 14px; gap: 2px;
+}
+
+.nav-link {
+  display: flex !important;
+  align-items: center; justify-content: space-between;
+  padding: 11px 16px; border-radius: 8px;
+  color: rgba(255,255,255,0.75);
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px; font-weight: 400;
+  text-decoration: none; letter-spacing: 0.2px;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &:hover { background-color: rgba(255,255,255,0.1); color: #fff; }
+  &.active { background-color: #32488C; color: #fff; font-weight: 600; }
+}
+
+.sidebar-footer {
+  width: 100%; padding: 12px 14px;
+}
+
+.logout-btn {
+  background: none; border: none;
+  color: rgba(255,255,255,0.65);
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px; font-weight: 400;
+  cursor: pointer; padding: 8px 16px;
+  width: 100%; text-align: left;
+  transition: color 0.2s ease;
+  &:hover { color: #fff; }
+}
+
+.notif-badge {
+  background: #A93845; color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px; font-weight: 700;
+  min-width: 18px; height: 18px;
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 5px; flex-shrink: 0;
+}
+
+/* Overlay oscuro */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 99;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 240px;
+    &.open { transform: translateX(0); }
+  }
+
+  .sidebar-overlay {
+    display: block;
+    &.hidden { display: none; }
+  }
+}

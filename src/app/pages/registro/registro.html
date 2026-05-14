@@ -1,0 +1,188 @@
+<!-- src/app/pages/registro/registro.html -->
+
+<div class="modal-overlay" *ngIf="mostrarModal">
+  <div class="modal-card">
+    <div class="modal-icon">✓</div>
+    <h3>¡Cuenta creada!</h3>
+    <p>Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión.</p>
+    <button class="btn-aceptar" (click)="irAlLogin()">Aceptar</button>
+  </div>
+</div>
+
+<div class="registro-bg">
+  <div class="left">
+    <div class="logo-circle">VID</div>
+    <h3>Únete a VIRTUALID</h3>
+  </div>
+
+  <div class="right">
+    <h2>Crear tu cuenta</h2>
+    <p>Completa el formulario para registrarte</p>
+
+    <!-- NOMBRE -->
+    <div class="row-fields">
+      <div class="field">
+        <label>Nombre(s) *</label>
+        <input type="text" placeholder="Guillermo"
+          [(ngModel)]="nombre" (ngModelChange)="validarNombre()"
+          [class.input-error]="errores.nombre"/>
+        <span class="field-error" *ngIf="errores.nombre">{{ errores.nombre }}</span>
+      </div>
+      <div class="field">
+        <label>Apellido paterno *</label>
+        <input type="text" placeholder="Castellanos"
+          [(ngModel)]="apellido_paterno" (ngModelChange)="validarApellidoPaterno()"
+          [class.input-error]="errores.apellido_paterno"/>
+        <span class="field-error" *ngIf="errores.apellido_paterno">{{ errores.apellido_paterno }}</span>
+      </div>
+      <div class="field">
+        <label>Apellido materno *</label>
+        <input type="text" placeholder="Pérez"
+          [(ngModel)]="apellido_materno" (ngModelChange)="validarApellidoMaterno()"
+          [class.input-error]="errores.apellido_materno"/>
+        <span class="field-error" *ngIf="errores.apellido_materno">{{ errores.apellido_materno }}</span>
+      </div>
+    </div>
+
+    <!-- CORREO -->
+    <div class="field">
+      <label>Correo electrónico *</label>
+      <input type="email" placeholder="guillermo@email.com"
+        [(ngModel)]="correo" (ngModelChange)="validarCorreo()"
+        [class.input-error]="errores.correo"/>
+      <span class="field-error" *ngIf="errores.correo">{{ errores.correo }}</span>
+    </div>
+
+    <!-- NÚMERO EMPLEADO + TIPO -->
+    <div class="row-fields">
+      <div class="field" style="flex:2">
+        <label>Número de empleado/estudiante *</label>
+        <input type="text" placeholder="2021XXXXXX" maxlength="10"
+          [(ngModel)]="numero_empleado" (ngModelChange)="validarNumeroEmpleado()"
+          [class.input-error]="errores.numero_empleado"/>
+        <span class="field-error" *ngIf="errores.numero_empleado">{{ errores.numero_empleado }}</span>
+      </div>
+      <div class="field" style="flex:1">
+        <label>Tipo *</label>
+        <select [(ngModel)]="tipo" [class.input-error]="errores.tipo" (ngModelChange)="validarTipo()">
+          <option value="">Selecciona</option>
+          <option value="estudiante">Estudiante</option>
+          <option value="empleado">Empleado</option>
+        </select>
+        <span class="field-error" *ngIf="errores.tipo">{{ errores.tipo }}</span>
+      </div>
+    </div>
+
+    <!-- SEPARADOR -->
+    <p class="section-label">Información personal <span class="opcional">(opcional)</span></p>
+
+    <!-- TELÉFONO + FECHA -->
+    <div class="row-fields">
+      <div class="field">
+        <label>Teléfono</label>
+        <input type="tel" placeholder="10 dígitos" maxlength="10"
+          [(ngModel)]="telefono" (ngModelChange)="validarTelefono()"
+          [class.input-error]="errores.telefono"/>
+        <span class="field-error" *ngIf="errores.telefono">{{ errores.telefono }}</span>
+      </div>
+      <div class="field">
+        <label>Fecha de nacimiento</label>
+        <input type="date" [max]="hoy"
+          [(ngModel)]="fecha_nacimiento" (ngModelChange)="validarFechaNacimiento()"
+          [class.input-error]="errores.fecha_nacimiento"/>
+        <span class="field-error" *ngIf="errores.fecha_nacimiento">{{ errores.fecha_nacimiento }}</span>
+      </div>
+    </div>
+
+    <!-- DIRECCIÓN -->
+    <div class="field">
+      <label>Dirección</label>
+      <input type="text" placeholder="Calle, número, colonia" [(ngModel)]="direccion"/>
+    </div>
+
+    <!-- CIUDAD + ESTADO + CP -->
+    <div class="row-fields">
+      <div class="field">
+        <label>Ciudad</label>
+        <input type="text" placeholder="Ej. Guadalajara" [(ngModel)]="ciudad"/>
+      </div>
+      <div class="field">
+        <label>Estado</label>
+        <select [(ngModel)]="estado">
+          <option value="">Selecciona</option>
+          <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Código Postal</label>
+        <input type="text" placeholder="5 dígitos" maxlength="5"
+          [(ngModel)]="codigo_postal" (ngModelChange)="validarCodigoPostal()"
+          [class.input-error]="errores.codigo_postal"/>
+        <span class="field-error" *ngIf="errores.codigo_postal">{{ errores.codigo_postal }}</span>
+      </div>
+    </div>
+
+    <!-- CONTRASEÑAS -->
+    <div class="row-fields">
+      <div class="field">
+        <label>Contraseña *</label>
+        <div class="input-wrapper">
+          <input [type]="showPassword ? 'text' : 'password'" placeholder="••••••••••"
+            [(ngModel)]="contrasena" (ngModelChange)="validarContrasena()"
+            [class.input-error]="errores.contrasena"/>
+          <button class="eye-btn" (click)="togglePassword()" type="button">
+            <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+              <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+            </svg>
+          </button>
+        </div>
+        <ul class="requisitos" *ngIf="contrasena.length > 0">
+          <li [class.ok]="contrasena.length >= 8"><span class="req-icon">{{ contrasena.length >= 8 ? '✓' : '✗' }}</span> Mínimo 8 caracteres</li>
+          <li [class.ok]="tieneUpperCase"><span class="req-icon">{{ tieneUpperCase ? '✓' : '✗' }}</span> Al menos una mayúscula</li>
+          <li [class.ok]="tieneNumero"><span class="req-icon">{{ tieneNumero ? '✓' : '✗' }}</span> Al menos un número</li>
+          <li [class.ok]="tieneEspecial"><span class="req-icon">{{ tieneEspecial ? '✓' : '✗' }}</span> Al menos un carácter especial</li>
+        </ul>
+        <span class="field-error" *ngIf="errores.contrasena">{{ errores.contrasena }}</span>
+      </div>
+      <div class="field">
+        <label>Confirmar contraseña *</label>
+        <div class="input-wrapper">
+          <input [type]="showConfirm ? 'text' : 'password'" placeholder="••••••••••"
+            [(ngModel)]="confirmar" (ngModelChange)="validarConfirmar()"
+            [class.input-error]="errores.confirmar"/>
+          <button class="eye-btn" (click)="toggleConfirm()" type="button">
+            <svg *ngIf="!showConfirm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+              <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <svg *ngIf="showConfirm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+            </svg>
+          </button>
+        </div>
+        <span class="field-error" *ngIf="errores.confirmar">{{ errores.confirmar }}</span>
+        <span class="field-ok" *ngIf="!errores.confirmar && confirmar.length > 0">✓ Las contraseñas coinciden</span>
+      </div>
+    </div>
+
+    <!-- TÉRMINOS -->
+    <label class="check">
+      <input type="checkbox" [(ngModel)]="aceptaTerminos" (ngModelChange)="validarTerminos()"/>
+      Acepto los términos y condiciones de uso
+    </label>
+    <span class="field-error" *ngIf="errores.terminos">{{ errores.terminos }}</span>
+
+    <p *ngIf="errorGeneral" class="error-general">{{ errorGeneral }}</p>
+
+    <button class="btn-crear" (click)="crearCuenta()" [disabled]="cargando" [class.btn-loading]="cargando">
+      <span *ngIf="!cargando">Crear Cuenta</span>
+      <span *ngIf="cargando" class="spinner"></span>
+    </button>
+
+    <a routerLink="/login" class="login-link">¿Ya tienes cuenta? Inicia sesión</a>
+  </div>
+</div>

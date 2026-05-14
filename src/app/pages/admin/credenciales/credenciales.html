@@ -1,0 +1,123 @@
+<div class="admin-layout">
+  <app-sidebar-admin paginaActiva="credenciales" />
+  <main class="main-content">
+    <div class="page-body">
+
+      <!-- HEADER -->
+      <div class="page-header">
+        <h1 class="page-title">Credenciales</h1>
+        <div class="search-row">
+          <input
+            class="search-input"
+            type="text"
+            placeholder="Buscar usuario..."
+            [(ngModel)]="busqueda"
+            (input)="buscar()"
+          />
+          <button class="btn-buscar" (click)="buscar()">BUSCAR</button>
+        </div>
+      </div>
+
+      <!-- FILTROS -->
+      <div class="filtros-row">
+        <button class="filtro-btn" [class.active]="filtroActivo === 'todas'"      (click)="setFiltro('todas')">
+          Todas ({{ totalCredenciales }})
+        </button>
+        <button class="filtro-btn" [class.active]="filtroActivo === 'activas'"    (click)="setFiltro('activas')">Activas</button>
+        <button class="filtro-btn" [class.active]="filtroActivo === 'pendientes'" (click)="setFiltro('pendientes')">Pendientes</button>
+        <button class="filtro-btn" [class.active]="filtroActivo === 'revocadas'"  (click)="setFiltro('revocadas')">Revocadas</button>
+      </div>
+
+      <!-- CARGANDO -->
+      <div class="tabla-card" *ngIf="cargando" style="padding:40px;text-align:center;color:#4A4D56">
+        Cargando credenciales...
+      </div>
+
+      <!-- TABLA -->
+      <div class="tabla-card" *ngIf="!cargando">
+
+        <div class="tabla-scroll">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>USUARIO</th>
+                <th>NO. ID</th>
+                <th>TIPO</th>
+                <th>ESTADO</th>
+                <th>FECHA SOLICITUD</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let c of credencialesFiltradas()"
+                class="tabla-row"
+                [class.revocada]="c.estado === 'Revocada'"
+              >
+                <td class="col-usuario">
+                  <div class="user-avatar" [ngClass]="c.avatarColor">{{ c.iniciales }}</div>
+                  <div class="user-info">
+                    <span class="user-nombre">{{ c.nombre }}</span>
+                    <span class="user-correo">{{ c.correo }}</span>
+                  </div>
+                </td>
+                <td class="col-id">{{ c.noId }}</td>
+                <td class="col-tipo">
+                  <span class="tipo-badge" [ngClass]="c.tipo.toLowerCase()">{{ c.tipo }}</span>
+                </td>
+                <td class="col-estado">
+                  <span class="estado-badge" [ngClass]="c.estado.toLowerCase()">
+                    <span class="estado-dot">
+                      {{ c.estado === 'Pendiente' ? '⏳' : c.estado === 'Activa' ? '●' : '✕' }}
+                    </span>
+                    {{ c.estado }}
+                  </span>
+                </td>
+                <td class="col-fecha">{{ c.fecha }}</td>
+                <td class="col-accion">
+                  <button
+                    *ngIf="c.estado === 'Pendiente'"
+                    class="btn-revisar"
+                    [routerLink]="['/admin/credenciales', c.id, 'validar']"
+                  >
+                    Revisar →
+                  </button>
+                  <button
+                    *ngIf="c.estado === 'Activa'"
+                    class="btn-ver"
+                    [routerLink]="['/admin/credenciales', c.id, 'validar']"
+                  >
+                    Ver detalle
+                  </button>
+                  <button
+                    *ngIf="c.estado === 'Revocada'"
+                    class="btn-rehabilitar"
+                    [routerLink]="['/admin/credenciales', c.id, 'validar']"
+                  >
+                    Rehabilitar
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="padding:32px;text-align:center;color:#4A4D56;font-size:13px"
+               *ngIf="credencialesFiltradas().length === 0">
+            No se encontraron credenciales.
+          </div>
+        </div>
+
+        <!-- PAGINACIÓN fuera del scroll, siempre visible -->
+        <div class="paginacion">
+          <button class="pag-btn" [disabled]="paginaActual === 1" (click)="paginaActual = paginaActual - 1">‹</button>
+          <button class="pag-btn" [class.active]="paginaActual === 1" (click)="paginaActual = 1">1</button>
+          <button class="pag-btn" [class.active]="paginaActual === 2" (click)="paginaActual = 2">2</button>
+          <button class="pag-btn" [class.active]="paginaActual === 3" (click)="paginaActual = 3">3</button>
+          <button class="pag-btn" (click)="paginaActual = paginaActual + 1">›</button>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>

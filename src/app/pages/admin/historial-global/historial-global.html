@@ -1,0 +1,102 @@
+<!-- src/app/pages/admin/historial-global/historial-global.html -->
+<div class="admin-layout">
+  <app-sidebar-admin paginaActiva="historial-global" />
+  <main class="main-content">
+    <div class="page-body">
+
+      <h1 class="page-title">Historial Global</h1>
+
+      <!-- FILTROS -->
+      <div class="filtros-bar">
+        <div class="filtro-grupo">
+          <label class="filtro-label">Punto de acceso</label>
+          <select class="filtro-select" [(ngModel)]="filtroPunto" (ngModelChange)="onFiltroChange()">
+            <option value="todos">Todos</option>
+            <option *ngFor="let p of puntos" [value]="p.id">{{ p.nombre }}</option>
+          </select>
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label">Resultado</label>
+          <select class="filtro-select" [(ngModel)]="filtroResultado" (ngModelChange)="onFiltroChange()">
+            <option value="todos">Todos</option>
+            <option value="exitoso">Exitoso</option>
+            <option value="denegado">Denegado</option>
+          </select>
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label">Periodo</label>
+          <select class="filtro-select" [(ngModel)]="filtroPeriodo" (ngModelChange)="onFiltroChange()">
+            <option value="todos">Todos</option>
+            <option value="hoy">Hoy</option>
+            <option value="semana">Esta semana</option>
+            <option value="mes">Este mes</option>
+            <option value="fecha">Día específico</option>
+          </select>
+        </div>
+        <div class="filtro-grupo" *ngIf="filtroPeriodo === 'fecha'">
+          <label class="filtro-label">Selecciona fecha</label>
+          <input
+            type="date"
+            class="filtro-select"
+            [(ngModel)]="filtroFecha"
+            (ngModelChange)="onFechaChange()"
+          />
+        </div>
+      </div>
+
+      <!-- CARGANDO -->
+      <div class="estado-txt" *ngIf="cargando">Cargando historial...</div>
+
+      <!-- TABLA -->
+      <div class="tabla-card" *ngIf="!cargando">
+        <div class="tabla-scroll">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>USUARIO</th>
+                <th>PUNTO DE ACCESO</th>
+                <th>FECHA Y HORA</th>
+                <th>RESULTADO</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="tabla-row clickeable"
+                *ngFor="let r of registros; let i = index"
+                (click)="verDetalle(r)"
+              >
+                <td class="col-usuario">
+                  <div class="user-avatar" [ngClass]="avatarColor(i)">{{ iniciales(r) }}</div>
+                  <div class="user-info">
+                    <span class="user-nombre">{{ nombreCompleto(r) }}</span>
+                    <span class="user-correo">{{ r.correo }}</span>
+                  </div>
+                </td>
+                <td class="col-punto">
+                  <div class="punto-cell">
+                    <span class="punto-tipo-icon">{{ puntoIcon(r.punto_tipo) }}</span>
+                    <span>{{ r.punto_nombre }}</span>
+                  </div>
+                </td>
+                <td class="col-fecha">{{ formatFecha(r.creado_en) }}</td>
+                <td>
+                  <span class="resultado-badge" [ngClass]="r.exitoso ? 'exitoso' : 'denegado'">
+                    {{ r.exitoso ? '' : '' }} {{ r.exitoso ? 'Exitoso' : 'Denegado' }}
+                  </span>
+                </td>
+                <td class="col-accion">
+                  <span class="ver-detalle-hint">Ver</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="empty-state" *ngIf="registros.length === 0">
+            No hay registros para los filtros seleccionados.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

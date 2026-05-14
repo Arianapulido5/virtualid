@@ -4,10 +4,162 @@
   <meta charset="utf-8">
   <title>Virtualid</title>
   <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <link rel="icon" type="image/x-icon" href="logo.png">
+
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet"/>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#4D0F60">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VirtualID">
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
 </head>
 <body>
+  <body>
   <app-root></app-root>
+
+  <div id="splash-screen">
+    <div class="splash-orb splash-orb--1"></div>
+    <div class="splash-orb splash-orb--2"></div>
+    <div class="splash-orb splash-orb--3"></div>
+
+    <div class="splash-content">
+      <h1 class="splash-title">Virtualid</h1>
+      <div class="splash-spinner"></div>
+    </div>
+  </div>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(145deg, #4D0F60 0%, #3a0b48 30%, #32488C 70%, #1e2d5c 100%);
+      background-size: 300% 300%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      animation: splashGradient 6s ease infinite;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    #splash-screen.hide {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .splash-orb--1 {
+      position: absolute;
+      width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(107,32,128,0.35) 0%, transparent 70%);
+      top: -160px; left: -120px;
+      animation: orbFloat1 14s ease-in-out infinite;
+    }
+    .splash-orb--2 {
+      position: absolute;
+      width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(63,91,169,0.3) 0%, transparent 70%);
+      bottom: -130px; right: -100px;
+      animation: orbFloat2 11s ease-in-out infinite;
+    }
+    .splash-orb--3 {
+      position: absolute;
+      width: 280px; height: 280px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(156,39,176,0.2) 0%, transparent 70%);
+      top: 50%; right: 15%;
+      transform: translateY(-50%);
+      animation: orbFloat3 16s ease-in-out infinite;
+    }
+
+    .splash-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      z-index: 1;
+    }
+
+ 
+
+.splash-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  font-weight: 30;        /* ← delgada, elegante */
+  color: #ffffff;
+  text-transform: uppercase; /* ← mayúsculas se ven más formales */
+}
+    .splash-spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(255,255,255,0.2);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: splashSpin 0.8s linear infinite;
+      margin-top: 8px;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.4));
+    }
+
+    @keyframes splashGradient {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes splashSpin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes logoIn {
+      from { opacity: 0; transform: scale(0.6) rotate(-15deg); }
+      to   { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    @keyframes titleIn {
+      from { opacity: 0; transform: translateY(-14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes orbFloat1 {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(40px,-60px) scale(1.08); }
+      66%      { transform: translate(-30px,30px) scale(0.94); }
+    }
+    @keyframes orbFloat2 {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      40%      { transform: translate(-50px,40px) scale(1.1); }
+      80%      { transform: translate(30px,-30px) scale(0.92); }
+    }
+    @keyframes orbFloat3 {
+      0%, 100% { transform: translateY(-50%) translate(0,0); }
+      50%      { transform: translateY(-50%) translate(20px,50px); }
+    }
+  </style>
+
+  <script>
+    // Carga la fuente Montserrat
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap';
+    document.head.appendChild(link);
+
+    // Oculta el splash cuando Angular termina de cargar
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        var splash = document.getElementById('splash-screen');
+        if (splash) {
+          splash.classList.add('hide');
+          setTimeout(function() {
+            splash.remove();
+          }, 500);
+        }
+      }, 800); // 800ms mínimo para que se vea la animación
+    });
+  </script>
+</body>
+  <app-root></app-root>
+  <noscript>Please enable JavaScript to continue using this application.</noscript>
 </body>
 </html>

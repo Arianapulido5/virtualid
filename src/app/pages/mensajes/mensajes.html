@@ -1,0 +1,107 @@
+<!-- mensajes.html -->
+<div class="notificaciones-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Notificaciones</h1>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Buscar notificación"
+      [(ngModel)]="searchQuery"
+      (input)="filtrarNotificaciones()"
+    />
+    <button class="btn-buscar" (click)="filtrarNotificaciones()">BUSCAR</button>
+  </div>
+
+  <!-- Vista: Lista de notificaciones -->
+  <ng-container *ngIf="!notificacionSeleccionada">
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab" [class.active]="tabActivo === 'todas'" (click)="setTab('todas')">
+        Todos ({{ notificaciones.length }})
+      </button>
+      <button class="tab" [class.active]="tabActivo === 'sinLeer'" (click)="setTab('sinLeer')">
+        Sin leer
+      </button>
+      <button class="tab" [class.active]="tabActivo === 'abiertos'" (click)="setTab('abiertos')">
+        Abiertos
+      </button>
+    </div>
+
+    <!-- Lista -->
+    <div class="notificaciones-list">
+      <div
+        class="notificacion-item"
+        *ngFor="let notif of notificacionesFiltradas"
+        (click)="abrirNotificacion(notif)"
+        [class.no-leida]="!notif.leida"
+      >
+        <!-- Columna 1: Avatar -->
+        <div class="avatar" [style.background-color]="notif.avatarColor">
+          {{ notif.iniciales }}
+        </div>
+
+        <!-- Columna 2: Nombre + Rol en la misma línea -->
+        <div class="notif-info">
+          <span class="notif-nombre">{{ notif.nombre }}</span>
+          <span class="notif-rol">{{ notif.rol }}</span>
+        </div>
+
+        <!-- Columna 3: Hora + Fecha -->
+        <div class="notif-tiempo">
+          <span class="hora">{{ notif.hora }}</span>
+          <span class="fecha">{{ notif.fecha }}</span>
+        </div>
+
+        <!-- Columna 4: Mensaje -->
+        <div class="notif-mensaje">
+          {{ notif.asunto }}
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="notificacionesFiltradas.length === 0">
+        <p>No se encontraron notificaciones.</p>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- Vista: Detalle de notificación -->
+  <ng-container *ngIf="notificacionSeleccionada">
+    <div class="notif-detalle">
+      <button class="btn-volver" (click)="cerrarNotificacion()">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+       fill="none" stroke="currentColor" stroke-width="2.5"
+       stroke-linecap="round" stroke-linejoin="round"
+       style="width:22px;height:22px">
+    <line x1="19" y1="12" x2="5" y2="12"/>
+    <polyline points="12 19 5 12 12 5"/>
+  </svg>
+</button>
+
+      <div class="detalle-header">
+        <h2 class="detalle-tipo">{{ notificacionSeleccionada.tipo | uppercase }}</h2>
+        <p class="detalle-meta">
+          #{{ notificacionSeleccionada.ticket }} · {{ notificacionSeleccionada.nombre }}
+        </p>
+        <p class="detalle-tiempo-texto">Hace {{ notificacionSeleccionada.tiempoRelativo }}</p>
+      </div>
+
+      <div class="detalle-cuerpo">
+        <div class="mensaje-burbuja">
+          <p>{{ notificacionSeleccionada.cuerpo }}</p>
+        </div>
+        <span class="detalle-autor">
+          {{ notificacionSeleccionada.autorCorto }} · Hace {{ notificacionSeleccionada.tiempoRelativo }}
+        </span>
+      </div>
+    </div>
+  </ng-container>
+
+</div>

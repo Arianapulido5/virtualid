@@ -1,0 +1,382 @@
+// src/app/pages/cambiar-contrasena/cambiar-contrasena.scss
+
+$purple-dark:  #4D0F60;
+$purple-mid:   #6B2080;
+$blue-dark:    #32488C;
+$white:        #ffffff;
+$bg:           #EDF2F4;
+$text-main:    #0F0C0C;
+$text-soft:    #4A4D56;
+$danger:       #e53935;
+$success:      #2e7d32;
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalIconPop {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  60%  { transform: scale(1.2) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+
+
+
+
+.cambiar-container {
+  width: 100%;
+  height: 100%;
+  padding: 32px 40px;
+  box-sizing: border-box;
+  background: $bg;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  animation: fadeInUp 0.4s ease both;
+}
+
+// ── BACK LINK ─────────────────────────────────
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  color: $text-soft;
+  text-decoration: none;
+  padding: 6px 8px;
+  border-radius: 8px;
+  width: fit-content;
+  margin-bottom: 12px;
+  transition: color 0.2s, background 0.2s, transform 0.2s;
+
+  .back-arrow { width: 28px; height: 28px; flex-shrink: 0; stroke-width: 3; transition: transform 0.25s cubic-bezier(.34,1.56,.64,1); }
+
+
+  &:hover {
+    color: $purple-dark;
+    background: rgba(77,15,96,0.07);
+    transform: translateX(-3px);
+  }
+}
+
+// ── TÍTULOS ───────────────────────────────────
+// ─────────────────────────────────────────────
+//  HEADER
+// ─────────────────────────────────────────────
+.page-header {
+  margin-bottom: 1.5rem;
+  animation: titleIn 0.5s cubic-bezier(.34,1.2,.64,1) 0.08s both;
+}
+
+.page-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: $text-main;
+  margin: 0;
+  animation: fadeInUp 0.45s ease 0.1s both;
+}
+.page-subtitle {
+  font-size: 13px;
+  color: $text-soft;
+  margin: 0 0 28px;
+  line-height: 1.6;
+  animation: fadeInUp 0.4s ease 0.1s both;
+}
+
+// ── FORM WRAPPER ──────────────────────────────
+.form-wrapper {
+  background: $white;
+  border-radius: 16px;
+  padding: 28px 32px;
+  width: 100%;
+  // max-width: 680px;  ← quita esta línea
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  animation: fadeInUp 0.4s ease 0.15s both;
+}
+
+// ── CAMPOS ────────────────────────────────────
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.form-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-soft;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .form-input { padding-right: 46px; }
+
+  .eye-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    color: $text-soft;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s, transform 0.2s;
+
+    svg { width: 20px; height: 20px; }
+
+    &:hover {
+      color: $purple-dark;
+      background: rgba(77,15,96,0.07);
+      transform: scale(1.12);
+    }
+  }
+}
+
+.form-input {
+  padding: 12px 14px;
+  border: 1.5px solid #d0d5dd;
+  border-radius: 10px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  color: $text-main;
+  background: $white;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: $purple-dark;
+    box-shadow: 0 0 0 3px rgba(77,15,96,0.1);
+  }
+
+  &:not(:focus):hover { border-color: rgba(77,15,96,0.4); }
+  &::placeholder { color: #b0b7c3; }
+}
+
+// ── REQUISITOS ────────────────────────────────
+.requisitos-box {
+  background: rgba(77,15,96,0.04);
+  border-radius: 10px;
+  border-left: 3px solid rgba(77,15,96,0.2);
+  padding: 14px 18px;
+}
+
+.requisitos-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: $text-soft;
+  margin: 0 0 8px;
+}
+
+.requisitos-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  li {
+    font-size: 12px;
+    color: $danger;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s, transform 0.25s;
+
+    &.valid {
+      color: $success;
+      font-weight: 600;
+      transform: translateX(4px);
+    }
+  }
+}
+
+// ── ERROR ─────────────────────────────────────
+.msg-error {
+  font-size: 13px;
+  color: #c62828;
+  background: #fdecea;
+  border: 1px solid $danger;
+  border-left: 4px solid $danger;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0;
+  animation: fadeInUp 0.3s ease both;
+}
+
+// ── BOTONES ───────────────────────────────────
+.form-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  // max-width: 680px;  ← quita esta línea
+  margin-top: 20px;
+  animation: fadeInUp 0.4s ease 0.2s both;
+}
+
+.btn-cancelar {
+  padding: 13px 32px;
+  border: 2px solid #d0d5dd;
+  border-radius: 10px;
+  background: $white;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: $text-soft;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: $purple-dark;
+    color: $purple-dark;
+    background: rgba(77,15,96,0.04);
+  }
+}
+
+.btn-cambiar {
+  flex: 1;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, $purple-dark 0%, $blue-dark 50%, $purple-mid 100%);
+  background-size: 250% 250%;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: $white;
+  cursor: pointer;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: gradientShift 5s ease infinite;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(77,15,96,0.35);
+  }
+  &:active:not(:disabled) { transform: translateY(0); }
+  &:disabled { opacity: 0.7; cursor: not-allowed; animation: none; }
+}
+
+.spinner {
+  width: 18px; height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.35);
+  border-top-color: $white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+// ── MODAL ─────────────────────────────────────
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0.2s ease both;
+}
+
+.modal-card {
+  background: $white;
+  border-radius: 20px;
+  padding: 44px 40px;
+  max-width: 380px; width: 90%;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 14px; text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: slideUp 0.3s cubic-bezier(.34,1.2,.64,1) both;
+
+  h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px; font-weight: 700;
+    color: $text-main; margin: 0;
+  }
+
+  p {
+    font-size: 14px; color: $text-soft;
+    margin: 0; line-height: 1.6;
+  }
+}
+
+.modal-icon {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, $blue-dark, $purple-mid);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; color: $white; font-weight: 700;
+  box-shadow: 0 8px 24px rgba(50,72,140,0.3);
+  animation: modalIconPop 0.5s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+.btn-aceptar {
+  margin-top: 4px; padding: 12px 44px;
+  background: linear-gradient(135deg, $purple-dark, $blue-dark);
+  color: $white; border: none; border-radius: 10px;
+  font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(77,15,96,0.35);
+  }
+}
+
+// ── RESPONSIVE ────────────────────────────────
+@media (max-width: 768px) {
+  .cambiar-container {
+    padding: 0 25px 25px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+  }
+
+  .page-title {
+    font-size: 22px;
+    padding-left: 35px;
+  }
+
+  .page-subtitle {
+    margin-bottom: 24px;
+    padding-left: 5px;
+  }
+
+  .form-wrapper  { padding: 20px 18px; }
+  .form-actions  { flex-direction: column; }
+  .btn-cancelar  { padding: 13px; }
+}

@@ -1,0 +1,254 @@
+<!-- src/app/pages/admin/registro-institucion/registro-institucion.html -->
+<div class="registro-layout">
+
+  <!-- MODAL ÉXITO -->
+  <div class="modal-overlay" *ngIf="mostrarModal">
+    <div class="modal-card">
+      <div class="modal-icon">✓</div>
+      <h3>¡Institución registrada!</h3>
+      <p>Tu institución y cuenta de administrador han sido creadas correctamente. Ya puedes iniciar sesión.</p>
+      <button class="btn-aceptar" (click)="irAlLogin()">Aceptar</button>
+    </div>
+  </div>
+
+  <!-- PANEL IZQUIERDO -->
+  <aside class="panel-left">
+    <div class="brand">
+      <div class="brand-logo">VID</div>
+      <span class="brand-name">VIRTUALID</span>
+    </div>
+    <div class="panel-info">
+      <h2 class="panel-title">Registra tu institución</h2>
+      <p class="panel-desc">Una vez registrada, podrás gestionar credenciales digitales para todos tus estudiantes y empleados.</p>
+    </div>
+  </aside>
+
+  <!-- PANEL DERECHO -->
+  <main class="panel-right">
+    <div class="form-container">
+      <div class="form-header">
+        <h1 class="form-title">Datos de la institución</h1>
+        <p class="form-sub">Completa todos los campos obligatorios</p>
+      </div>
+
+      <div class="form-body">
+
+        <!-- NOMBRE + TIPO -->
+        <div class="form-row">
+          <div class="field">
+            <label>Nombre de la institución *</label>
+            <input class="field-input" type="text" placeholder="Universidad Tecnológica"
+              [(ngModel)]="form.nombre_institucion" (ngModelChange)="v.nombre_institucion()"
+              [class.input-error]="errores['nombre_institucion']" />
+            <span class="field-error" *ngIf="errores['nombre_institucion']">{{ errores['nombre_institucion'] }}</span>
+          </div>
+          <div class="field">
+            <!-- ✅ CAMBIO: select con opciones predefinidas -->
+            <label>Tipo *</label>
+            <select class="field-input"
+              [(ngModel)]="form.tipo" (ngModelChange)="v.tipo()"
+              [class.input-error]="errores['tipo']">
+              <option value="">Selecciona</option>
+              <option value="Universidad pública">Universidad pública</option>
+              <option value="Universidad privada">Universidad privada</option>
+              <option value="Instituto tecnológico">Instituto tecnológico</option>
+              <option value="Preparatoria pública">Preparatoria pública</option>
+              <option value="Preparatoria privada">Preparatoria privada</option>
+              <option value="Centro de investigación">Centro de investigación</option>
+              <option value="Otro">Otro</option>
+            </select>
+            <span class="field-error" *ngIf="errores['tipo']">{{ errores['tipo'] }}</span>
+          </div>
+        </div>
+
+        <!-- RFC + DOMINIO -->
+        <div class="form-row">
+          <div class="field">
+            <label>RFC *</label>
+            <input class="field-input" type="text" placeholder="UTE200101AB" maxlength="12"
+              [(ngModel)]="form.rfc" (ngModelChange)="v.rfc()"
+              [class.input-error]="errores['rfc']" />
+            <span class="field-error" *ngIf="errores['rfc']">{{ errores['rfc'] }}</span>
+          </div>
+          <div class="field">
+            <label>Dominio de correo institucional *</label>
+            <input class="field-input" type="text" placeholder="@utec.edu.mx"
+              [(ngModel)]="form.dominio" (ngModelChange)="v.dominio()"
+              [class.input-error]="errores['dominio']" />
+            <span class="field-error" *ngIf="errores['dominio']">{{ errores['dominio'] }}</span>
+            <span class="field-ok" *ngIf="verificandoDominio">⏳ Verificando dominio...</span>
+          </div>
+        </div>
+
+        <!-- CORREO CONTACTO -->
+        <div class="field">
+          <label>Correo de contacto *</label>
+          <input class="field-input" type="email" placeholder="admisiones@utec.edu.mx"
+            [(ngModel)]="form.correo_contacto" (ngModelChange)="v.correo_contacto()"
+            [class.input-error]="errores['correo_contacto']" />
+          <span class="field-error" *ngIf="errores['correo_contacto']">{{ errores['correo_contacto'] }}</span>
+        </div>
+
+        <!-- CIUDAD + ESTADO -->
+        <div class="form-row">
+          <div class="field">
+            <label>Ciudad *</label>
+            <input class="field-input" type="text" placeholder="Córdoba"
+              [(ngModel)]="form.ciudad" (ngModelChange)="v.ciudad()"
+              [class.input-error]="errores['ciudad']" />
+            <span class="field-error" *ngIf="errores['ciudad']">{{ errores['ciudad'] }}</span>
+          </div>
+          <div class="field">
+            <label>Estado *</label>
+            <select class="field-input"
+              [(ngModel)]="form.estado" (ngModelChange)="v.estado()"
+              [class.input-error]="errores['estado']">
+              <option value="">Selecciona</option>
+              <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
+            </select>
+            <span class="field-error" *ngIf="errores['estado']">{{ errores['estado'] }}</span>
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN GEOLOCALIZACIÓN ─────────────────────────────────────── -->
+        <p class="section-label">
+          📍 Ubicación geográfica
+          <span class="section-opcional">(opcional — permite validar presencia del usuario)</span>
+        </p>
+
+        <div class="geo-info-box">
+          <span class="geo-info-icon">ℹ️</span>
+          <p class="geo-info-text">
+            Si marcas la ubicación en el mapa, los usuarios solo podrán generar su QR cuando
+            estén físicamente cerca de la institución. Si no la registras, el QR se puede
+            generar desde cualquier lugar.
+          </p>
+        </div>
+
+        <!-- Mapa Google Maps -->
+        <app-mapa-selector
+          [lat]="mapaLat"
+          [lng]="mapaLng"
+          mapId="mapa-registro"
+          (coordenadasChange)="onCoordsChange($event)"
+          (lugarChange)="onLugarChange($event)">
+        </app-mapa-selector>
+
+        <!-- Radio -->
+        <div class="field radio-field-standalone">
+          <label class="field-label">Radio permitido (metros)</label>
+          <input class="field-input" type="number" min="50" max="5000"
+            placeholder="200" [(ngModel)]="form.radio_metros" />
+        </div>
+        <!-- ─────────────────────────────────────────────────────────────────── -->
+
+        <!-- SEPARADOR ADMIN -->
+        <p class="section-label">Datos del administrador</p>
+
+        <!-- NOMBRE + APELLIDOS -->
+        <div class="form-row tres-cols">
+          <div class="field">
+            <label>Nombre(s) *</label>
+            <input class="field-input" type="text" placeholder="María"
+              [(ngModel)]="form.nombre" (ngModelChange)="v.nombre()"
+              [class.input-error]="errores['nombre']" />
+            <span class="field-error" *ngIf="errores['nombre']">{{ errores['nombre'] }}</span>
+          </div>
+          <div class="field">
+            <label>Apellido paterno *</label>
+            <input class="field-input" type="text" placeholder="Contreras"
+              [(ngModel)]="form.apellido_paterno" (ngModelChange)="v.apellido_paterno()"
+              [class.input-error]="errores['apellido_paterno']" />
+            <span class="field-error" *ngIf="errores['apellido_paterno']">{{ errores['apellido_paterno'] }}</span>
+          </div>
+          <div class="field">
+            <label>Apellido materno *</label>
+            <input class="field-input" type="text" placeholder="López"
+              [(ngModel)]="form.apellido_materno" (ngModelChange)="v.apellido_materno()"
+              [class.input-error]="errores['apellido_materno']" />
+            <span class="field-error" *ngIf="errores['apellido_materno']">{{ errores['apellido_materno'] }}</span>
+          </div>
+        </div>
+
+        <!-- CORREO ADMIN -->
+        <div class="field">
+          <label>Correo del administrador *</label>
+          <input class="field-input" type="email" placeholder="admin@utec.edu.mx"
+            [(ngModel)]="form.correo_admin" (ngModelChange)="v.correo_admin()"
+            [class.input-error]="errores['correo_admin']" />
+          <span class="field-error" *ngIf="errores['correo_admin']">{{ errores['correo_admin'] }}</span>
+        </div>
+
+        <!-- CONTRASEÑAS -->
+        <div class="form-row">
+          <div class="field">
+            <label>Contraseña *</label>
+            <div class="input-wrapper">
+              <input class="field-input" [type]="showPassword ? 'text' : 'password'"
+                placeholder="••••••••••"
+                [(ngModel)]="form.contrasena" (ngModelChange)="v.contrasena()"
+                [class.input-error]="errores['contrasena']" />
+              <button class="eye-btn" (click)="togglePassword()" type="button">
+                <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                  <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                </svg>
+              </button>
+            </div>
+            <ul class="requisitos" *ngIf="form.contrasena.length > 0">
+              <li [class.ok]="form.contrasena.length >= 8">
+                <span class="req-icon">{{ form.contrasena.length >= 8 ? '✓' : '✗' }}</span> Mínimo 8 caracteres
+              </li>
+              <li [class.ok]="tieneUpperCase">
+                <span class="req-icon">{{ tieneUpperCase ? '✓' : '✗' }}</span> Al menos una mayúscula
+              </li>
+              <li [class.ok]="tieneNumero">
+                <span class="req-icon">{{ tieneNumero ? '✓' : '✗' }}</span> Al menos un número
+              </li>
+              <li [class.ok]="tieneEspecial">
+                <span class="req-icon">{{ tieneEspecial ? '✓' : '✗' }}</span> Al menos un carácter especial
+              </li>
+            </ul>
+            <span class="field-error" *ngIf="errores['contrasena']">{{ errores['contrasena'] }}</span>
+          </div>
+
+          <div class="field">
+            <label>Confirmar contraseña *</label>
+            <div class="input-wrapper">
+              <input class="field-input" [type]="showConfirm ? 'text' : 'password'"
+                placeholder="••••••••••"
+                [(ngModel)]="confirmar" (ngModelChange)="v.confirmar()"
+                [class.input-error]="errores['confirmar']" />
+              <button class="eye-btn" (click)="toggleConfirm()" type="button">
+                <svg *ngIf="!showConfirm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                  <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <svg *ngIf="showConfirm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                </svg>
+              </button>
+            </div>
+            <span class="field-error" *ngIf="errores['confirmar']">{{ errores['confirmar'] }}</span>
+            <span class="field-ok" *ngIf="!errores['confirmar'] && confirmar.length > 0">✓ Las contraseñas coinciden</span>
+          </div>
+        </div>
+
+        <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+        <div class="form-actions">
+          <button class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+          <button class="btn-registrar" [disabled]="cargando || verificandoDominio" (click)="registrar()">
+            <span *ngIf="!cargando">Registrar institución</span>
+            <span *ngIf="cargando" class="spinner"></span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+</div>

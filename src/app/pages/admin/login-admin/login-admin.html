@@ -1,0 +1,72 @@
+<div class="login-bg">
+  <div class="card">
+    <div class="logo-circle">VID</div>
+    <h2>Iniciar Sesión</h2>
+
+    <!-- CORREO -->
+    <div class="field">
+      <label>Correo electrónico</label>
+      <input
+        type="email"
+        placeholder="usuario@email.com"
+        [(ngModel)]="correo"
+        (ngModelChange)="validarCorreo()"
+        [class.input-error]="errores.correo"
+      />
+      <span class="field-error" *ngIf="errores.correo">{{ errores.correo }}</span>
+    </div>
+
+    <!-- CONTRASEÑA -->
+    <div class="field">
+      <label>Contraseña</label>
+      <div class="input-wrapper">
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          placeholder="••••••••••"
+          [(ngModel)]="contrasena"
+          (ngModelChange)="validarContrasena()"
+          [class.input-error]="errores.contrasena"
+          autocomplete="new-password"
+        />
+        <button class="eye-btn" (click)="togglePassword()" type="button" tabindex="-1">
+          <!-- showPassword=false → contraseña oculta → ojo CON diagonal -->
+          <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+            <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+          <!-- showPassword=true → contraseña visible → ojo SIN diagonal -->
+          <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+          </svg>
+        </button>
+      </div>
+      <span class="field-error" *ngIf="errores.contrasena">{{ errores.contrasena }}</span>
+    </div>
+
+    <!-- OLVIDÉ CONTRASEÑA -->
+    <div class="row-options">
+      <a routerLink="/olvide-contrasena" class="forgot-link">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <!-- ERROR GENERAL -->
+    <p *ngIf="errorGeneral" class="error-general">{{ errorGeneral }}</p>
+
+    <!-- BOTÓN -->
+    <button class="btn-login" (click)="iniciarSesion()" [disabled]="cargando">
+      <span *ngIf="!cargando">Iniciar Sesión</span>
+      <span *ngIf="cargando" class="spinner"></span>
+    </button>
+
+    <!-- LINKS DE REGISTRO -->
+    <a routerLink="/registro" class="register-link">
+      ¿No tienes cuenta? Regístrate aquí
+    </a>
+
+    <div class="divider"></div>
+
+    <a routerLink="/registro-institucion" class="institution-link">
+      ¿Eres una institución? Regístrala aquí
+    </a>
+
+  </div>
+</div>

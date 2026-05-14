@@ -1,0 +1,496 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap');
+
+:host {
+  --purple:   #4D0F60;
+  --purple-m: #6B2080;
+  --blue:     #32488C;
+  --blue-m:   #4a5eaa;
+  --bg:       #EDF2F4;
+  --dark:     #4A4D56;
+  --black:    #0F0C0C;
+  --white:    #ffffff;
+  --success:  #2e7d32;
+  --danger:   #A93845;
+  --warning:  #e65100;
+  display: block;
+}
+
+// ─────────────────────────────────────────────
+//  KEYFRAMES
+// ─────────────────────────────────────────────
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes headerIn {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes statCardIn {
+  from { opacity: 0; transform: translateY(26px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.6) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes barGrow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes barShine {
+  0%   { left: -80%; }
+  100% { left: 130%; }
+}
+
+@keyframes barraFill {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+@keyframes periodoActive {
+  from { transform: scale(0.93); }
+  to   { transform: scale(1); }
+}
+
+@keyframes rangoIn {
+  from { opacity: 0; transform: translateY(-12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes puntoItemIn {
+  from { opacity: 0; transform: translateX(-14px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes accentGrow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes statAccentY {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+// ─────────────────────────────────────────────
+//  LAYOUT
+// ─────────────────────────────────────────────
+.admin-layout {
+  display: flex; min-height: 100vh;
+  background: var(--bg); width: 100%; overflow-x: hidden;
+}
+
+.main-content {
+  margin-left: 210px; margin-top: 52px; flex: 1; overflow-y: auto;
+  min-height: calc(100vh - 52px);
+  width: calc(100% - 210px); box-sizing: border-box; min-width: 0;
+  animation: fadeIn 0.4s ease both;
+}
+
+.page-body {
+  padding: 28px 32px; display: flex; flex-direction: column; gap: 24px;
+}
+
+// ─────────────────────────────────────────────
+//  HEADER
+// ─────────────────────────────────────────────
+.page-header {
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  animation: headerIn 0.5s cubic-bezier(.34,1.2,.64,1) 0.05s both;
+}
+
+.page-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 26px; font-weight: 800; color: var(--black); margin: 0;
+}
+
+// ─────────────────────────────────────────────
+//  PERIODO BTNs — Bootstrap btn-group pill
+// ─────────────────────────────────────────────
+.periodo-btns {
+  display: flex; gap: 3px;
+  background: var(--white); border-radius: 14px;
+  padding: 5px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border: 1.5px solid #e0e4ec;
+}
+
+.periodo-btn {
+  padding: 8px 20px; border: none; background: transparent;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px; font-weight: 600; color: #888;
+  cursor: pointer; border-radius: 10px;
+  position: relative; overflow: hidden;
+  transition: all 0.22s cubic-bezier(.34,1.2,.64,1);
+
+  // Fondo hover
+  &::before {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(77,15,96,0.07); border-radius: 10px;
+    transform: scale(0); transition: transform 0.25s ease;
+  }
+
+  &:hover { color: var(--purple); &::before { transform: scale(1); } }
+
+  &.active {
+    background: linear-gradient(135deg, var(--purple) 0%, var(--blue) 60%, var(--purple-m) 100%);
+    background-size: 250% 250%;
+    color: var(--white); font-weight: 700;
+    box-shadow: 0 4px 14px rgba(77,15,96,0.35);
+    animation: gradientShift 5s ease infinite, periodoActive 0.25s ease both;
+    &::before { display: none; }
+    &:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(77,15,96,0.4); }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  RANGO PERSONALIZADO
+// ─────────────────────────────────────────────
+.rango-bar {
+  display: flex; align-items: flex-end; gap: 14px;
+  background: var(--white); border-radius: 16px;
+  padding: 20px 24px; box-shadow: 0 2px 14px rgba(0,0,0,0.07);
+  flex-wrap: wrap; border: 1.5px solid #e0e4ec;
+  animation: rangoIn 0.4s cubic-bezier(.34,1.2,.64,1) both;
+}
+
+.rango-grupo { display: flex; flex-direction: column; gap: 6px; }
+
+.rango-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px; font-weight: 800; color: var(--purple);
+  text-transform: uppercase; letter-spacing: 0.8px;
+}
+
+.rango-input {
+  padding: 10px 14px; border: 1.5px solid #e0e4ec;
+  border-radius: 10px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px; color: var(--black); background: var(--white);
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.15s;
+
+  &:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 4px rgba(77,15,96,0.1);
+    transform: translateY(-1px);
+  }
+  &:not(:focus):hover { border-color: rgba(77,15,96,0.35); }
+}
+
+.btn-aplicar {
+  padding: 10px 24px; align-self: flex-end;
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  background-size: 200% 200%;
+  color: var(--white); border: none; border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(77,15,96,0.3);
+  position: relative; overflow: hidden;
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+  animation: gradientShift 4s ease infinite;
+
+  &::before {
+    content: ''; position: absolute; top: 0; left: -80%;
+    width: 55%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: skewX(-20deg); transition: left 0.55s ease; pointer-events: none;
+  }
+
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(77,15,96,0.4); &::before { left: 130%; } }
+  &:active { transform: translateY(0); }
+}
+
+.error-fecha {
+  font-family: 'Open Sans', sans-serif; font-size: 12px;
+  color: var(--danger); align-self: flex-end;
+}
+
+// ─────────────────────────────────────────────
+//  STATS GRID
+// ─────────────────────────────────────────────
+.stats-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+
+.stat-card {
+  background: var(--white); border-radius: 16px;
+  padding: 22px 24px; display: flex; flex-direction: column; gap: 8px;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.07);
+  position: relative; overflow: hidden;
+  transition: box-shadow 0.25s ease, transform 0.25s cubic-bezier(.34,1.2,.64,1);
+  animation: statCardIn 0.55s cubic-bezier(.34,1.2,.64,1) both;
+
+  @for $i from 1 through 3 { &:nth-child(#{$i}) { animation-delay: #{0.09 * $i}s; } }
+
+  // Acento izquierdo
+  &::before {
+    content: ''; position: absolute;
+    left: 0; top: 0; bottom: 0; width: 4px;
+    background: linear-gradient(180deg, var(--purple), var(--blue));
+    border-radius: 0 3px 3px 0;
+    transform: scaleY(0); transform-origin: bottom;
+    transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  // Orb decorativo
+  &::after {
+    content: ''; position: absolute;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(77,15,96,0.05) 0%, transparent 70%);
+    bottom: -40px; right: -30px; pointer-events: none;
+  }
+
+  &:hover {
+    box-shadow: 0 10px 32px rgba(77,15,96,0.15);
+    transform: translateY(-5px);
+    &::before { transform: scaleY(1); animation: statAccentY 0.35s cubic-bezier(.34,1.56,.64,1) both; }
+  }
+}
+
+.stat-label {
+  font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 800;
+  letter-spacing: 0.8px; color: var(--dark); text-transform: uppercase;
+}
+
+.stat-value {
+  font-family: 'Montserrat', sans-serif; font-size: 36px; font-weight: 800;
+  color: var(--black); line-height: 1.1;
+  animation: countUp 0.55s cubic-bezier(.34,1.56,.64,1) 0.35s both;
+}
+
+.stat-sub {
+  font-family: 'Open Sans', sans-serif; font-size: 12px; font-weight: 500; color: #888;
+
+  &.danger  { color: var(--danger); font-weight: 700; }
+  &.success { color: var(--success); font-weight: 700; }
+}
+
+// ─────────────────────────────────────────────
+//  BOTTOM GRID
+// ─────────────────────────────────────────────
+.bottom-grid {
+  display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px;
+}
+
+.card {
+  background: var(--white); border-radius: 16px;
+  padding: 22px 24px; box-shadow: 0 2px 14px rgba(0,0,0,0.07); min-width: 0;
+  position: relative; overflow: hidden;
+  transition: box-shadow 0.25s, transform 0.25s;
+  animation: cardIn 0.5s cubic-bezier(.34,1.2,.64,1) both;
+
+  &.chart-card  { animation-delay: 0.28s; }
+  &.puntos-card { animation-delay: 0.36s; }
+
+  // Acento superior
+  &::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--purple), var(--blue), var(--purple-m));
+    background-size: 300% 100%;
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s cubic-bezier(.34,1.2,.64,1);
+    animation: gradientShift 4s ease infinite;
+  }
+
+  &:hover {
+    box-shadow: 0 10px 32px rgba(77,15,96,0.12);
+    transform: translateY(-3px);
+    &::before { transform: scaleX(1); }
+  }
+}
+
+.card-title {
+  font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700;
+  color: var(--black); margin: 0 0 20px;
+  animation: fadeInUp 0.4s ease 0.32s both;
+}
+
+// ─────────────────────────────────────────────
+//  GRÁFICA DE BARRAS
+// ─────────────────────────────────────────────
+.chart-area {
+  height: 200px; display: flex; align-items: flex-end;
+  padding: 0 4px;
+}
+
+.bars-container {
+  display: flex; align-items: flex-end;
+  justify-content: space-around;
+  width: 100%; height: 100%; gap: 6px;
+}
+
+.bar-group {
+  display: flex; flex-direction: column; align-items: center;
+  flex: 1; height: 100%; gap: 7px; min-width: 0;
+}
+
+.bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; }
+
+.bar {
+  width: 100%; border-radius: 8px 8px 0 0;
+  background: linear-gradient(180deg, var(--purple-m) 0%, var(--purple) 100%);
+  min-height: 4px; cursor: pointer;
+  transform-origin: bottom;
+  position: relative; overflow: hidden;
+  box-shadow: 0 -2px 8px rgba(77,15,96,0.2);
+  animation: barGrow 0.65s cubic-bezier(.34,1.2,.64,1) both;
+
+  @for $i from 1 through 30 {
+    .bar-group:nth-child(#{$i}) & { animation-delay: #{0.04 * $i + 0.35}s; }
+  }
+
+  // Reflejo superior
+  &::after {
+    content: ''; position: absolute; top: 0; left: -80%;
+    width: 55%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+
+  &.today {
+    background: linear-gradient(180deg, var(--blue-m) 0%, var(--blue) 100%);
+    box-shadow: 0 -2px 8px rgba(50,72,140,0.3);
+  }
+
+  &:hover {
+    opacity: 0.85;
+    &::after { left: 130%; }
+  }
+}
+
+.bar-label {
+  font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 600;
+  color: #aaa; text-align: center; white-space: nowrap;
+}
+
+// ─────────────────────────────────────────────
+//  PUNTOS ACTIVOS
+// ─────────────────────────────────────────────
+.puntos-lista { display: flex; flex-direction: column; gap: 16px; }
+
+.punto-item {
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 14px;
+  padding: 8px 10px; border-radius: 10px;
+  transition: background 0.18s, transform 0.22s cubic-bezier(.34,1.2,.64,1);
+  animation: puntoItemIn 0.4s ease both;
+
+  @for $i from 1 through 8 { &:nth-child(#{$i}) { animation-delay: #{0.07 * $i + 0.32}s; } }
+
+  &:hover {
+    background: rgba(77,15,96,0.05);
+    transform: translateX(5px);
+    .punto-nombre { color: var(--purple); }
+    .punto-valor  { color: var(--purple); }
+  }
+}
+
+.punto-info {
+  flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0;
+}
+
+.punto-nombre {
+  font-family: 'Open Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--dark);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: color 0.2s;
+}
+
+.barra-wrap {
+  width: 100%; height: 7px; background: #ede9f5;
+  border-radius: 6px; overflow: hidden;
+}
+
+.barra-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--purple), var(--blue), var(--purple-m));
+  background-size: 250% 100%;
+  border-radius: 6px;
+  animation: barraFill 0.75s cubic-bezier(.34,1.2,.64,1) both, gradientShift 5s ease infinite;
+  box-shadow: 0 2px 6px rgba(77,15,96,0.2);
+}
+
+.punto-valor {
+  font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 800;
+  color: var(--black); flex-shrink: 0; transition: color 0.2s;
+}
+
+// ─────────────────────────────────────────────
+//  ESTADOS
+// ─────────────────────────────────────────────
+.estado-txt {
+  font-family: 'Open Sans', sans-serif; font-size: 14px; color: #888;
+  padding: 24px; text-align: center;
+  background: var(--white); border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  animation: fadeIn 0.3s ease both;
+}
+
+.empty-state {
+  padding: 36px 20px; text-align: center;
+  font-family: 'Open Sans', sans-serif; font-size: 13px; color: #bbb;
+  animation: fadeIn 0.4s ease both;
+}
+
+// ─────────────────────────────────────────────
+//  RESPONSIVE
+// ─────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .main-content { margin-left: 0 !important; width: 100% !important; }
+  .bottom-grid  { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 768px) {
+  .admin-layout  { flex-direction: column !important; }
+  .main-content  { margin-left: 0 !important; margin-top: 52px !important; width: 100% !important; }
+  .page-body     { padding: 16px 14px !important; gap: 16px !important; }
+  .page-header   { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+  .page-title    { font-size: 20px !important; }
+  .periodo-btns  { width: 100%; }
+  .periodo-btn   { flex: 1; padding: 7px 8px !important; font-size: 12px !important; text-align: center; }
+  .stats-grid    { grid-template-columns: 1fr 1fr !important; }
+  .stat-value    { font-size: 28px !important; }
+  .card          { padding: 16px 18px !important; }
+  .chart-area    { height: 160px !important; }
+  .bar-label     { font-size: 10px !important; }
+}
+
+@media (max-width: 480px) {
+  .main-content  { margin-left: 0 !important; width: 100% !important; }
+  .page-body     { padding: 12px 10px !important; }
+  .page-title    { font-size: 18px !important; }
+  .stats-grid    { grid-template-columns: 1fr !important; }
+  .stat-value    { font-size: 30px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.1ms !important;
+  }
+}

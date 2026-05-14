@@ -1,0 +1,115 @@
+<!-- agregar-punto-acceso.html -->
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="puntos-acceso" />
+
+  <!-- MODAL ÉXITO -->
+  <div class="modal-overlay" *ngIf="exitoso">
+    <div class="modal-card">
+      <div class="modal-icon">✓</div>
+      <h3>¡Punto de acceso creado!</h3>
+      <p>El punto de acceso ha sido registrado correctamente.</p>
+      <button class="btn-aceptar" (click)="irAPuntos()">Aceptar</button>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <h1 class="page-title">Nuevo Punto de Acceso</h1>
+
+      <!-- ERROR -->
+      <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+
+      <div class="contenido-grid">
+
+        <!-- FORMULARIO -->
+        <div class="card form-card">
+          <h3 class="card-title">Datos del punto de acceso</h3>
+
+          <div class="field-group">
+            <label class="field-label">Nombre *</label>
+            <input class="field-input" type="text"
+              placeholder="Ej. Edificio A — Entrada Principal"
+              [(ngModel)]="form.nombre" />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Descripción / ubicación</label>
+            <input class="field-input" type="text"
+              placeholder="Ej. Planta baja, puerta norte"
+              [(ngModel)]="form.descripcion" />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Tipo de espacio *</label>
+            <div class="tipos-grid">
+              <button class="tipo-btn" *ngFor="let t of tipos"
+                [class.active]="form.tipo === t.value"
+                (click)="form.tipo = t.value">
+                <span>{{ t.icon }}</span> {{ t.label }}
+              </button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Nivel de acceso *</label>
+            <select class="field-input" [(ngModel)]="form.nivelAcceso">
+              <option value="abierto">Abierto — todos los usuarios con credencial activa</option>
+              <option value="restringido">Restringido — solo personal autorizado</option>
+              <option value="exclusivo">Exclusivo — requiere aprobación manual</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">¿Quiénes pueden acceder? *</label>
+            <div class="check-group">
+              <label class="check-item">
+                <input type="checkbox" [(ngModel)]="form.permite_estudiantes" />
+                <span>Estudiantes</span>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" [(ngModel)]="form.permite_empleados" />
+                <span>Empleados</span>
+              </label>
+            </div>
+            <p *ngIf="!form.permite_estudiantes && !form.permite_empleados" class="campo-error">
+              Selecciona al menos un tipo de usuario.
+            </p>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-cancelar" (click)="cancelar()" [disabled]="guardando">Cancelar</button>
+            <button class="btn-guardar" [disabled]="!formularioValido() || guardando" (click)="guardar()">
+              {{ guardando ? 'Guardando…' : 'Guardar' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- VISTA PREVIA -->
+        <div class="card preview-card">
+          <h3 class="card-title">Vista previa de la tarjeta</h3>
+          <div class="preview-tarjeta" [ngClass]="colorPreview()">
+            <span class="preview-icon">{{ iconoActivo() }}</span>
+            <div class="preview-info">
+              <span class="preview-nombre">{{ form.nombre || 'Nombre del punto' }}</span>
+              <span class="preview-desc">{{ form.descripcion || 'Descripción / ubicación' }}</span>
+            </div>
+          </div>
+          <div class="preview-meta">
+            <span class="meta-item">
+              <strong>Nivel:</strong> {{ form.nivelAcceso | titlecase }}
+            </span>
+            <span class="meta-item">
+              <strong>Acceso:</strong>
+              {{ form.permite_estudiantes && form.permite_empleados ? 'Todos'
+                 : form.permite_estudiantes ? 'Solo estudiantes'
+                 : form.permite_empleados  ? 'Solo empleados' : '—' }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>

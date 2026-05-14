@@ -1,0 +1,280 @@
+// src/app/pages/ubicacion/ubicacion.scss
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap');
+
+$purple:   #4D0F60;
+$purple-m: #6B2080;
+$blue:     #32488C;
+$bg:       #EDF2F4;
+$white:    #ffffff;
+$text:     #111118;
+$soft:     #4A4D56;
+$success:  #1a7a4a;
+$border:   #e8e8e8;
+
+@keyframes fadeIn    { from { opacity: 0; }                         to { opacity: 1; } }
+@keyframes fadeInUp  { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cardIn    { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes shimmer   { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+@keyframes badgePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+@keyframes iconBounce { 0% { transform: scale(0.6) rotate(-10deg); } 80% { transform: scale(1.08) rotate(2deg); } 100% { transform: scale(1) rotate(0deg); } }
+
+// ── Container ────────────────────────────────────────────────────────────────
+.ubicacion-container {
+  padding: 0 0 32px;
+  min-height: 100vh;
+  background: $bg;
+  font-family: 'Open Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  animation: fadeIn 0.35s ease both;
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+.ubi-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px 4px;
+  animation: fadeInUp 0.4s ease 0.05s both;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: $soft;
+  text-decoration: none;
+  cursor: pointer;
+  width: fit-content;
+  padding: 6px 12px 6px 8px;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
+  transition: color 0.2s, background 0.2s, border-color 0.2s, transform 0.22s cubic-bezier(.34,1.56,.64,1);
+  animation: fadeInUp 0.4s ease 0.05s both;
+
+  &:hover {
+    color: $purple;
+    background: rgba(77,15,96,0.07);
+    border-color: rgba(77,15,96,0.2);
+    transform: translateX(-4px);
+    .back-arrow { transform: translateX(-3px); }
+  }
+}
+
+.back-arrow {
+ width: 28px; height: 28px; flex-shrink: 0; stroke-width: 3; transition: transform 0.25s cubic-bezier(.34,1.56,.64,1); 
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1);
+}
+
+.page-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px; font-weight: 800;
+  color: $text; margin: 0;
+}
+
+// ── Card base ────────────────────────────────────────────────────────────────
+.ubi-card {
+  background: $white;
+  border-radius: 16px;
+  border: 1.5px solid $border;
+  padding: 20px 22px;
+  margin: 0 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  animation: cardIn 0.45s cubic-bezier(.34,1.2,.64,1) 0.12s both;
+  transition: box-shadow 0.25s, transform 0.25s;
+  position: relative; overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, $purple, $blue);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s cubic-bezier(.34,1.2,.64,1);
+    border-radius: 14px 14px 0 0;
+  }
+
+  &:hover {
+    box-shadow: 0 6px 24px rgba(77,15,96,0.1);
+    transform: translateY(-2px);
+    &::before { transform: scaleX(1); }
+  }
+}
+
+// ── Skeleton card ────────────────────────────────────────────────────────────
+.skeleton-card {
+  display: flex; align-items: flex-start; gap: 16px;
+  pointer-events: none;
+}
+
+.skeleton-icon {
+  width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+  background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.3s infinite;
+}
+
+.skeleton-body { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+
+.skeleton-line {
+  height: 14px; border-radius: 6px;
+  background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.3s infinite;
+  width: 100%;
+  &.short  { width: 65%; }
+  &.xshort { width: 40%; }
+}
+
+// ── Card top (icon + nombre + badge) ─────────────────────────────────────────
+.card-top {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+}
+
+.inst-icon-wrap {
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, $purple, $blue);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(77,15,96,0.28);
+  animation: iconBounce 0.55s cubic-bezier(.34,1.56,.64,1) 0.2s both;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+
+  .ubi-card:hover & { transform: scale(1.08) rotate(-4deg); }
+}
+
+.inst-icon { line-height: 1; }
+
+.inst-info {
+  display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0;
+}
+
+.inst-nombre {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px; font-weight: 700; color: $text;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.ubi-badge {
+  display: inline-flex; align-items: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 50px;
+  width: fit-content;
+
+  &.activa {
+    color: $success;
+    background: rgba(26,122,74,0.1);
+    animation: badgePulse 3s ease-in-out infinite;
+  }
+  &.inactiva {
+    color: #aaa;
+    background: rgba(0,0,0,0.06);
+  }
+}
+
+.card-divider {
+  height: 1px; background: #f0f2f5; margin-bottom: 14px;
+}
+
+// ── Filas de datos ────────────────────────────────────────────────────────────
+.dato-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 16px; padding: 10px 8px; border-radius: 8px;
+  transition: background 0.18s;
+
+  &:hover { background: rgba(77,15,96,0.03); }
+}
+
+.dato-label {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px; color: #aaa; flex-shrink: 0; padding-top: 1px;
+}
+
+.dato-val-col {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+  text-align: right; flex: 1;
+}
+
+.dato-valor {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px; font-weight: 600; color: $text;
+  line-height: 1.5;
+
+  &.sin-dato { color: #bbb; font-weight: 400; font-style: italic; }
+  &.mono { font-family: 'Courier New', monospace; font-size: 12.5px; color: $soft; }
+}
+
+.geo-skeleton {
+  display: flex; flex-direction: column; gap: 6px; width: 100%; align-items: flex-end;
+}
+
+// ── Nota informativa ─────────────────────────────────────────────────────────
+.ubi-nota {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin: 0 16px;
+  background: rgba(26,122,74,0.07);
+  border: 1px solid rgba(26,122,74,0.15);
+  border-radius: 12px; padding: 14px 16px;
+  animation: fadeInUp 0.4s ease 0.28s both;
+
+  &.inactiva {
+    background: rgba(0,0,0,0.03);
+    border-color: rgba(0,0,0,0.08);
+  }
+}
+
+.nota-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+.nota-txt {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12.5px; color: $soft; line-height: 1.55; margin: 0;
+}
+
+// ── Estado vacío ─────────────────────────────────────────────────────────────
+.ubi-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: 60px 32px;
+  text-align: center;
+  animation: fadeInUp 0.4s ease 0.15s both;
+}
+
+.empty-icon  { font-size: 48px; opacity: 0.25; }
+.empty-title { font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 700; color: #bbb; margin: 0; }
+.empty-sub   { font-family: 'Open Sans', sans-serif; font-size: 13px; color: #ccc; margin: 0; line-height: 1.5; }
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .ubi-header {
+    padding: 0 24px 20px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 22px);
+    padding-left: 44px;
+  }
+   .page-title {
+    font-size: 22px;
+    padding-left: 15px;
+  }
+
+  .back-link {
+    margin: 80px 16px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ubi-header {
+    padding: 0 20px 20px;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 22px);
+    padding-left: 44px;
+  }
+
+  .back-link   { margin: 8px 12px 16px; }
+  .ubi-card    { margin: 0 22px; padding: 20px; }
+  .ubi-nota    { margin: 0 22px; }
+  .page-title  { font-size: 19px; }
+  .inst-nombre { font-size: 14px; }
+  .dato-row    { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .dato-val-col { align-items: flex-start; text-align: left; }
+}

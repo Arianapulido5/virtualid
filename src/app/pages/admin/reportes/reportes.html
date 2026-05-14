@@ -1,0 +1,105 @@
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="reportes" />
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <div class="page-header">
+        <h1 class="page-title">Reportes</h1>
+        <div class="periodo-btns">
+          <button class="periodo-btn" [class.active]="periodo === 'semana'"        (click)="cambiarPeriodo('semana')">Esta semana</button>
+          <button class="periodo-btn" [class.active]="periodo === 'mes'"           (click)="cambiarPeriodo('mes')">Este mes</button>
+          <button class="periodo-btn" [class.active]="periodo === 'personalizado'" (click)="cambiarPeriodo('personalizado')">Personalizado</button>
+        </div>
+      </div>
+
+      <!-- SELECTOR DE RANGO PERSONALIZADO -->
+      <div class="rango-bar" *ngIf="periodo === 'personalizado'">
+        <div class="rango-grupo">
+          <label class="rango-label">Fecha inicio</label>
+          <input type="date" class="rango-input" [(ngModel)]="fechaInicio" />
+        </div>
+        <div class="rango-grupo">
+          <label class="rango-label">Fecha fin</label>
+          <input type="date" class="rango-input" [(ngModel)]="fechaFin" />
+        </div>
+        <button class="btn-aplicar" (click)="aplicarPersonalizado()">Aplicar</button>
+        <span class="error-fecha" *ngIf="errorFecha">{{ errorFecha }}</span>
+      </div>
+
+      <!-- CARGANDO -->
+      <div class="estado-txt" *ngIf="cargando">Cargando reportes...</div>
+
+      <!-- CONTENIDO -->
+      <ng-container *ngIf="!cargando">
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">TOTAL ACCESOS</span>
+            <span class="stat-value">{{ totalAccesos | number }}</span>
+            <span class="stat-sub">{{ etiquetaPeriodo }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">DENEGADOS</span>
+            <span class="stat-value">{{ totalDenegados | number }}</span>
+            <span class="stat-sub danger">{{ porcentajeDenegados }} del total</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">USUARIOS ÚNICOS</span>
+            <span class="stat-value">{{ usuariosUnicos | number }}</span>
+            <span class="stat-sub">con al menos 1 acceso</span>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+
+          <div class="card chart-card">
+            <h3 class="card-title">Accesos por día</h3>
+            <div class="chart-area" *ngIf="totalAccesos > 0">
+              <div class="bars-container">
+                <div class="bar-group" *ngFor="let d of diasSemana">
+                  <div class="bar-wrap">
+                    <div
+                      class="bar"
+                      [class.today]="d.esHoy"
+                      [style.height.%]="(d.valor / maxValor) * 100"
+                      [title]="d.valor + ' accesos'"
+                    ></div>
+                  </div>
+                  <span class="bar-label">{{ d.dia }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="empty-state" *ngIf="totalAccesos === 0">
+              Sin accesos registrados en este periodo.
+            </div>
+          </div>
+
+          <div class="card puntos-card">
+            <h3 class="card-title">Puntos más activos</h3>
+            <div class="puntos-lista" *ngIf="puntosActivos.length > 0">
+              <div class="punto-item" *ngFor="let p of puntosActivos">
+                <div class="punto-info">
+                  <span class="punto-nombre">{{ p.nombre }}</span>
+                  <div class="barra-wrap">
+                    <div class="barra-fill"
+                      [style.width.%]="(p.valor / puntosActivos[0].valor) * 100">
+                    </div>
+                  </div>
+                </div>
+                <span class="punto-valor">{{ p.valor }}</span>
+              </div>
+            </div>
+            <div class="empty-state" *ngIf="puntosActivos.length === 0">
+              Sin datos en este periodo.
+            </div>
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </div>
+  </main>
+</div>

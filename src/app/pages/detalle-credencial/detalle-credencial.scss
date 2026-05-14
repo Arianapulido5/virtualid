@@ -1,0 +1,670 @@
+/* src/app/pages/detalle-credencial/detalle-credencial.scss */
+
+$purple-dark:  #4D0F60;
+$purple-mid:   #6B2080;
+$purple-light: #9C27B0;
+$blue-dark:    #32488C;
+$bg:           #EDF2F4;
+$white:        #ffffff;
+$text-main:    #111118;
+$text-soft:    #4A4D56;
+$border:       #e0e0e0;
+$success:      #2e7d32;
+$danger:       #A93845;
+$warning:      #e65100;
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.9) translateY(16px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-36px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(36px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideUp {
+  from { transform: translateY(28px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+@keyframes girar { to { transform: rotate(360deg); } }
+@keyframes qrReveal {
+  from { opacity: 0; transform: scale(0.78) rotateY(22deg); perspective: 600px; }
+  to   { opacity: 1; transform: scale(1) rotateY(0deg); }
+}
+@keyframes qrScanLine {
+  0%   { top: 14px; opacity: 1; }
+  88%  { top: calc(100% - 14px); opacity: 1; }
+  100% { top: calc(100% - 14px); opacity: 0; }
+}
+@keyframes progressGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(77,15,96,0.55)); }
+  50%       { filter: drop-shadow(0 0 10px rgba(77,15,96,0.9)); }
+}
+@keyframes timerTick {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+@keyframes timerUrgente {
+  0%, 100% { color: #A93845; text-shadow: 0 0 0 rgba(169,56,69,0); }
+  50%       { color: #c0392b; text-shadow: 0 0 12px rgba(169,56,69,0.6); }
+}
+@keyframes pulseGreen {
+  0%   { box-shadow: 0 0 0 0 rgba(46,125,50,0.55); }
+  70%  { box-shadow: 0 0 0 9px rgba(46,125,50,0); }
+  100% { box-shadow: 0 0 0 0 rgba(46,125,50,0); }
+}
+@keyframes statusBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(16px, -20px) scale(1.07); }
+  66%       { transform: translate(-10px, 14px) scale(0.94); }
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%       { transform: translate(-18px, 16px) scale(1.09); }
+  80%       { transform: translate(14px, -12px) scale(0.93); }
+}
+@keyframes badgeIn {
+  from { opacity: 0; transform: scale(0.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes chipShine {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes datoRowIn {
+  from { opacity: 0; transform: translateX(22px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes sectionLabelIn {
+  from { opacity: 0; transform: translateX(-10px); letter-spacing: 3px; }
+  to   { opacity: 1; transform: translateX(0); letter-spacing: 0.8px; }
+}
+@keyframes rightTitleIn {
+  from { opacity: 0; transform: translateY(-14px) skewX(-3deg); }
+  to   { opacity: 1; transform: translateY(0) skewX(0deg); }
+}
+@keyframes chipIn {
+  from { opacity: 0; transform: scale(0.7) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes qrBtnPulse {
+  0%   { box-shadow: 0 6px 22px rgba(77,15,96,0.35), 0 0 0 0 rgba(77,15,96,0.45); }
+  70%  { box-shadow: 0 6px 22px rgba(77,15,96,0.35), 0 0 0 14px rgba(77,15,96,0); }
+  100% { box-shadow: 0 6px 22px rgba(77,15,96,0.35), 0 0 0 0 rgba(77,15,96,0); }
+}
+@keyframes borderAccentGrow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%       { transform: translateY(-4px) rotate(-5deg); }
+}
+@keyframes geoPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.15); opacity: 0.7; }
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes modalIconPop {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  60%  { transform: scale(1.2) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+// ─────────────────────────────────────────────
+//  CONTAINER
+// ─────────────────────────────────────────────
+.detalle-container {
+  padding: 32px;
+  min-height: 100vh;
+  background-color: $bg;
+  font-family: 'Open Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+  width: 100%;
+  animation: fadeIn 0.4s ease both;
+}
+
+.back-link {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: $text-soft;
+  text-decoration: none; cursor: pointer;
+  width: fit-content; padding: 7px 14px 7px 8px;
+  border-radius: 10px; border: 1.5px solid transparent;
+  transition: color 0.2s, background 0.2s, border-color 0.2s, transform 0.25s cubic-bezier(.34,1.56,.64,1);
+  animation: fadeInUp 0.4s ease 0.05s both;
+
+  &:hover {
+    color: $purple-dark; background: rgba(77,15,96,0.07); border-color: rgba(77,15,96,0.2);
+    transform: translateX(-5px);
+    .back-arrow { transform: translateX(-4px); }
+  }
+}
+
+.back-arrow { width: 28px; height: 28px; flex-shrink: 0; stroke-width: 3; transition: transform 0.25s cubic-bezier(.34,1.56,.64,1); }
+
+.estado-msg {
+  font-size: 14px; color: $text-soft; background: $white; border-radius: 14px;
+  padding: 24px; text-align: center; animation: fadeIn 0.35s ease both;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  &.error { color: $danger; border-left: 4px solid $danger; background: #fff8f8; }
+}
+
+// ─────────────────────────────────────────────
+//  LAYOUT
+// ─────────────────────────────────────────────
+.layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 32px; align-items: start; width: 100%;
+}
+
+.col-left {
+  display: flex; flex-direction: column; gap: 20px;
+  animation: slideInLeft 0.55s cubic-bezier(.34,1.2,.64,1) 0.12s both;
+}
+
+// ─────────────────────────────────────────────
+//  TARJETA FÍSICA
+// ─────────────────────────────────────────────
+.cred-card {
+  position: relative;
+  background: linear-gradient(140deg, $purple-dark 0%, #5a2878 38%, $blue-dark 100%);
+  background-size: 300% 300%;
+  border-radius: 24px; padding: 28px 28px 24px;
+  display: flex; flex-direction: column; gap: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 64px rgba(77,15,96,0.4), 0 0 0 1px rgba(255,255,255,0.09) inset;
+  min-height: 240px;
+  animation: fadeInScale 0.65s cubic-bezier(.34,1.2,.64,1) 0.1s both, gradientShift 14s ease 1s infinite;
+  transition: transform 0.32s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
+
+  &::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); z-index: 2; pointer-events: none; }
+  &::after { content: ''; position: absolute; top: 0; left: -120%; width: 70%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transform: skewX(-20deg); transition: left 0.75s ease; pointer-events: none; z-index: 2; }
+
+  &:hover {
+    transform: translateY(-8px) scale(1.018);
+    box-shadow: 0 38px 90px rgba(77,15,96,0.56), 0 0 0 1px rgba(255,255,255,0.16) inset;
+    &::after { left: 150%; }
+    .cred-card__chip { animation: chipShine 1.1s ease infinite; }
+    .cred-card__avatar { background: rgba(255,255,255,0.3); transform: scale(1.1) rotate(-4deg); }
+  }
+  &:active { transform: translateY(-4px) scale(0.997); }
+}
+
+.cred-card__noise {
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  &::before { content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 55%, transparent 100%); top: -120px; right: -80px; animation: orbFloat1 14s ease-in-out infinite; }
+  &::after  { content: ''; position: absolute; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 55%, transparent 100%); bottom: -65px; left: -45px; animation: orbFloat2 10s ease-in-out infinite; }
+}
+
+.cred-card__top { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 3; }
+
+.cred-card__chip {
+  width: 40px; height: 30px;
+  background: linear-gradient(135deg, #d4a843 0%, #f0c96a 40%, #d4a843 60%, #f0c96a 100%);
+  background-size: 200% auto; border-radius: 6px;
+  display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 6px 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  .chip-line { height: 2px; background: rgba(0,0,0,0.22); border-radius: 1px; }
+}
+
+.cred-card__badge {
+  font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 50px;
+  animation: badgeIn 0.5s cubic-bezier(.34,1.56,.64,1) 0.45s both;
+  position: relative; z-index: 3; letter-spacing: 0.2px;
+
+  &.activa { background: rgba(46,125,50,0.28); color: #a5d6a7; border: 1px solid rgba(165,214,167,0.5); animation: badgeIn 0.5s cubic-bezier(.34,1.56,.64,1) 0.45s both, pulseGreen 2.8s ease-in-out 1.2s infinite; }
+  &.inactiva { background: rgba(0,0,0,0.25); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.2); animation: badgeIn 0.5s cubic-bezier(.34,1.56,.64,1) 0.45s both, statusBlink 3.5s ease-in-out infinite; }
+}
+
+.cred-card__inst { display: flex; align-items: center; gap: 12px; position: relative; z-index: 3; animation: fadeInUp 0.55s ease 0.32s both; }
+
+.cred-card__avatar {
+  width: 46px; height: 46px; border-radius: 12px; background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 800; color: $white; flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  transition: background 0.3s, transform 0.4s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s;
+}
+
+.cred-card__inst-name { font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 800; color: $white; margin: 0 0 2px; }
+.cred-card__inst-tipo { font-size: 11px; color: rgba(255,255,255,0.65); margin: 0; text-transform: capitalize; }
+
+.cred-card__id { display: flex; align-items: baseline; gap: 8px; position: relative; z-index: 3; animation: fadeInUp 0.55s ease 0.42s both; }
+.cred-card__id-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+.cred-card__id-num { font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 800; color: $white; letter-spacing: 2px; }
+
+// ─────────────────────────────────────────────
+//  BOTTOM DE LA TARJETA  ← CORREGIDO
+// ─────────────────────────────────────────────
+.cred-card__bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  align-items: start;
+  gap: 0;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  padding-top: 16px;
+  position: relative;
+  z-index: 3;
+  animation: fadeInUp 0.55s ease 0.52s both;
+}
+
+.cred-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 33px;
+}
+
+.cred-card__field-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.45); margin: 0 0 3px; }
+.cred-card__field-val { font-size: 12px; font-weight: 600; color: $white; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
+
+// ─────────────────────────────────────────────
+//  ESTADO SOLICITANDO GEO
+// ─────────────────────────────────────────────
+.geo-solicitando {
+  .geo-pulse span { animation: geoPulse 1.2s ease-in-out infinite !important; display: inline-block; }
+}
+
+// ─────────────────────────────────────────────
+//  BOTÓN GENERAR QR (externo, no usado dentro de tarjeta)
+// ─────────────────────────────────────────────
+.btn-generar-qr {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 20px;
+  background: linear-gradient(135deg, $purple-dark 0%, $blue-dark 50%, $purple-mid 100%);
+  background-size: 250% 250%;
+  border: none; border-radius: 14px; color: $white;
+  font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: transform 0.28s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s;
+  animation: gradientShift 5s ease infinite, qrBtnPulse 3s ease-in-out 1.5s infinite;
+
+  &::before { content: ''; position: absolute; top: 0; left: -80%; width: 55%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent); transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none; }
+
+  .btn-qr-icon { font-size: 18px; display: inline-block; transition: transform 0.38s cubic-bezier(.34,1.56,.64,1); animation: iconFloat 2.5s ease-in-out infinite; }
+
+  &:hover { transform: translateY(-5px) scale(1.025); box-shadow: 0 18px 40px rgba(77,15,96,0.52); &::before { left: 130%; } .btn-qr-icon { transform: scale(1.3) rotate(8deg); animation-play-state: paused; } }
+  &:active { transform: translateY(0) scale(0.97); }
+}
+
+// ─────────────────────────────────────────────
+//  BOTÓN QR INLINE (dentro de la tarjeta)  ← CORREGIDO
+// ─────────────────────────────────────────────
+.btn-qr-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: $white;
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
+  min-width: 60px;
+  align-self: start;
+ 
+  span {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: rgba(255,255,255,0.85);
+    white-space: nowrap;
+  }
+
+  &:hover {
+    transform: translateY(-3px) scale(1.08);
+    opacity: 0.9;
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.97);
+  }
+
+  &.btn-qr-loading {
+    cursor: default;
+    opacity: 0.6;
+    .qr-icon { animation: girar 1.2s linear infinite; }
+  }
+}
+
+.qr-icon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  color: $white;
+}
+
+// ─────────────────────────────────────────────
+//  ERROR GEO / FUERA DE ÁREA
+// ─────────────────────────────────────────────
+.qr-block--error {
+  border-left-color: $danger !important;
+  .qr-title { color: $danger !important; }
+}
+
+.btn-reintentar-geo {
+  margin-top: 8px; padding: 8px 18px;
+  background: transparent; border: 1.5px solid rgba(169,56,69,0.5);
+  border-radius: 8px; color: $danger;
+  font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
+  cursor: pointer; width: 100%;
+  transition: background 0.2s, transform 0.22s cubic-bezier(.34,1.56,.64,1);
+  &:hover { background: rgba(169,56,69,0.08); transform: translateY(-2px); }
+  &:active { transform: translateY(0); }
+}
+
+// ─────────────────────────────────────────────
+//  TARJETA QR (modal)
+// ─────────────────────────────────────────────
+.qr-card { background: $white; border-radius: 20px; padding: 24px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; box-shadow: 0 10px 42px rgba(0,0,0,0.1), 0 2px 8px rgba(77,15,96,0.1); border: 1.5px solid #f0e8f8; animation: qrReveal 0.52s cubic-bezier(.34,1.2,.64,1) both; }
+
+.qr-loading { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px 0; p { font-size: 13px; color: #888; margin: 0; } }
+
+.qr-spinner { width: 44px; height: 44px; border: 3px solid #f0e8f8; border-top-color: $purple-dark; border-right-color: $purple-mid; border-radius: 50%; animation: girar 0.68s linear infinite; filter: drop-shadow(0 0 7px rgba(77,15,96,0.5)); }
+
+.qr-imagen-wrap {
+  padding: 14px; background: $white; border-radius: 16px; border: 1.5px solid #f0e8f8;
+  box-shadow: 0 4px 26px rgba(77,15,96,0.16); position: relative; overflow: hidden;
+  transition: box-shadow 0.3s, transform 0.3s cubic-bezier(.34,1.2,.64,1);
+  animation: fadeInScale 0.55s cubic-bezier(.34,1.2,.64,1) 0.1s both;
+  &::after { content: ''; position: absolute; left: 14px; right: 14px; height: 2px; background: linear-gradient(90deg, transparent, $purple-dark, $purple-light, $purple-dark, transparent); border-radius: 2px; animation: qrScanLine 2.3s linear infinite; pointer-events: none; filter: drop-shadow(0 0 6px $purple-dark); opacity: 0.8; }
+  &:hover { box-shadow: 0 8px 34px rgba(77,15,96,0.26); transform: scale(1.03); }
+}
+
+.qr-imagen { display: block; width: 200px; height: 200px; border-radius: 4px; }
+
+.qr-timer { width: 100%; display: flex; flex-direction: column; gap: 6px; animation: fadeInUp 0.45s ease 0.22s both; }
+.qr-timer-row { display: flex; justify-content: space-between; align-items: center; }
+.qr-timer-label { font-family: 'Open Sans', sans-serif; font-size: 13px; color: #888; }
+.qr-timer-num { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 800; color: $purple-dark; transition: color 0.3s; min-width: 44px; text-align: right; &.urgente { animation: timerTick 0.65s ease-in-out infinite, timerUrgente 1s ease-in-out infinite; } }
+.qr-timer-bar { height: 7px; background: #f0e8f8; border-radius: 8px; overflow: hidden; }
+.qr-timer-fill { height: 100%; background: linear-gradient(90deg, $purple-dark, $purple-light); border-radius: 8px; transition: width 1s linear, background 0.45s; position: relative; animation: progressGlow 2.2s ease-in-out infinite; &::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 24px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6)); border-radius: 0 8px 8px 0; } &.urgente { background: linear-gradient(90deg, $danger, #e57373); animation: progressGlow 0.5s ease-in-out infinite; } }
+.qr-timer-hint { font-family: 'Open Sans', sans-serif; font-size: 11px; color: #bbb; margin: 0; text-align: center; letter-spacing: 0.2px; }
+
+.btn-cerrar-qr { width: 100%; padding: 12px; background: transparent; border: 1.5px solid #e0d4f0; border-radius: 10px; color: $purple-dark; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s, border-color 0.2s, transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s; &:hover { background: #f8f0ff; border-color: $purple-mid; transform: translateY(-2px); box-shadow: 0 5px 16px rgba(77,15,96,0.16); } &:active { transform: translateY(0); } }
+
+// ─────────────────────────────────────────────
+//  QR BLOCK (cuando credencial inactiva)
+// ─────────────────────────────────────────────
+.qr-block { background: $white; border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 4px solid #e0d4f0; animation: slideInLeft 0.4s cubic-bezier(.34,1.2,.64,1) 0.2s both; transition: box-shadow 0.25s, transform 0.25s; &:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.09); transform: translateY(-2px); } }
+.qr-graphic { width: 64px; height: 64px; background: #f5f5f5; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 44px; flex-shrink: 0; transition: transform 0.4s cubic-bezier(.34,1.56,.64,1), background 0.2s; .qr-block:hover & { transform: rotate(-8deg) scale(1.1); background: #ede8f5; } }
+.qr-title { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; color: $text-main; margin: 0 0 4px; }
+.qr-sub   { font-size: 12px; color: $text-soft; margin: 0; opacity: 0.7; }
+
+// ─────────────────────────────────────────────
+//  CHIPS
+// ─────────────────────────────────────────────
+.accesos-row { display: flex; gap: 10px; flex-wrap: wrap; animation: fadeInUp 0.5s ease 0.5s both; }
+.acceso-chip { padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1.5px solid; transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s; animation: chipIn 0.4s cubic-bezier(.34,1.56,.64,1) both; @for $i from 1 through 3 { &:nth-child(#{$i}) { animation-delay: #{0.08 * $i + 0.5}s; } } &:hover { transform: translateY(-3px); box-shadow: 0 5px 14px rgba(0,0,0,0.12); } &.permitido { background: #f5e8ff; color: $purple-dark; border-color: #d4a0ee; } &.nivel { text-transform: capitalize; } }
+
+// ─────────────────────────────────────────────
+//  COLUMNA DERECHA
+// ─────────────────────────────────────────────
+.col-right { display: flex; flex-direction: column; gap: 24px; animation: slideInRight 0.55s cubic-bezier(.34,1.2,.64,1) 0.2s both; }
+
+// ─────────────────────────────────────────────
+//  RIGHT HEADER
+// ─────────────────────────────────────────────
+.right-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid rgba(77,15,96,0.1);
+  position: relative;
+  animation: fadeInUp 0.5s ease 0.28s both;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0;
+    width: 60px; height: 2px;
+    background: linear-gradient(90deg, $purple-dark, $blue-dark);
+    border-radius: 2px;
+    animation: borderAccentGrow 0.6s cubic-bezier(.34,1.2,.64,1) 0.5s both;
+    transform-origin: left;
+  }
+}
+
+.right-header__left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.right-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 28px; font-weight: 800;
+  color: $text-main; margin: 0;
+  animation: rightTitleIn 0.55s cubic-bezier(.34,1.2,.64,1) 0.3s both;
+}
+
+.right-loc {
+  font-size: 14px; color: $text-soft; margin: 0;
+  animation: fadeInUp 0.45s ease 0.4s both;
+}
+
+// ─────────────────────────────────────────────
+//  BOTÓN ELIMINAR CREDENCIAL
+// ─────────────────────────────────────────────
+.btn-eliminar-credencial {
+  background: rgba(169,56,69,0.08);
+  border: 1.5px solid $danger;
+  color: $danger;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px; font-weight: 700;
+  padding: 9px 18px; border-radius: 10px; cursor: pointer;
+  white-space: nowrap; flex-shrink: 0;
+  margin-top: 4px;
+  transition: all 0.22s cubic-bezier(.34,1.2,.64,1);
+  box-shadow: 0 2px 8px rgba(169,56,69,0.12);
+  animation: fadeInUp 0.45s ease 0.35s both;
+
+  &:hover:not(:disabled) {
+    background: $danger; color: $white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(169,56,69,0.35);
+  }
+  &:active:not(:disabled) { transform: translateY(0); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+// ─────────────────────────────────────────────
+//  INFO SECTIONS
+// ─────────────────────────────────────────────
+.info-section { display: flex; flex-direction: column; gap: 10px; animation: fadeInUp 0.5s ease both; @for $i from 1 through 4 { &:nth-child(#{$i + 1}) { animation-delay: #{0.1 * $i + 0.32}s; } } }
+
+.section-label { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; color: $text-soft; text-transform: uppercase; letter-spacing: 0.8px; animation: sectionLabelIn 0.5s ease both; }
+
+// ─────────────────────────────────────────────
+//  PUNTO CARD
+// ─────────────────────────────────────────────
+.punto-card { background: $white; border-radius: 16px; padding: 20px; display: flex; align-items: flex-start; gap: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); border-left: 4px solid $purple-dark; position: relative; overflow: hidden; transition: box-shadow 0.28s, transform 0.28s cubic-bezier(.34,1.2,.64,1); &::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(77,15,96,0.04) 0%, transparent 100%); opacity: 0; transition: opacity 0.3s; pointer-events: none; } &:hover { box-shadow: 0 10px 32px rgba(77,15,96,0.16); transform: translateY(-4px) translateX(4px); &::before { opacity: 1; } .punto-icon { transform: scale(1.18) rotate(-6deg); } } }
+.punto-icon { font-size: 32px; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); transition: transform 0.38s cubic-bezier(.34,1.56,.64,1); }
+.punto-body { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.punto-nombre { font-family: 'Montserrat', sans-serif; font-size: 17px; font-weight: 700; color: $text-main; margin: 0; }
+.punto-desc { font-size: 13px; color: $text-soft; margin: 0; text-transform: capitalize; opacity: 0.8; }
+.punto-badges { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.badge-tipo { font-size: 11px; font-weight: 700; text-transform: capitalize; background: $bg; color: $text-soft; padding: 3px 10px; border-radius: 20px; transition: background 0.2s, color 0.2s; .punto-card:hover & { background: #f0e8ff; color: $purple-dark; } }
+.badge-nivel { font-size: 12px; font-weight: 700; text-transform: capitalize; }
+
+// ─────────────────────────────────────────────
+//  DATOS CARD
+// ─────────────────────────────────────────────
+.datos-card { background: $white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.07); transition: box-shadow 0.28s, transform 0.28s; &:hover { box-shadow: 0 10px 32px rgba(77,15,96,0.12); transform: translateY(-3px); } }
+
+.dato-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; gap: 12px; border-bottom: 1px solid #f0f0f0; transition: background 0.18s, padding-left 0.2s cubic-bezier(.34,1.2,.64,1); animation: datoRowIn 0.4s ease both; position: relative; @for $i from 1 through 6 { &:nth-child(#{$i}) { animation-delay: #{0.07 * $i + 0.45}s; } } &:last-child { border-bottom: none; } &::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, $purple-dark, $blue-dark); border-radius: 0 2px 2px 0; transform: scaleY(0); transform-origin: center; transition: transform 0.2s cubic-bezier(.34,1.56,.64,1); } &:hover { background: #faf5ff; padding-left: 24px; &::before { transform: scaleY(1); } } }
+
+.dato-label { font-size: 13px; color: #aaa; flex-shrink: 0; }
+.dato-val { font-size: 14px; font-weight: 600; color: $text-main; text-align: right; transition: color 0.2s; &.estado-val.activa { color: $purple-dark; font-weight: 700; } }
+
+// ─────────────────────────────────────────────
+//  UBICACIÓN INLINE
+// ─────────────────────────────────────────────
+.ubi-row { align-items: flex-start !important; }
+.ubi-inline-val { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; text-align: right; flex: 1; }
+.sin-dir { color: #bbb !important; font-weight: 400 !important; font-style: italic; }
+.ubi-meta { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.ubi-radio-txt { font-family: 'Open Sans', sans-serif; font-size: 11px; color: #999; strong { color: $purple-dark; font-weight: 700; } }
+.ubi-badge-inline { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 50px; &.activa { color: #1a7a4a; background: rgba(26,122,74,0.1); } &.inactiva { color: #aaa; background: rgba(0,0,0,0.06); } }
+
+// ─────────────────────────────────────────────
+//  SKELETON
+// ─────────────────────────────────────────────
+.ubi-skeleton { display: flex; flex-direction: column; gap: 6px; }
+.ubi-skeleton-line { height: 13px; border-radius: 6px; background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%); background-size: 400px 100%; animation: shimmer 1.3s infinite; width: 100%; &.short { width: 55%; } }
+
+// ─────────────────────────────────────────────
+//  MODALES
+// ─────────────────────────────────────────────
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(5px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; animation: fadeIn 0.22s ease both;
+}
+
+.modal-card {
+  background: $bg; border-radius: 24px; padding: 44px 40px;
+  max-width: 420px; width: 90%;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 16px; text-align: center;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.6) inset;
+  animation: slideUp 0.32s cubic-bezier(.34,1.2,.64,1) both;
+
+  h3 { font-family: 'Montserrat', sans-serif; font-size: 22px; font-weight: 700; color: $text-main; margin: 0; animation: fadeInUp 0.4s ease 0.15s both; }
+  p  { font-size: 14px; color: $text-soft; margin: 0; line-height: 1.6; animation: fadeInUp 0.4s ease 0.22s both; }
+}
+
+.modal-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; color: $white; font-weight: 700;
+  animation: modalIconPop 0.5s cubic-bezier(.34,1.56,.64,1) both;
+
+  &.confirm-icon { background: linear-gradient(135deg, $text-soft, #5a5d70); box-shadow: 0 6px 20px rgba(74,77,86,0.3); }
+  &.exito        { background: linear-gradient(135deg, $blue-dark, $purple-mid); box-shadow: 0 6px 20px rgba(50,72,140,0.3); }
+  &.error        { background: linear-gradient(135deg, $danger, #c0392b); box-shadow: 0 6px 20px rgba(169,56,69,0.3); }
+   &.modal-icon--warn {
+    background: linear-gradient(135deg, $danger, #c0392b);
+    box-shadow: 0 6px 20px rgba(169,56,69,0.3);}
+}
+
+.modal-btns { display: flex; gap: 12px; width: 100%; margin-top: 6px; }
+
+.btn-cancelar-modal {
+  flex: 1; padding: 13px; background: transparent;
+  border: 1.5px solid #ccc; border-radius: 10px;
+  font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 600; color: $text-soft;
+  cursor: pointer; transition: all 0.2s;
+  &:hover { border-color: $text-soft; background: rgba(0,0,0,0.04); transform: translateY(-1px); }
+}
+
+.btn-aceptar-modal {
+  flex: 1; padding: 13px;
+  background: linear-gradient(135deg, $purple-dark 0%, $blue-dark 50%, $purple-mid 100%);
+  background-size: 250% 250%;
+  color: $white; border: none; border-radius: 10px;
+  font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(77,15,96,0.28);
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+  animation: gradientShift 4s ease infinite;
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(77,15,96,0.4); }
+  &:active { transform: translateY(0); }
+}
+
+.btn-aceptar-solo { width: 100%; }
+
+// ─────────────────────────────────────────────
+//  BOTÓN CERRAR MODAL (X)
+// ─────────────────────────────────────────────
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;                    // ← sin borde
+  background: transparent;         // ← sin fondo
+  color: $text-soft;
+  font-size: 30px;                 // ← más grande
+  font-weight: 9000;                // ← máximo negrita
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, transform 0.22s cubic-bezier(.34,1.56,.64,1);
+  animation: fadeIn 0.3s ease 0.2s both;
+
+  &:hover {
+    background: transparent;
+    border: none;
+    color: $danger;
+    transform: rotate(90deg) scale(1.15);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  RESPONSIVE
+// ─────────────────────────────────────────────
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .col-left { max-width: 440px; margin: 0 auto; width: 100%; animation: fadeInUp 0.5s ease 0.1s both; }
+  .col-right { animation: fadeInUp 0.5s ease 0.2s both; }
+}
+
+@media (max-width: 768px) {
+  .detalle-container { padding: 120px 16px 24px; }
+  .right-title { font-size: 20px !important; }
+  .right-header { flex-wrap: wrap; gap: 12px; }
+  .btn-eliminar-credencial { margin-top: 0; }
+  .modal-btns { flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+  .detalle-container { padding: 115px 20px 22px; }
+  .cred-card { padding: 22px 20px 18px; }
+  .cred-card__id-num { font-size: 22px; }
+  .cred-card__bottom { gap: 14px; }
+  .modal-card { padding: 32px 24px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.1ms !important; }
+}

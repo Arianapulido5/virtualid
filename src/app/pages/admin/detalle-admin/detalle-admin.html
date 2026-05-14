@@ -1,0 +1,184 @@
+<!-- src/app/pages/admin/detalle-admin/detalle-admin.html -->
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="administradores" />
+
+  <!-- ══ MODAL CONFIRMACIÓN ══ -->
+  <div class="modal-overlay" *ngIf="confirmVisible">
+    <div class="modal-card">
+      <div class="modal-icon confirm-icon">?</div>
+      <h3>{{ confirmTitulo }}</h3>
+      <p>{{ confirmMensaje }}</p>
+      <div class="modal-btns">
+        <button class="btn-cancelar-modal" (click)="cancelarConfirmacion()">Cancelar</button>
+        <button class="btn-aceptar" (click)="confirmarAccion()">Sí, continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL RESULTADO ══ -->
+  <div class="modal-overlay" *ngIf="modalVisible">
+    <div class="modal-card">
+      <div class="modal-icon" [ngClass]="modalTipo">
+        {{ modalTipo === 'exito' ? '✓' : '!' }}
+      </div>
+      <h3>{{ modalTitulo }}</h3>
+      <p>{{ modalMensaje }}</p>
+      <button class="btn-aceptar" (click)="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <!-- FILA SUPERIOR -->
+      <div class="top-row">
+        <a class="back-link" routerLink="/admin/administradores">
+          <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </a>
+
+        <div class="top-actions" *ngIf="!cargando">
+          <!-- Editar — solo propio admin -->
+          <button
+            class="btn-editar-admin"
+            *ngIf="esMiPropioDetalle"
+            (click)="irAEditar()">
+             Editar mis datos
+          </button>
+
+          <!-- Eliminar — solo si no es principal y no es el propio admin -->
+          <button
+            class="btn-eliminar"
+            *ngIf="!admin.esPrincipal && !esMiPropioDetalle"
+            (click)="confirmarEliminar()"
+            [disabled]="procesando">
+             Eliminar administrador
+          </button>
+        </div>
+      </div>
+
+      <!-- CARGANDO -->
+      <div *ngIf="cargando" class="estado-txt">Cargando información...</div>
+
+      <ng-container *ngIf="!cargando">
+
+        <div class="detalle-grid">
+
+          <!-- ── CARD INFO ── -->
+          <div class="card info-card">
+            <div class="card-header">
+              <h3 class="card-title">Información del administrador</h3>
+              <span class="estado-badge activo">● Activo</span>
+            </div>
+
+            <div class="user-perfil">
+              <div class="user-avatar" [ngClass]="admin.avatarColor">{{ admin.iniciales }}</div>
+              <div class="user-datos">
+                <div class="user-nombre-row">
+                  <span class="user-nombre">{{ admin.nombre }}</span>
+                  <span class="badge-yo" *ngIf="esMiPropioDetalle">Tú</span>
+                </div>
+                <span class="user-correo">{{ admin.correo }}</span>
+                <span class="user-tipo">Administrador</span>
+              </div>
+            </div>
+
+            <div class="info-lista">
+              <div class="info-row">
+                <span class="info-label">No. Identificación</span>
+                <span class="info-valor">{{ admin.noId }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Tipo de acceso</span>
+                <span class="info-valor acceso-total">● Acceso total</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Rol</span>
+                <span class="info-valor">
+                  <span class="badge-principal" *ngIf="admin.esPrincipal"> Principal</span>
+                  <span *ngIf="!admin.esPrincipal">Secundario</span>
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Miembro desde</span>
+                <span class="info-valor">{{ formatearFecha(admin.creado_en) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── CARD ACCESOS ── -->
+          <div class="card accesos-card">
+            <div class="card-header">
+              <h3 class="card-title">Permisos y accesos</h3>
+            </div>
+
+            <div class="permisos-lista">
+              <div class="permiso-row">
+                <span class="permiso-icon">👥</span>
+                <div class="permiso-info">
+                  <span class="permiso-nombre">Gestión de usuarios</span>
+                  <span class="permiso-desc">Ver, bloquear y eliminar usuarios de la institución</span>
+                </div>
+                <span class="permiso-estado activo">✓</span>
+              </div>
+              <div class="permiso-row">
+                <span class="permiso-icon">🪪</span>
+                <div class="permiso-info">
+                  <span class="permiso-nombre">Gestión de credenciales</span>
+                  <span class="permiso-desc">Aprobar, revocar y rehabilitar credenciales</span>
+                </div>
+                <span class="permiso-estado activo">✓</span>
+              </div>
+              <div class="permiso-row">
+                <span class="permiso-icon">🏛</span>
+                <div class="permiso-info">
+                  <span class="permiso-nombre">Puntos de acceso</span>
+                  <span class="permiso-desc">Crear y gestionar puntos de acceso físico</span>
+                </div>
+                <span class="permiso-estado activo">✓</span>
+              </div>
+              <div class="permiso-row">
+                <span class="permiso-icon">📊</span>
+                <div class="permiso-info">
+                  <span class="permiso-nombre">Reportes e historial</span>
+                  <span class="permiso-desc">Acceso a reportes y historial global de accesos</span>
+                </div>
+                <span class="permiso-estado activo">✓</span>
+              </div>
+              <div class="permiso-row">
+                <span class="permiso-icon">🎫</span>
+                <div class="permiso-info">
+                  <span class="permiso-nombre">Soporte</span>
+                  <span class="permiso-desc">Gestionar tickets de soporte de usuarios</span>
+                </div>
+                <span class="permiso-estado activo">✓</span>
+              </div>
+              <div class="permiso-row">
+                <span class="permiso-icon">🏢</span>
+                <div class="permiso-info">
+                  <span class="permiso-nombre">Editar institución</span>
+                  <span class="permiso-desc">Modificar datos de la institución</span>
+                </div>
+                <span class="permiso-estado" [ngClass]="admin.esPrincipal ? 'activo' : 'inactivo'">
+                  {{ admin.esPrincipal ? '✓' : '✕' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="nota-permisos" *ngIf="!admin.esPrincipal">
+              <span>ℹ️</span>
+              <p>La edición de datos de la institución es exclusiva del administrador principal.</p>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+
+    </div>
+  </main>
+</div>

@@ -1,0 +1,303 @@
+// src/app/pages/admin/mi-institucion/mi-institucion.scss
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap');
+
+:host {
+  --purple:      #4D0F60;
+  --purple-m:    #6B2080;
+  --blue:        #32488C;
+  --bg:          #EDF2F4;
+  --dark:        #4A4D56;
+  --black:       #0F0C0C;
+  --white:       #ffffff;
+  --success:     #1a7a4a;
+  font-family: 'Open Sans', sans-serif;
+  display: block;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cardIn { from { opacity: 0; transform: translateY(18px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes avatarIn { from { opacity: 0; transform: scale(0.6) rotate(-10deg); } to { opacity: 1; transform: scale(1) rotate(0deg); } }
+@keyframes datoRowIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes resumenItemIn { from { opacity: 0; transform: translateX(14px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes badgeActivePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
+@keyframes statCountUp { from { opacity: 0; transform: scale(0.7) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes headerIn { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes btnPulse { 0% { box-shadow: 0 4px 16px rgba(77,15,96,0.35), 0 0 0 0 rgba(77,15,96,0.35); } 70% { box-shadow: 0 4px 16px rgba(77,15,96,0.35), 0 0 0 10px rgba(77,15,96,0); } 100% { box-shadow: 0 4px 16px rgba(77,15,96,0.35), 0 0 0 0 rgba(77,15,96,0); } }
+@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+@keyframes flechaSlide { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
+
+.admin-layout { display: flex; min-height: 100vh; background: var(--bg); }
+
+.main-content {
+  margin-left: 210px; margin-top: 52px; flex: 1; overflow-y: auto;
+  min-height: calc(100vh - 52px); width: calc(100% - 210px); box-sizing: border-box;
+  animation: fadeIn 0.4s ease both;
+}
+
+.page-body {
+  padding: 28px 32px; display: flex; flex-direction: column; gap: 24px;
+}
+
+// Header
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  animation: headerIn 0.5s cubic-bezier(.34,1.2,.64,1) 0.08s both;
+}
+
+.page-title {
+  font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 800;
+  color: var(--black); margin: 0;
+}
+
+.btn-editar {
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  background-size: 200% 200%;
+  border: none; color: var(--white);
+  font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700;
+  padding: 11px 24px; border-radius: 10px; cursor: pointer;
+  position: relative; overflow: hidden;
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+  animation: gradientShift 4s ease infinite, btnPulse 3s ease-in-out 1.5s infinite;
+  white-space: nowrap;
+
+  &::before {
+    content: ''; position: absolute; top: 0; left: -80%;
+    width: 55%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: skewX(-20deg); transition: left 0.55s ease; pointer-events: none;
+  }
+
+  &:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(77,15,96,0.42); &::before { left: 130%; } }
+  &:active { transform: translateY(0); }
+}
+
+// Grid
+.institucion-grid {
+  display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; align-items: start;
+}
+
+// Cards base
+.card {
+  background: var(--white); border-radius: 16px; padding: 22px 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  position: relative; overflow: hidden;
+  animation: cardIn 0.5s cubic-bezier(.34,1.2,.64,1) both;
+  transition: box-shadow 0.25s, transform 0.25s;
+
+  &.datos-card  { animation-delay: 0.15s; }
+  &.resumen-card { animation-delay: 0.22s; }
+
+  &::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--purple), var(--blue));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s cubic-bezier(.34,1.2,.64,1);
+    border-radius: 14px 14px 0 0;
+  }
+
+  &:hover {
+    box-shadow: 0 8px 28px rgba(77,15,96,0.1); transform: translateY(-2px);
+    &::before { transform: scaleX(1); }
+  }
+}
+
+.card-header-row {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+}
+
+.card-label {
+  font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; color: var(--black);
+}
+
+.badge-activa {
+  font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
+  color: var(--success); padding: 4px 12px; border-radius: 50px;
+  background: rgba(26,122,74,0.1);
+  animation: badgeActivePulse 3s ease-in-out infinite;
+}
+
+// Perfil institución
+.inst-perfil {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
+  padding: 14px; background: var(--bg); border-radius: 12px;
+  transition: background 0.2s, box-shadow 0.2s;
+  &:hover { background: #e0e8ef; box-shadow: inset 0 0 0 1px rgba(77,15,96,0.1); }
+}
+
+.inst-avatar {
+  width: 58px; height: 58px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--purple), var(--purple-m));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 17px; color: var(--white);
+  flex-shrink: 0; box-shadow: 0 4px 14px rgba(77,15,96,0.3);
+  animation: avatarIn 0.5s cubic-bezier(.34,1.56,.64,1) 0.25s both;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s;
+  .inst-perfil:hover & { transform: scale(1.08) rotate(-3deg); box-shadow: 0 6px 20px rgba(77,15,96,0.4); }
+}
+
+.inst-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+.inst-nombre {
+  font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 16px;
+  color: var(--black); word-break: break-word;
+  animation: fadeInUp 0.45s ease 0.32s both;
+}
+
+.inst-contacto {
+  font-family: 'Open Sans', sans-serif; font-size: 12px; color: #888;
+  word-break: break-all; animation: fadeInUp 0.45s ease 0.38s both;
+}
+
+.divider { height: 1px; background: var(--bg); margin-bottom: 18px; }
+
+// Datos lista
+.datos-lista { display: flex; flex-direction: column; gap: 0; }
+
+.dato-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 10px; gap: 12px; border-bottom: 1px solid #f0f2f5;
+  border-radius: 8px;
+  transition: background 0.18s, padding-left 0.2s cubic-bezier(.34,1.2,.64,1);
+  animation: datoRowIn 0.38s ease both; cursor: default;
+
+  @for $i from 1 through 7 { &:nth-child(#{$i}) { animation-delay: #{0.06 * $i + 0.28}s; } }
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: rgba(77,15,96,0.04); padding-left: 16px; }
+}
+
+.dato-label { font-family: 'Open Sans', sans-serif; font-size: 13px; color: #aaa; flex-shrink: 0; }
+.dato-valor { font-family: 'Open Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--black); text-align: right; word-break: break-word; }
+
+// Resumen card
+.resumen-title {
+  font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 700;
+  color: var(--black); margin: 0 0 16px;
+  animation: fadeInUp 0.4s ease 0.22s both;
+}
+
+.resumen-lista { display: flex; flex-direction: column; gap: 10px; }
+
+.resumen-item {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg); border-radius: 12px; padding: 16px 18px;
+  position: relative; overflow: hidden;
+  transition: background 0.2s, transform 0.2s cubic-bezier(.34,1.2,.64,1), box-shadow 0.2s;
+  animation: resumenItemIn 0.4s ease both;
+
+  @for $i from 1 through 5 { &:nth-child(#{$i}) { animation-delay: #{0.08 * $i + 0.28}s; } }
+
+  &::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(180deg, var(--purple), var(--blue));
+    transform: scaleY(0); transform-origin: center;
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  &:hover {
+    background: #e4eaf0; transform: translateX(4px);
+    box-shadow: 0 3px 12px rgba(77,15,96,0.08);
+    &::before { transform: scaleY(1); }
+    .resumen-valor { color: var(--purple); }
+  }
+}
+
+// Item clickeable — cursor pointer + flecha visible en hover
+.resumen-item-link {
+  cursor: pointer;
+
+  .resumen-flecha {
+    font-size: 14px; color: #ccc; margin-left: 8px;
+    transition: color 0.2s, transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    display: inline-block;
+  }
+
+  &:hover {
+    .resumen-flecha {
+      color: var(--purple);
+      animation: flechaSlide 0.6s ease-in-out infinite;
+    }
+  }
+
+  &:active { transform: translateX(2px) scale(0.98); }
+}
+
+.resumen-valor-wrapper {
+  display: flex; align-items: center; gap: 2px;
+}
+
+.resumen-label { font-family: 'Open Sans', sans-serif; font-size: 13px; color: var(--dark); }
+
+.resumen-valor {
+  font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 800; color: var(--black);
+  transition: color 0.2s;
+  animation: statCountUp 0.5s cubic-bezier(.34,1.56,.64,1) 0.4s both;
+}
+
+// ── Ubicación inline ──────────────────────────────────────────────────────────
+.ubicacion-row { align-items: flex-start !important; }
+
+.dato-ubicacion-val {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 5px; text-align: right;
+}
+
+.ubicacion-radio-inline {
+  font-family: 'Open Sans', sans-serif; font-size: 11px; color: #999;
+  display: flex; align-items: center; gap: 6px; justify-content: flex-end;
+  strong { color: var(--purple); }
+}
+
+.sin-geo { color: #bbb !important; font-style: italic; }
+
+// Skeleton
+.skeleton-line {
+  height: 14px; border-radius: 6px;
+  background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+  background-size: 400px 100%; animation: shimmer 1.3s infinite; width: 100%;
+  &.short { width: 55%; }
+}
+
+// Estados
+.estado-txt {
+  font-family: 'Open Sans', sans-serif; font-size: 14px; color: #888;
+  padding: 20px; background: var(--white); border-radius: 14px;
+  text-align: center; animation: fadeIn 0.3s ease both;
+  &.error { color: #A93845; border-left: 4px solid #A93845; background: #fff8f8; }
+}
+
+// ─────────────────────────────────────────────
+//  RESPONSIVE
+// ─────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .main-content { margin-left: 0 !important; width: 100% !important; }
+  .institucion-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 768px) {
+  .main-content { margin-left: 0 !important; width: 100% !important; margin-top: 52px !important; }
+  .page-body { padding: 16px 14px !important; gap: 16px !important; }
+  .page-header { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+  .page-title { font-size: 20px !important; }
+  .btn-editar { width: 100%; text-align: center; }
+  .card { padding: 16px 18px !important; }
+  .inst-perfil { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .dato-row { flex-direction: column !important; align-items: flex-start !important; gap: 3px !important; padding: 10px 0 !important; }
+  .dato-valor { text-align: left !important; }
+  .dato-ubicacion-val { align-items: flex-start !important; }
+  .ubicacion-radio-inline { justify-content: flex-start !important; }
+  .resumen-item { padding: 12px 14px !important; }
+}
+
+@media (max-width: 480px) {
+  .main-content { margin-left: 0 !important; width: 100% !important; }
+  .page-body { padding: 12px 10px !important; }
+  .page-title { font-size: 18px !important; }
+  .inst-avatar { width: 46px !important; height: 46px !important; font-size: 14px !important; }
+  .inst-nombre { font-size: 14px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.1ms !important; }
+}

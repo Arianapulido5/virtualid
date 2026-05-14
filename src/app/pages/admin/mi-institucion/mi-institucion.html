@@ -1,0 +1,113 @@
+<!-- src/app/pages/admin/mi-institucion/mi-institucion.html -->
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="mi-institucion" />
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <!-- CARGANDO -->
+      <div *ngIf="cargando" class="estado-txt">Cargando información...</div>
+
+      <!-- ERROR -->
+      <div *ngIf="!cargando && errorMsg" class="estado-txt error">{{ errorMsg }}</div>
+
+      <!-- CONTENIDO -->
+      <ng-container *ngIf="!cargando && !errorMsg && institucion">
+
+        <div class="page-header">
+          <h1 class="page-title">Mi Institución</h1>
+          <button class="btn-editar" routerLink="/admin/editar-institucion">
+            Editar información
+          </button>
+        </div>
+
+        <div class="institucion-grid">
+
+          <!-- DATOS GENERALES -->
+          <div class="card datos-card">
+            <div class="card-header-row">
+              <span class="card-label">Datos Generales</span>
+              <span class="badge-activa">● Activa en VIRTUALID</span>
+            </div>
+
+            <div class="inst-perfil">
+              <div class="inst-avatar">{{ iniciales }}</div>
+              <div class="inst-info">
+                <span class="inst-nombre">{{ institucion.nombre }}</span>
+                <span class="inst-contacto">
+                  {{ institucion.correo_contacto }} · {{ institucion.dominio_correo }}
+                </span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="datos-lista">
+              <div class="dato-row">
+                <span class="dato-label">Tipo</span>
+                <span class="dato-valor">{{ institucion.tipo }}</span>
+              </div>
+              <div class="dato-row">
+                <span class="dato-label">RFC</span>
+                <span class="dato-valor">{{ institucion.rfc }}</span>
+              </div>
+              <div class="dato-row">
+                <span class="dato-label">Ciudad</span>
+                <span class="dato-valor">{{ institucion.ciudad }}, {{ institucion.estado }}</span>
+              </div>
+              <div class="dato-row">
+                <span class="dato-label">Dominio institucional</span>
+                <span class="dato-valor">{{ institucion.dominio_correo }}</span>
+              </div>
+              <div class="dato-row">
+                <span class="dato-label">Correo de contacto</span>
+                <span class="dato-valor">{{ institucion.correo_contacto }}</span>
+              </div>
+
+              <!-- UBICACIÓN INLINE -->
+              <div class="dato-row ubicacion-row" *ngIf="tieneUbicacion()">
+                <span class="dato-label">Ubicación</span>
+                <div class="dato-ubicacion-val">
+                  <span class="dato-valor" *ngIf="!cargandoGeo && direccionGeo">{{ direccionGeo }}</span>
+                  <span class="dato-valor sin-geo" *ngIf="!cargandoGeo && !direccionGeo">Coordenadas registradas</span>
+                  <div class="skeleton-line short" *ngIf="cargandoGeo"></div>
+                  <span class="ubicacion-radio-inline">
+                    Radio: <strong>{{ institucion.radio_metros || 200 }} m</strong>
+                  </span>
+                </div>
+              </div>
+
+              <div class="dato-row" *ngIf="!tieneUbicacion()">
+                <span class="dato-label">Ubicación</span>
+                <span class="dato-valor sin-geo">Sin validación geográfica</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESUMEN — cada item es clickeable y navega a su sección -->
+          <div class="card resumen-card">
+            <h3 class="resumen-title">Resumen</h3>
+            <div class="resumen-lista">
+              <div
+                class="resumen-item resumen-item-link"
+                *ngFor="let r of resumen"
+                (click)="irA(r.ruta)"
+                [title]="'Ir a ' + r.label"
+              >
+                <span class="resumen-label">{{ r.label }}</span>
+                <div class="resumen-valor-wrapper">
+                  <span class="resumen-valor">{{ r.valor }}</span>
+                  <span class="resumen-flecha">→</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </div>
+  </main>
+</div>

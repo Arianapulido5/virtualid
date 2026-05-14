@@ -1,0 +1,186 @@
+<!-- src/app/pages/admin/editar-administrador/editar-administrador.html -->
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="administradores" />
+
+  <!-- MODAL ÉXITO -->
+  <div class="modal-overlay" *ngIf="exitoso">
+    <div class="modal-card">
+      <div class="modal-icon">✓</div>
+      <h3>¡Datos actualizados!</h3>
+      <p>Tu información ha sido guardada correctamente.</p>
+      <button class="btn-aceptar" (click)="irADetalle()">Aceptar</button>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <a class="back-link" [routerLink]="['/admin/administradores', miId]">
+        <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </a>
+
+      <div *ngIf="cargandoDatos" class="estado-txt">Cargando datos...</div>
+
+      <ng-container *ngIf="!cargandoDatos">
+
+        <div class="form-header">
+          <h1 class="form-title">Editar mis datos</h1>
+          <p class="form-sub">
+            Actualiza tu nombre, correo institucional o contraseña de acceso al panel.
+            El correo debe pertenecer al dominio
+            <strong *ngIf="dominio">{{ dominio }}</strong>.
+          </p>
+        </div>
+
+        <div class="form-card">
+
+          <!-- NOMBRE -->
+          <div class="field">
+            <label class="field-label">Nombre(s) *</label>
+            <input class="field-input" type="text" placeholder="María"
+              [(ngModel)]="form.nombre" (ngModelChange)="v.nombre()"
+              [class.input-error]="errores['nombre']" />
+            <span class="field-error" *ngIf="errores['nombre']">{{ errores['nombre'] }}</span>
+          </div>
+
+          <!-- APELLIDOS -->
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">Apellido paterno *</label>
+              <input class="field-input" type="text" placeholder="Contreras"
+                [(ngModel)]="form.apellido_paterno" (ngModelChange)="v.apellido_paterno()"
+                [class.input-error]="errores['apellido_paterno']" />
+              <span class="field-error" *ngIf="errores['apellido_paterno']">{{ errores['apellido_paterno'] }}</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Apellido materno *</label>
+              <input class="field-input" type="text" placeholder="López"
+                [(ngModel)]="form.apellido_materno" (ngModelChange)="v.apellido_materno()"
+                [class.input-error]="errores['apellido_materno']" />
+              <span class="field-error" *ngIf="errores['apellido_materno']">{{ errores['apellido_materno'] }}</span>
+            </div>
+          </div>
+
+          <!-- CORREO -->
+          <div class="field">
+            <label class="field-label">Correo institucional *</label>
+            <input class="field-input" type="email"
+              [placeholder]="'admin' + (dominio || '@tudominio.edu.mx')"
+              [(ngModel)]="form.correo" (ngModelChange)="v.correo()"
+              [class.input-error]="errores['correo']" />
+            <span class="field-error" *ngIf="errores['correo']">{{ errores['correo'] }}</span>
+          </div>
+
+          <!-- SEPARADOR -->
+          <p class="section-label">
+            Cambiar contraseña
+            <span class="section-opcional">(opcional — déjalo vacío si no quieres cambiarla)</span>
+          </p>
+
+          <!-- CONTRASEÑA ACTUAL -->
+          <div class="field">
+            <label class="field-label">Contraseña actual</label>
+            <div class="input-wrapper">
+              <input class="field-input" [type]="showActual ? 'text' : 'password'"
+                placeholder="••••••••••" autocomplete="current-password"
+                [(ngModel)]="form.contrasena_actual" (ngModelChange)="v.contrasena_actual()"
+                [class.input-error]="errores['contrasena_actual']" />
+              <button class="eye-btn" type="button" (click)="showActual = !showActual" tabindex="-1">
+                <svg *ngIf="!showActual" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                  <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+                <svg *ngIf="showActual" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                </svg>
+              </button>
+            </div>
+            <span class="field-error" *ngIf="errores['contrasena_actual']">{{ errores['contrasena_actual'] }}</span>
+          </div>
+
+          <!-- NUEVA + CONFIRMAR -->
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">Nueva contraseña</label>
+              <div class="input-wrapper">
+                <input class="field-input" [type]="showPass ? 'text' : 'password'"
+                  placeholder="••••••••••" autocomplete="new-password"
+                  [(ngModel)]="form.contrasena" (ngModelChange)="v.contrasena()"
+                  [class.input-error]="errores['contrasena']" />
+                <button class="eye-btn" type="button" (click)="showPass = !showPass" tabindex="-1">
+                  <svg *ngIf="!showPass" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                    <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                  </svg>
+                  <svg *ngIf="showPass" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                  </svg>
+                </button>
+              </div>
+              <ul class="requisitos" *ngIf="form.contrasena.length > 0">
+                <li [class.ok]="form.contrasena.length >= 8">
+                  <span class="req-icon">{{ form.contrasena.length >= 8 ? '✓' : '✗' }}</span> Mínimo 8 caracteres
+                </li>
+                <li [class.ok]="tieneUpperCase">
+                  <span class="req-icon">{{ tieneUpperCase ? '✓' : '✗' }}</span> Al menos una mayúscula
+                </li>
+                <li [class.ok]="tieneLowerCase">
+                  <span class="req-icon">{{ tieneLowerCase ? '✓' : '✗' }}</span> Al menos una minúscula
+                </li>
+                <li [class.ok]="tieneNumero">
+                  <span class="req-icon">{{ tieneNumero ? '✓' : '✗' }}</span> Al menos un número
+                </li>
+                <li [class.ok]="tieneEspecial">
+                  <span class="req-icon">{{ tieneEspecial ? '✓' : '✗' }}</span> Al menos un carácter especial
+                </li>
+              </ul>
+              <span class="field-error" *ngIf="errores['contrasena']">{{ errores['contrasena'] }}</span>
+            </div>
+
+            <div class="field">
+              <label class="field-label">Confirmar nueva contraseña</label>
+              <div class="input-wrapper">
+                <input class="field-input" [type]="showConfirm ? 'text' : 'password'"
+                  placeholder="••••••••••" autocomplete="new-password"
+                  [(ngModel)]="confirmar" (ngModelChange)="v.confirmar()"
+                  [class.input-error]="errores['confirmar']" />
+                <button class="eye-btn" type="button" (click)="showConfirm = !showConfirm" tabindex="-1">
+                  <svg *ngIf="!showConfirm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                    <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                  </svg>
+                  <svg *ngIf="showConfirm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                  </svg>
+                </button>
+              </div>
+              <span class="field-error" *ngIf="errores['confirmar']">{{ errores['confirmar'] }}</span>
+              <span class="field-ok"
+                *ngIf="!errores['confirmar'] && confirmar.length > 0 && form.contrasena.length > 0">
+                ✓ Las contraseñas coinciden
+              </span>
+            </div>
+          </div>
+
+          <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+          <div class="form-actions">
+            <button class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+            <button class="btn-guardar" [disabled]="cargando" (click)="guardar()">
+              <span *ngIf="!cargando">Guardar cambios</span>
+              <span *ngIf="cargando" class="spinner"></span>
+            </button>
+          </div>
+
+        </div>
+      </ng-container>
+
+    </div>
+  </main>
+</div>

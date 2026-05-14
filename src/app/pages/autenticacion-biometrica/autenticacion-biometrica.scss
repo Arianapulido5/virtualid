@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;500&display=swap');
+
+.bio-bg {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.sidebar {
+  width: 200px;
+  background-color: #4D0F60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  gap: 14px;
+  flex-shrink: 0;
+
+  .logo-circle {
+    width: 70px;
+    height: 70px;
+    background-color: #32488C;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .brand {
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+}
+
+.content {
+  flex: 1;
+  background-color: #EDF2F4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 40px 20px;
+}
+
+.lock-circle {
+  width: 180px;
+  height: 180px;
+  background-color: #32488C;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+
+  svg {
+    width: 90px;
+    height: 90px;
+  }
+}
+
+h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #0F0C0C;
+  margin: 0;
+  text-align: center;
+}
+
+p {
+  font-size: 14px;
+  color: #4A4D56;
+  margin: 0;
+  text-align: center;
+}
+
+.buttons {
+  display: flex;
+  gap: 14px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-filled {
+  padding: 12px 28px;
+  background-color: #4D0F60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover { background-color: #3a0b48; }
+}
+
+.btn-outline {
+  padding: 12px 28px;
+  background-color: white;
+  color: #4D0F60;
+  border: 2px solid #4D0F60;
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #4D0F60;
+    color: white;
+  }
+}
+
+.password-link {
+  color: #4A4D56;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-top: 4px;
+
+  &:hover { color: #4D0F60; }
+}
+
+// Tablets
+@media (max-width: 768px) {
+  .bio-bg {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    padding: 20px 28px;
+    gap: 16px;
+
+    .logo-circle {
+      width: 50px;
+      height: 50px;
+      font-size: 15px;
+    }
+  }
+
+  .lock-circle {
+    width: 140px;
+    height: 140px;
+
+    svg { width: 70px; height: 70px; }
+  }
+
+  h2 { font-size: 22px; }
+}
+
+// Móviles
+@media (max-width: 480px) {
+  .sidebar {
+    padding: 16px 20px;
+
+    .logo-circle {
+      width: 42px;
+      height: 42px;
+      font-size: 13px;
+    }
+
+    .brand { font-size: 13px; }
+  }
+
+  .lock-circle {
+    width: 110px;
+    height: 110px;
+
+    svg { width: 55px; height: 55px; }
+  }
+
+  h2 { font-size: 20px; }
+
+  .btn-filled, .btn-outline {
+    width: 100%;
+    text-align: center;
+  }
+
+  .buttons {
+    width: 100%;
+    flex-direction: column;
+  }
+}

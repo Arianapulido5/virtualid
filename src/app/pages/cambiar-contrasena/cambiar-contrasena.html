@@ -1,0 +1,119 @@
+<!-- src/app/pages/cambiar-contrasena/cambiar-contrasena.html -->
+<div class="cambiar-container">
+
+  <!-- ── MODAL ÉXITO ──────────────────────────────────────── -->
+  <div class="modal-overlay" *ngIf="mostrarModal">
+    <div class="modal-card">
+      <div class="modal-icon">✓</div>
+      <h3>¡Contraseña actualizada!</h3>
+      <p>Tu contraseña ha sido cambiada correctamente.</p>
+      <button class="btn-aceptar" (click)="irAConfiguracion()">Aceptar</button>
+    </div>
+  </div>
+
+ <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">Cambiar Contraseña</h1>
+  </div>
+
+
+<p class="page-subtitle">Por tu seguridad, asegúrate de crear una contraseña fuerte</p>
+  <div class="form-wrapper">
+
+    <!-- ── Contraseña actual ──────────────────────────────── -->
+    <div class="form-group">
+      <label class="form-label">Contraseña actual</label>
+      <div class="input-wrapper">
+        <input
+          class="form-input"
+          [type]="showActual ? 'text' : 'password'"
+          [(ngModel)]="contrasenaActual"
+          placeholder="••••••••••"
+          autocomplete="current-password"
+        >
+        <button class="eye-btn" (click)="showActual = !showActual" type="button">
+          <svg *ngIf="!showActual" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+            <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg *ngIf="showActual" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Nueva contraseña ───────────────────────────────── -->
+    <div class="form-group">
+      <label class="form-label">Nueva contraseña</label>
+      <div class="input-wrapper">
+        <input
+          class="form-input"
+          [type]="showNueva ? 'text' : 'password'"
+          [(ngModel)]="contrasenaNueva"
+          placeholder="••••••••••"
+          autocomplete="new-password"
+        >
+        <button class="eye-btn" (click)="showNueva = !showNueva" type="button">
+          <svg *ngIf="!showNueva" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+            <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg *ngIf="showNueva" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Confirmar nueva contraseña ─────────────────────── -->
+    <div class="form-group">
+      <label class="form-label">Confirmar nueva contraseña</label>
+      <div class="input-wrapper">
+        <input
+          class="form-input"
+          [type]="showConfirmar ? 'text' : 'password'"
+          [(ngModel)]="contrasenaConfirmar"
+          placeholder="••••••••••"
+          autocomplete="new-password"
+        >
+        <button class="eye-btn" (click)="showConfirmar = !showConfirmar" type="button">
+          <svg *ngIf="!showConfirmar" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+            <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg *ngIf="showConfirmar" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Checklist ──────────────────────────────────────── -->
+    <div class="requisitos-box">
+      <p class="requisitos-title">La contraseña debe contener:</p>
+      <ul class="requisitos-list">
+        <li [class.valid]="hasMinLength">✓ Mínimo 8 caracteres</li>
+        <li [class.valid]="hasUppercase">✓ Al menos una letra mayúscula</li>
+        <li [class.valid]="hasLowercase">✓ Al menos una letra minúscula</li>
+        <li [class.valid]="hasNumber">✓ Al menos un número</li>
+        <li [class.valid]="hasSpecial">✓ Al menos un carácter especial (@, #, $, etc.)</li>
+      </ul>
+    </div>
+
+    <!-- ── Mensaje de error ───────────────────────────────── -->
+    <p *ngIf="error" class="msg-error">{{ error }}</p>
+
+  </div>
+
+  <!-- ── Botones ────────────────────────────────────────────── -->
+  <div class="form-actions">
+    <button class="btn-cambiar" (click)="cambiar()" [disabled]="cargando">
+      <span class="spinner" *ngIf="cargando"></span>
+      <span *ngIf="!cargando">Cambiar Contraseña</span>
+    </button>
+        <button class="btn-cancelar" routerLink="/configuracion">Cancelar</button>
+
+  </div>
+
+</div>

@@ -1,0 +1,75 @@
+<!-- puntos-acceso.html  — ACTUALIZADO: maneja carga y errores -->
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="puntos-acceso" />
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <!-- HEADER -->
+      <div class="page-header">
+        <h1 class="page-title">Puntos de Acceso</h1>
+        <button class="btn-agregar" routerLink="/admin/puntos-acceso/nuevo">
+          + Agregar punto
+        </button>
+      </div>
+
+      <!-- CARGANDO -->
+      <div *ngIf="cargando" class="estado-msg">Cargando puntos de acceso…</div>
+
+      <!-- ERROR -->
+      <div *ngIf="!cargando && error" class="estado-msg estado-error">{{ error }}</div>
+
+      <!-- VACÍO -->
+      <div *ngIf="!cargando && !error && puntos.length === 0" class="estado-msg">
+        No hay puntos de acceso registrados. ¡Agrega el primero!
+      </div>
+
+      <!-- GRID DE TARJETAS -->
+      <div class="puntos-grid" *ngIf="!cargando && !error && puntos.length > 0">
+        <div class="punto-card" *ngFor="let p of puntos" [ngClass]="p.colorClass">
+
+          <div class="punto-header">
+            <span class="punto-icon">{{ p.icon }}</span>
+            <div class="punto-titulo">
+              <span class="punto-nombre">{{ p.nombre }}</span>
+              <span class="punto-desc">{{ p.descripcion || p.tipo }}</span>
+            </div>
+          </div>
+
+          <div class="punto-stats">
+            <div class="stat-row">
+              <span class="stat-label">Nivel de acceso</span>
+              <span class="stat-num" style="font-size:12px;text-transform:capitalize">
+                {{ p.nivel_acceso }}
+              </span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Usuarios</span>
+              <span class="stat-num" style="font-size:11px">
+                {{ p.permite_estudiantes && p.permite_empleados ? 'Todos'
+                   : p.permite_estudiantes ? 'Solo estudiantes'
+                   : 'Solo empleados' }}
+              </span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Estado</span>
+              <span class="estado-badge" [ngClass]="estadoClass(p.estado)">
+                ● {{ p.estado }}
+              </span>
+            </div>
+          </div>
+
+          <button
+            class="btn-historial"
+            [routerLink]="['/admin/puntos-acceso', p.id, 'historial']"
+          >
+            Ver historial
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

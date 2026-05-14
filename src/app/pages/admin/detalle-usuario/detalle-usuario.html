@@ -1,0 +1,170 @@
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="usuarios" />
+
+  <!-- ══ MODAL CONFIRMACIÓN (¿estás seguro?) ══ -->
+  <div class="modal-overlay" *ngIf="confirmVisible">
+    <div class="modal-card">
+      <div class="modal-icon confirm-icon">?</div>
+      <h3>{{ confirmTitulo }}</h3>
+      <p>{{ confirmMensaje }}</p>
+      <div class="modal-btns">
+        <button class="btn-cancelar-modal" (click)="cancelarConfirmacion()">Cancelar</button>
+        <button class="btn-aceptar" (click)="confirmarAccion()">Sí, continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL RESULTADO (éxito / error) ══ -->
+  <div class="modal-overlay" *ngIf="modalVisible">
+    <div class="modal-card">
+      <div class="modal-icon" [ngClass]="modalTipo">
+        {{ modalTipo === 'exito' ? '✓' : '!' }}
+      </div>
+      <h3>{{ modalTitulo }}</h3>
+      <p>{{ modalMensaje }}</p>
+      <button class="btn-aceptar" (click)="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+
+  <!-- ══ MODAL ENVIAR MENSAJE ══ -->
+  <app-modal-mensaje
+    *ngIf="mostrarModal"
+    [usuario]="{ nombre: usuario.nombre, correo: usuario.correo, tipo: usuario.tipo }"
+    (cerrado)="onModalCerrado()"
+    (enviado)="onMensajeEnviado($event)"
+  />
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <!-- FLECHA REGRESO -->
+      <a class="back-link" routerLink="/admin/usuarios">
+        <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </a>
+
+      <!-- ACCIONES -->
+      <div class="acciones-row">
+        <button class="btn-bloquear" (click)="toggleBloqueo()" [disabled]="procesando">
+          {{ usuario.bloqueado ? '🔓 Desbloquear usuario' : '🔒 Bloquear usuario' }}
+        </button>
+        <button class="btn-mensaje" (click)="abrirMensaje()" [disabled]="procesando">
+           Enviar mensaje
+        </button>
+        <button class="btn-eliminar" (click)="confirmarEliminar()" [disabled]="procesando">
+           Eliminar usuario
+        </button>
+      </div>
+
+      <!-- CARGANDO -->
+      <div *ngIf="cargando" style="padding:40px;text-align:center;color:#4A4D56">
+        Cargando información...
+      </div>
+
+      <ng-container *ngIf="!cargando">
+
+        <!-- ALERTA BLOQUEADO -->
+        <div class="alerta-bloqueado" *ngIf="usuario.bloqueado">
+          🔒 Este usuario está bloqueado. No puede crear ni usar credenciales.
+        </div>
+
+        <div class="detalle-grid">
+
+          <!-- ── CARD INFO PERSONAL ── -->
+          <div class="card info-card">
+            <div class="card-header">
+              <h3 class="card-title">Información Personal</h3>
+              <span class="estado-badge"
+                    [class.bloqueado]="usuario.bloqueado"
+                    [class.activo]="!usuario.bloqueado">
+                {{ usuario.bloqueado ? '● Bloqueado' : '● Activo' }}
+              </span>
+            </div>
+
+            <div class="user-perfil">
+              <div class="user-avatar" [ngClass]="usuario.avatarColor">{{ usuario.iniciales }}</div>
+              <div class="user-datos">
+                <span class="user-nombre">{{ usuario.nombre }}</span>
+                <span class="user-correo">{{ usuario.correo }}</span>
+                <span class="user-tipo">{{ usuario.tipo }}</span>
+              </div>
+            </div>
+
+            <div class="info-lista">
+              <div class="info-row">
+                <span class="info-label">No. Identificación</span>
+                <span class="info-valor">{{ usuario.noId }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Teléfono</span>
+                <span class="info-valor">{{ usuario.telefono }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Fecha nacimiento</span>
+                <span class="info-valor">{{ usuario.fechaNacimiento }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Ciudad</span>
+                <span class="info-valor">{{ usuario.ciudad }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── CARD CREDENCIALES ── -->
+          <div class="card credenciales-card">
+            <div class="card-header">
+              <h3 class="card-title">Credenciales</h3>
+              <span class="creds-count">{{ credenciales.length }} total</span>
+            </div>
+
+            <div class="creds-empty" *ngIf="credenciales.length === 0">
+              Este usuario no tiene credenciales en tu institución.
+            </div>
+
+            <div class="cred-lista" *ngIf="credenciales.length > 0">
+              <div class="cred-row" *ngFor="let c of credenciales">
+
+                <div class="cred-icon">{{ getTipoIcon(c.punto_tipo) }}</div>
+
+                <div class="cred-info">
+                  <span class="cred-nombre">{{ c.punto_nombre }}</span>
+                  <span class="cred-tipo" style="text-transform:capitalize">{{ c.tipo_usuario }}</span>
+                </div>
+
+                <span class="cred-estado"
+                      [style.color]="getEstadoColor(c.estado)"
+                      style="text-transform:capitalize">
+                  ● {{ c.estado }}
+                </span>
+
+                <!-- Activa o pendiente: mostrar Revocar -->
+                <button
+                  class="btn-revocar-cred"
+                  *ngIf="c.estado !== 'revocada'"
+                  (click)="revocarCredencial(c.id)">
+                  Revocar
+                </button>
+
+                <!-- Revocada: mostrar Rehabilitar -->
+                <button
+                  class="btn-rehabilitar-cred"
+                  *ngIf="c.estado === 'revocada'"
+                  (click)="rehabilitarCredencial(c.id)">
+                  Rehabilitar
+                </button>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+
+    </div>
+  </main>
+</div>

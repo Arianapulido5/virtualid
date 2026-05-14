@@ -1,0 +1,95 @@
+<div class="gestion-container">
+
+  <div class="gestion-header">
+    <div class="gestion-header__text">
+      <h1 class="page-title">Mis Credenciales</h1>
+      <p class="page-subtitle">Gestiona y accede a todas tus credenciales digitales</p>
+    </div>
+    <button class="add-credential-btn" routerLink="/agregar-credencial">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Nueva credencial
+    </button>
+  </div>
+
+  <!-- resto igual... -->
+
+  <!-- CARGANDO -->
+  <div class="estado-msg" *ngIf="cargando">
+    <div class="cards-grid">
+      <div class="cred-card cred-card--skeleton" *ngFor="let i of [1,2,3]"></div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="estado-msg error" *ngIf="!cargando && error">{{ error }}</div>
+
+  <ng-container *ngIf="!cargando && !error">
+
+    <!-- LISTA VACÍA -->
+    <div class="empty-state" *ngIf="credenciales.length === 0">
+      <div class="empty-state__icon">🪪</div>
+      <h3 class="empty-state__title">Sin credenciales aún</h3>
+      <p class="empty-state__text">Agrega tu primera credencial para comenzar</p>
+      <button class="empty-state__btn" routerLink="/agregar-credencial">+ Agregar credencial</button>
+    </div>
+
+    <!-- GRID DE TARJETAS -->
+    <div class="cards-grid" *ngIf="credenciales.length > 0">
+      <div
+        class="cred-card"
+        *ngFor="let c of credenciales"
+        [class.cred-card--active]="c.activa && c.estado === 'activa'"
+        [class.cred-card--pending]="c.estado === 'pendiente'"
+        [class.cred-card--revoked]="c.estado === 'revocada'"
+        (click)="c.activa && c.estado === 'activa' ? verDetalle(c.id) : null"
+        [style.cursor]="c.activa && c.estado === 'activa' ? 'pointer' : 'default'"
+      >
+        <!-- Orbs decorativos -->
+        <div class="cred-card__orb cred-card__orb--1"></div>
+        <div class="cred-card__orb cred-card__orb--2"></div>
+
+        <!-- Top row -->
+        <div class="cred-card__top">
+          <div class="cred-card__chip">
+            <div></div><div></div><div></div>
+          </div>
+
+          <ng-container [ngSwitch]="c.estado">
+            <span *ngSwitchCase="'activa'"    class="cred-card__badge cred-card__badge--activa">● Activa</span>
+            <span *ngSwitchCase="'pendiente'" class="cred-card__badge cred-card__badge--pendiente">⏳ En proceso</span>
+            <span *ngSwitchCase="'revocada'"  class="cred-card__badge cred-card__badge--revocada">✕ Revocada</span>
+            <span *ngSwitchDefault            class="cred-card__badge cred-card__badge--inactiva">○ Inactiva</span>
+          </ng-container>
+        </div>
+
+        <!-- Institución -->
+        <div class="cred-card__inst">
+          <div class="cred-card__avatar">{{ getIniciales(c.institucion_nombre) }}</div>
+          <div class="cred-card__inst-info">
+            <p class="cred-card__inst-name">{{ c.institucion_nombre }}</p>
+            <p class="cred-card__inst-sub">{{ c.punto_nombre }}</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="cred-card__bottom">
+          <div class="cred-card__field">
+            <span class="cred-card__field-label">Tipo</span>
+            <span class="cred-card__field-val" style="text-transform:capitalize">{{ c.tipo_usuario }}</span>
+          </div>
+          <div class="cred-card__field">
+          </div>
+          <div class="cred-card__tap" *ngIf="c.activa && c.estado === 'activa'">
+            <span>Ver detalle</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

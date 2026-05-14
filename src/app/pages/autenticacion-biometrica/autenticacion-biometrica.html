@@ -1,0 +1,29 @@
+<div class="bio-bg">
+
+  <div class="sidebar">
+    <div class="logo-circle">VID</div>
+    <span class="brand">VIRTUALID</span>
+  </div>
+
+  <div class="content">
+    <div class="lock-circle">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+        <rect x="16" y="28" width="32" height="24" rx="4" ry="4" fill="#f0a500"/>
+        <path d="M22 28v-8a10 10 0 0 1 20 0v8" fill="none" stroke="#b0b0b0" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="32" cy="40" r="4" fill="#c07800"/>
+        <rect x="30" y="40" width="4" height="5" rx="1" fill="#c07800"/>
+      </svg>
+    </div>
+
+    <h2>Verificación biométrica</h2>
+    <p>Usa tu huella o Face ID para continuar</p>
+
+    <div class="buttons">
+      <button class="btn-filled" (click)="go()">Autenticar con Huella</button>
+      <button class="btn-outline" (click)="go()">Usar Face ID</button>
+    </div>
+
+    <a class="password-link" (click)="go()">Usar contraseña</a>
+  </div>
+
+</div>

@@ -1,0 +1,586 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500&display=swap');
+
+// ─────────────────────────────────────────────
+//  TOKENS
+// ─────────────────────────────────────────────
+$purple-dark:  #4D0F60;
+$purple-mid:   #6B2080;
+$purple-light: #9C27B0;
+$blue-dark:    #32488C;
+$bg:           #EDF2F4;
+$white:        #ffffff;
+$text-main:    #0F0C0C;
+$text-soft:    #4A4D56;
+$border:       #c5c9d4;
+$success:      #2e7d32;
+$danger:       #e53935;
+
+// ─────────────────────────────────────────────
+//  KEYFRAMES
+// ─────────────────────────────────────────────
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(28px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes leftPanelIn {
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes rightPanelIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes logoIn {
+  from { opacity: 0; transform: scale(0.6) rotate(-12deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes logoGlow {
+  0%, 100% { box-shadow: 0 6px 24px rgba(50,72,140,0.45); }
+  50%       { box-shadow: 0 10px 36px rgba(77,15,96,0.55); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fieldIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-5px); }
+  40%       { transform: translateX(5px); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(3px); }
+}
+
+@keyframes checkmark {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+@keyframes sectionLabelIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes btnPulse {
+  0%   { box-shadow: 0 4px 18px rgba(77,15,96,0.4), 0 0 0 0 rgba(77,15,96,0.35); }
+  70%  { box-shadow: 0 4px 18px rgba(77,15,96,0.4), 0 0 0 12px rgba(77,15,96,0); }
+  100% { box-shadow: 0 4px 18px rgba(77,15,96,0.4), 0 0 0 0 rgba(77,15,96,0); }
+}
+
+@keyframes reqValid {
+  0%   { transform: translateX(0); }
+  30%  { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes modalIconPop {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  60%  { transform: scale(1.2) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(10px, -15px) scale(1.06); }
+}
+
+// ─────────────────────────────────────────────
+//  MODAL
+// ─────────────────────────────────────────────
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0.22s ease both;
+}
+
+.modal-card {
+  background: $bg;
+  border-radius: 24px;
+  padding: 44px 40px;
+  max-width: 400px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  box-shadow:
+    0 24px 64px rgba(0,0,0,0.28),
+    0 0 0 1px rgba(255,255,255,0.6) inset;
+  animation: slideUp 0.32s cubic-bezier(.34,1.2,.64,1) both;
+
+  h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 24px; font-weight: 700;
+    color: $text-main; margin: 0;
+    animation: fadeInUp 0.4s ease 0.15s both;
+  }
+  p {
+    font-size: 14px; color: $text-soft; margin: 0; line-height: 1.6;
+    animation: fadeInUp 0.4s ease 0.22s both;
+  }
+}
+
+.modal-icon {
+  width: 76px; height: 76px;
+  background: linear-gradient(135deg, $blue-dark, $purple-mid);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; color: $white; font-weight: 700;
+  box-shadow: 0 8px 28px rgba(50,72,140,0.35);
+  animation: modalIconPop 0.5s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+.btn-aceptar {
+  margin-top: 6px;
+  padding: 13px 48px;
+  background: linear-gradient(135deg, $purple-dark 0%, $blue-dark 50%, $purple-mid 100%);
+  background-size: 250% 250%;
+  color: $white; border: none; border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(77,15,96,0.3);
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+  animation: gradientShift 4s ease infinite, fadeInUp 0.4s ease 0.3s both;
+
+  &:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 10px 28px rgba(77,15,96,0.42);
+  }
+  &:active { transform: translateY(0) scale(0.97); }
+}
+
+// ─────────────────────────────────────────────
+//  LAYOUT
+// ─────────────────────────────────────────────
+.registro-bg {
+  min-height: 100vh;
+  display: flex;
+  font-family: 'Open Sans', sans-serif;
+}
+
+// ─────────────────────────────────────────────
+//  PANEL IZQUIERDO
+// ─────────────────────────────────────────────
+.left {
+  width: 20%;
+  background: linear-gradient(160deg, $purple-dark 0%, #3a0b48 50%, $blue-dark 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 10s ease infinite, leftPanelIn 0.6s ease both;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+
+  // Orb decorativo
+  &::before {
+    content: '';
+    position: absolute;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%);
+    top: -100px; right: -80px;
+    pointer-events: none;
+    animation: orbFloat 12s ease-in-out infinite;
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+    bottom: -60px; left: -40px;
+    pointer-events: none;
+    animation: orbFloat 9s ease-in-out 2s infinite;
+  }
+
+  .logo-circle {
+    width: 100px; height: 100px;
+    background: linear-gradient(135deg, $blue-dark, $purple-mid);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: $white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 28px; font-weight: 800;
+    box-shadow: 0 6px 24px rgba(50,72,140,0.45);
+    animation:
+      logoIn 0.7s cubic-bezier(.34,1.56,.64,1) 0.2s both,
+      logoGlow 3s ease-in-out infinite;
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    z-index: 1;
+
+    &:hover { transform: scale(1.08) rotate(-5deg); }
+  }
+
+  h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px; font-weight: 700;
+    color: $white; text-align: center;
+    z-index: 1;
+    animation: fadeInUp 0.5s ease 0.4s both;
+  }
+}
+
+// ─────────────────────────────────────────────
+//  PANEL DERECHO
+// ─────────────────────────────────────────────
+.right {
+  flex: 1;
+  background-color: $bg;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 12px;
+  overflow-y: auto;
+  animation: rightPanelIn 0.6s ease 0.1s both;
+
+  h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 28px; font-weight: 800;
+    color: $text-main; margin: 0;
+    animation: fadeInUp 0.5s ease 0.2s both;
+  }
+
+  > p {
+    font-size: 13px; color: $text-soft; margin: 0;
+    animation: fadeInUp 0.5s ease 0.28s both;
+  }
+}
+
+// ─────────────────────────────────────────────
+//  CAMPOS
+// ─────────────────────────────────────────────
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  animation: fieldIn 0.4s ease both;
+
+  label {
+    font-size: 13px; font-weight: 600;
+    color: $text-soft;
+    font-family: 'Montserrat', sans-serif;
+    transition: color 0.2s;
+  }
+
+  input {
+    padding: 11px 14px;
+    border: 1.5px solid $border;
+    border-radius: 10px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    background: $white;
+    color: $text-main;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.25s, box-shadow 0.25s, transform 0.15s;
+
+    &:focus {
+      border-color: $purple-dark;
+      box-shadow: 0 0 0 4px rgba(77,15,96,0.1);
+      transform: translateY(-1px);
+    }
+
+    &:not(:focus):hover { border-color: rgba(77,15,96,0.35); }
+    &::placeholder { color: #aaa; }
+
+    &.input-error {
+      border-color: $danger;
+      background: #fff5f5;
+      box-shadow: 0 0 0 3px rgba(229,57,53,0.1);
+      animation: errorShake 0.4s ease both;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  MENSAJES
+// ─────────────────────────────────────────────
+.field-error {
+  font-size: 11.5px; color: $danger;
+  margin-top: 2px; min-height: 16px; display: block;
+  animation: fadeInUp 0.25s ease both;
+}
+
+.field-ok {
+  font-size: 11.5px; color: $success;
+  margin-top: 2px; display: block;
+  animation: checkmark 0.3s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+.error-general {
+  background: #fdecea;
+  border: 1px solid $danger;
+  border-left: 4px solid $danger;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #c62828;
+  font-size: 13px; margin: 0;
+  animation: fadeInUp 0.3s ease both;
+}
+
+// ─────────────────────────────────────────────
+//  INPUT WRAPPER (password)
+// ─────────────────────────────────────────────
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input { padding-right: 46px; }
+
+  .eye-btn {
+    position: absolute; right: 12px;
+    background: none; border: none; cursor: pointer;
+    padding: 6px; display: flex; align-items: center;
+    color: $text-soft; border-radius: 6px;
+    transition: color 0.2s, background 0.2s, transform 0.2s cubic-bezier(.34,1.56,.64,1);
+
+    svg { width: 20px; height: 20px; }
+    &:hover { color: $purple-dark; background: rgba(77,15,96,0.08); transform: scale(1.15); }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  REQUISITOS CONTRASEÑA
+// ─────────────────────────────────────────────
+.requisitos {
+  list-style: none; margin: 6px 0 0; padding: 0;
+  display: flex; flex-direction: column; gap: 4px;
+  background: rgba(77,15,96,0.04);
+  border-radius: 8px; padding: 10px 12px;
+  border-left: 3px solid rgba(77,15,96,0.2);
+  animation: fadeInUp 0.3s ease both;
+
+  li {
+    font-size: 11.5px; color: $danger;
+    display: flex; align-items: center; gap: 5px;
+    transition: color 0.25s, transform 0.3s cubic-bezier(.34,1.2,.64,1);
+
+    &.ok {
+      color: $success; font-weight: 600;
+      transform: translateX(4px);
+      animation: reqValid 0.3s ease both;
+    }
+
+    .req-icon { font-size: 12px; font-weight: 700; }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  FILA DE CAMPOS
+// ─────────────────────────────────────────────
+.row-fields {
+  display: flex; gap: 16px; width: 100%; align-items: flex-start;
+}
+
+// ─────────────────────────────────────────────
+//  SEPARADOR DE SECCIÓN
+// ─────────────────────────────────────────────
+.section-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: $purple-dark;
+  margin: 10px 0 2px;
+  border-bottom: 1.5px solid rgba(77,15,96,0.15);
+  padding-bottom: 6px;
+  animation: sectionLabelIn 0.4s ease both;
+
+  .opcional { font-weight: 400; color: #999; font-size: 12px; }
+}
+
+// ─────────────────────────────────────────────
+//  CHECKBOX
+// ─────────────────────────────────────────────
+.check {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: $text-soft;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
+  transition: background 0.2s, border-color 0.2s;
+
+  input { width: auto; cursor: pointer; accent-color: $purple-dark; }
+
+  &:hover {
+    background: rgba(77,15,96,0.05);
+    border-color: rgba(77,15,96,0.2);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  BOTÓN CREAR CUENTA
+// ─────────────────────────────────────────────
+.btn-crear {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, $purple-dark 0%, $blue-dark 50%, $purple-mid 100%);
+  background-size: 250% 250%;
+  color: $white;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 50px;
+  position: relative; overflow: hidden;
+  letter-spacing: 0.3px;
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s;
+  animation: gradientShift 5s ease infinite, btnPulse 3.5s ease-in-out 1.2s infinite;
+
+  &::before {
+    content: '';
+    position: absolute; top: 0; left: -80%;
+    width: 55%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 14px 32px rgba(77,15,96,0.48);
+    &::before { left: 130%; }
+  }
+
+  &:active:not(:disabled) { transform: translateY(0) scale(0.97); }
+
+  &:disabled {
+    opacity: 0.7; cursor: not-allowed;
+    animation: none; background: #aaa; box-shadow: none;
+  }
+}
+
+.spinner {
+  width: 20px; height: 20px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: $white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.4));
+}
+
+// ─────────────────────────────────────────────
+//  LINK
+// ─────────────────────────────────────────────
+.login-link {
+  color: $blue-dark;
+  font-size: 13px; font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  padding: 5px 10px; border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+
+  &:hover { text-decoration: underline; color: $purple-dark; background: rgba(77,15,96,0.05); }
+}
+
+// ─────────────────────────────────────────────
+//  SELECT
+// ─────────────────────────────────────────────
+select {
+  padding: 11px 36px 11px 14px;
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  background: $white;
+  color: $text-main;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234A4D56' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.15s;
+
+  &:focus {
+    border-color: $purple-dark;
+    box-shadow: 0 0 0 4px rgba(77,15,96,0.1);
+    transform: translateY(-1px);
+  }
+  &:not(:focus):hover { border-color: rgba(77,15,96,0.35); }
+}
+
+// ─────────────────────────────────────────────
+//  RESPONSIVE
+// ─────────────────────────────────────────────
+@media (max-width: 900px) {
+  .row-fields { flex-direction: column; gap: 12px; }
+}
+
+@media (max-width: 768px) {
+  .registro-bg { flex-direction: column; }
+
+  .left {
+    width: 100%; padding: 40px 20px;
+    .logo-circle { width: 90px; height: 90px; font-size: 24px; }
+    h3 { font-size: 18px; }
+  }
+
+  .right { padding: 32px 28px; }
+}
+
+@media (max-width: 480px) {
+  .left {
+    padding: 30px 16px;
+    .logo-circle { width: 75px; height: 75px; font-size: 20px; }
+    h3 { font-size: 16px; }
+  }
+
+  .right { padding: 24px 16px; h2 { font-size: 22px; } }
+  .field input { font-size: 13px; padding: 10px 12px; }
+  .btn-crear { font-size: 14px; padding: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.1ms !important;
+  }
+}

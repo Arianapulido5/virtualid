@@ -1,0 +1,140 @@
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="soporte" />
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <div class="page-header">
+        <h1 class="page-title">Soporte</h1>
+        <div class="search-bar">
+          <input type="text" [(ngModel)]="busqueda" placeholder="Buscar usuario..." class="search-input" />
+          <button class="btn-buscar">BUSCAR</button>
+        </div>
+      </div>
+
+      <div class="estado-txt" *ngIf="cargando">Cargando tickets...</div>
+
+      <ng-container *ngIf="!cargando">
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">ABIERTOS</span>
+            <span class="stat-value warning">{{ abiertos }}</span>
+            <span class="stat-sub">tickets sin resolver</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">EN PROCESO</span>
+            <span class="stat-value blue">{{ enProceso }}</span>
+            <span class="stat-sub">en atención activa</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">RESUELTOS</span>
+            <span class="stat-value success">{{ resueltos }}</span>
+            <span class="stat-sub success">total resueltos</span>
+          </div>
+        </div>
+
+        <div class="panel-grid">
+
+          <div class="card lista-card">
+            <div class="filtros">
+              <button class="filtro-btn" [class.active]="filtroActivo === 'Todos'"      (click)="filtroActivo = 'Todos'">Todos</button>
+              <button class="filtro-btn" [class.active]="filtroActivo === 'En proceso'" (click)="filtroActivo = 'En proceso'">En proceso</button>
+              <button class="filtro-btn" [class.active]="filtroActivo === 'Resueltos'"  (click)="filtroActivo = 'Resueltos'">Resueltos</button>
+            </div>
+
+            <div class="tickets-scroll">
+
+              <div *ngFor="let ticket of ticketsFiltrados"
+                class="ticket-item"
+                [class.selected]="ticketSeleccionado?.id === ticket.id"
+                (click)="seleccionarTicket(ticket)">
+
+                <div class="ticket-row-top">
+                  <span class="ticket-titulo">{{ ticket.asunto }}</span>
+                  <span class="estado-badge estado--{{ ticket.estado === 'En proceso' ? 'proceso' : ticket.estado.toLowerCase() }}">
+                    ● {{ ticket.estado }}
+                  </span>
+                </div>
+
+                <div class="ticket-row-bottom">
+                  <div class="ticket-usuario">
+                    <a [routerLink]="['/admin/usuarios', ticket.usuario_id]" (click)="$event.stopPropagation()" class="link-usuario">
+                      {{ nombreCompleto(ticket) }}
+                    </a>
+                    · #T-{{ ticket.id }}
+                  </div>
+                  <span class="ticket-counter" *ngIf="+ticket.mensajes_nuevos_usuario > 0">
+                    {{ ticket.mensajes_nuevos_usuario }}
+                  </span>
+                </div>
+
+                <div class="ticket-footer">
+                  <span class="ticket-tipo">{{ ticket.tipo }}</span>
+                  <span class="ticket-tiempo">{{ tiempoRelativo(ticket.creado_en) }}</span>
+                </div>
+
+              </div>
+
+              <div class="empty-state" *ngIf="ticketsFiltrados.length === 0">
+                <span>No hay tickets en esta categoría</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="card detalle-card" *ngIf="ticketSeleccionado; else sinSeleccion">
+            <div class="detalle-header">
+              <div class="detalle-info">
+                <h3 class="detalle-titulo">{{ ticketSeleccionado.asunto }}</h3>
+                <div class="detalle-meta">
+                  <span class="detalle-id">#T-{{ ticketSeleccionado.id }}</span>
+                  <a [routerLink]="['/admin/usuarios', ticketSeleccionado.usuario_id]" class="link-usuario link-usuario--md">
+                    {{ nombreCompleto(ticketSeleccionado) }}
+                  </a>
+                  <span class="detalle-tiempo">{{ tiempoRelativo(ticketSeleccionado.creado_en) }}</span>
+                </div>
+              </div>
+              <div class="detalle-acciones">
+                <button class="btn-resolver" (click)="marcarResuelto()"
+                  *ngIf="ticketSeleccionado.estado !== 'Resuelto'">
+                  Marcar resuelto
+                </button>
+                <button class="btn-cerrar-detalle" (click)="ticketSeleccionado = null" title="Cerrar">✕</button>
+              </div>
+            </div>
+
+            <div class="mensajes-scroll" #chatScroll>
+              <div *ngFor="let msg of ticketSeleccionado.mensajes"
+                class="mensaje"
+                [class.mensaje--admin]="msg.es_admin"
+                [class.mensaje--usuario]="!msg.es_admin">
+                <p class="mensaje-texto">{{ msg.texto }}</p>
+                <span class="mensaje-meta">
+                  {{ msg.es_admin ? 'Administrador' : msg.nombre }} · {{ tiempoRelativo(msg.creado_en) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="respuesta-bar" *ngIf="ticketSeleccionado.estado !== 'Resuelto'">
+              <input type="text" [(ngModel)]="nuevaRespuesta"
+                placeholder="Escribe una respuesta..."
+                class="respuesta-input"
+                (keyup.enter)="enviarRespuesta()" />
+              <button class="btn-enviar" (click)="enviarRespuesta()">Enviar</button>
+            </div>
+          </div>
+
+          <ng-template #sinSeleccion>
+            <div class="card detalle-card detalle-vacio">
+              <span>Selecciona un mensaje para ver el detalle</span>
+            </div>
+          </ng-template>
+
+        </div>
+      </ng-container>
+
+    </div>
+  </main>
+</div>

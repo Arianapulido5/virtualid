@@ -1,0 +1,110 @@
+<!-- dashboard-admin.html — ACTUALIZADO -->
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="dashboard" />
+
+  <main class="main-content">
+    <div class="dashboard-body">
+
+      <div class="estado-txt" *ngIf="cargando">Cargando dashboard...</div>
+
+      <ng-container *ngIf="!cargando">
+
+        <!-- STATS -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">USUARIOS REGISTRADOS</span>
+            <span class="stat-value">{{ stats.usuarios_activos | number }}</span>
+            <span class="stat-trend positive">con dominio institucional</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">CREDENCIALES ACTIVAS</span>
+            <span class="stat-value">{{ stats.credenciales_activas | number }}</span>
+            <span class="stat-trend warning" *ngIf="stats.credenciales_pendientes > 0">
+              {{ stats.credenciales_pendientes }} pendientes de validar
+            </span>
+            <span class="stat-trend positive" *ngIf="stats.credenciales_pendientes === 0">
+              Sin pendientes
+            </span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">ACCESOS HOY</span>
+            <span class="stat-value">{{ stats.accesos_hoy | number }}</span>
+            <span class="stat-trend positive" *ngIf="stats.accesos_hoy > 0">
+              ↑ {{ stats.porcentaje_exitosos }}% exitosos
+            </span>
+            <span class="stat-trend" *ngIf="stats.accesos_hoy === 0">Sin accesos hoy</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">ACCESOS DENEGADOS HOY</span>
+            <span class="stat-value">{{ stats.accesos_denegados_hoy | number }}</span>
+            <span class="stat-trend danger" *ngIf="stats.accesos_denegados_hoy > 0">
+              ↑ {{ stats.accesos_denegados_hoy }} hoy
+            </span>
+            <span class="stat-trend positive" *ngIf="stats.accesos_denegados_hoy === 0">
+              Sin denegados hoy
+            </span>
+          </div>
+        </div>
+
+        <!-- BOTTOM GRID -->
+        <div class="bottom-grid">
+
+          <!-- ACTIVIDAD RECIENTE -->
+          <div class="card">
+            <div class="card-header-row">
+              <h3 class="card-title">Actividad Reciente</h3>
+              <button class="btn-ver-todo" (click)="verHistorial()">
+                Ver todo →
+              </button>
+            </div>
+
+            <!-- Lista sin scroll — máximo MAX_ACTIVIDAD items -->
+            <ul class="actividad-list" *ngIf="actividadVisible.length > 0">
+              <li class="actividad-item clickeable"
+                  *ngFor="let a of actividadVisible; let i = index"
+                  (click)="verDetalleAcceso(a)">
+                <span class="dot" [ngClass]="dotColor(a)"></span>
+                <div class="actividad-body">
+                  <p><strong>{{ textoActividad(a) }}</strong></p>
+                  <span class="time">{{ tiempoRelativo(a.creado_en) }}</span>
+                </div>
+                <span class="actividad-arrow">›</span>
+              </li>
+            </ul>
+
+            <div class="empty-state" *ngIf="actividadVisible.length === 0">
+              Sin actividad reciente registrada.
+            </div>
+          </div>
+
+          <!-- CREDENCIALES PENDIENTES -->
+          <div class="card">
+            <div class="card-header-row">
+              <h3 class="card-title">Credenciales Pendientes</h3>
+              <span class="badge-pendientes" *ngIf="stats.credenciales_pendientes > 0">
+                {{ stats.credenciales_pendientes }} por revisar
+              </span>
+            </div>
+
+            <div class="pendientes-table" *ngIf="pendientes.length > 0">
+              <div class="pendiente-row" *ngFor="let p of pendientes; let i = index">
+                <div class="user-avatar" [ngClass]="avatarColor(i)">{{ iniciales(p) }}</div>
+                <span class="user-name">{{ nombreCompleto(p) }}</span>
+                <span class="tipo-badge">{{ p.tipo_usuario }}</span>
+                <button class="btn-revisar" (click)="revisar(p.id)">Revisar</button>
+              </div>
+            </div>
+
+            <div class="empty-state" *ngIf="pendientes.length === 0">
+              No hay credenciales pendientes.
+            </div>
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </div>
+  </main>
+</div>

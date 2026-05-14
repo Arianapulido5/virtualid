@@ -1,0 +1,113 @@
+<!-- src/app/pages/admin/administradores/administradores.html -->
+<div class="admin-layout">
+
+  <app-sidebar-admin paginaActiva="administradores" />
+
+  <!-- ══ MODAL CONFIRMACIÓN ══ -->
+  <div class="modal-overlay" *ngIf="confirmVisible">
+    <div class="modal-card">
+      <div class="modal-icon confirm-icon">?</div>
+      <h3>{{ confirmTitulo }}</h3>
+      <p>{{ confirmMensaje }}</p>
+      <div class="modal-btns">
+        <button class="btn-cancelar-modal" (click)="cancelarConfirmacion()">Cancelar</button>
+        <button class="btn-aceptar" (click)="confirmarAccion()">Sí, continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL RESULTADO ══ -->
+  <div class="modal-overlay" *ngIf="modalVisible">
+    <div class="modal-card">
+      <div class="modal-icon" [ngClass]="modalTipo">
+        {{ modalTipo === 'exito' ? '✓' : '!' }}
+      </div>
+      <h3>{{ modalTitulo }}</h3>
+      <p>{{ modalMensaje }}</p>
+      <button class="btn-aceptar" (click)="cerrarModal()">Aceptar</button>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <!-- HEADER -->
+      <div class="page-header">
+        <div class="header-left">
+          <h1 class="page-title">Administradores</h1>
+          <p class="page-sub">Gestiona quién tiene acceso al panel de administración de tu institución.</p>
+        </div>
+      </div>
+
+      <!-- CARGANDO -->
+      <div class="estado-txt" *ngIf="cargando">Cargando administradores...</div>
+
+      <!-- GRID DE ADMINS -->
+      <div class="admins-grid" *ngIf="!cargando">
+
+        <div class="admin-card"
+             *ngFor="let a of admins"
+             [class.card-yo]="esMiCuenta(a)">
+
+          <div class="badges-top-right">
+            <div class="badge-yo" *ngIf="esMiCuenta(a)">Tú</div>
+            <div class="badge-principal" *ngIf="a.es_principal">Principal</div>
+          </div>
+
+          <!-- PERFIL -->
+          <div class="admin-perfil">
+            <div class="admin-avatar" [ngClass]="a.avatarColor">{{ a.iniciales }}</div>
+            <div class="admin-datos">
+              <span class="admin-nombre">{{ a.nombre }} {{ a.apellido_paterno }} {{ a.apellido_materno }}</span>
+              <span class="admin-correo">{{ a.correo }}</span>
+              <span class="admin-desde">Desde {{ formatearFecha(a.creado_en) }}</span>
+            </div>
+          </div>
+
+          <!-- INFO ROWS -->
+          <div class="admin-info-rows">
+            <div class="admin-info-row">
+              <span class="info-label">No. ID</span>
+              <span class="info-valor">{{ a.numero_empleado }}</span>
+            </div>
+            <div class="admin-info-row">
+              <span class="info-label">Acceso</span>
+              <span class="info-valor acceso-total">● Acceso total</span>
+            </div>
+          </div>
+
+          <!-- FOOTER -->
+          <div class="card-footer">
+            <button class="btn-ver-detalle" (click)="verDetalle(a)">
+              Ver detalle →
+            </button>
+
+            <button
+              class="btn-eliminar-admin"
+              *ngIf="!a.es_principal && !esMiCuenta(a)"
+              (click)="pedirEliminar(a)"
+              [disabled]="procesando">
+               Eliminar acceso
+            </button>
+
+            <div class="badge-no-eliminar" *ngIf="a.es_principal">
+              🔒 Administrador principal
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CARD AGREGAR -->
+        <div class="admin-card card-agregar" (click)="irAgregar()">
+          <div class="agregar-circulo">
+            <span class="agregar-plus">+</span>
+          </div>
+          <span class="agregar-titulo">Agregar administrador</span>
+          <span class="agregar-desc">Crea una cuenta con acceso total al panel</span>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
