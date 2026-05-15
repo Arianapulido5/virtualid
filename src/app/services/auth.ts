@@ -1,4 +1,3 @@
-// src/app/services/auth.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -25,8 +24,33 @@ export class Auth {
 
   constructor(private http: HttpClient) {}
 
+  static setToken(token: string): void {
+    try { localStorage.setItem('token', token); }
+    catch { sessionStorage.setItem('token', token); }
+  }
+
+  static getToken(): string {
+    return localStorage.getItem('token') ?? sessionStorage.getItem('token') ?? '';
+  }
+
+  static setRol(rol: string): void {
+    try { localStorage.setItem('rol', rol); }
+    catch { sessionStorage.setItem('rol', rol); }
+  }
+
+  static getRol(): string {
+    return localStorage.getItem('rol') ?? sessionStorage.getItem('rol') ?? '';
+  }
+
+  static clearSession(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('rol');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('rol');
+  }
+
   private headers(): HttpHeaders {
-    const token = localStorage.getItem('token') ?? '';
+    const token = Auth.getToken();
     return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
@@ -52,7 +76,7 @@ export class Auth {
   }
 
   cerrarSesion(): void {
-    localStorage.removeItem('token');
+    Auth.clearSession();
   }
 
   solicitarRecuperacion(correo: string) {
@@ -64,18 +88,11 @@ export class Auth {
   }
 
   obtenerInformacion(): Observable<InfoPersonalData> {
-    return this.http.get<InfoPersonalData>(
-      `${this.url}/informacion`,
-      { headers: this.headers() }
-    );
+    return this.http.get<InfoPersonalData>(`${this.url}/informacion`, { headers: this.headers() });
   }
 
   guardarInformacion(datos: InfoPersonalData): Observable<any> {
-    return this.http.put<any>(
-      `${this.url}/informacion`,
-      datos,
-      { headers: this.headers() }
-    );
+    return this.http.put<any>(`${this.url}/informacion`, datos, { headers: this.headers() });
   }
 
   cambiarContrasena(

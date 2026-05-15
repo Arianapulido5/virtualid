@@ -1,9 +1,10 @@
-// src/app/pages/login/login.ts
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
+import { timeout, catchError } from 'rxjs/operators';
+import { TimeoutError, throwError } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,6 @@ export class Login {
   correo       = '';
   contrasena   = '';
   errorGeneral = '';
-
   errores: { correo?: string; contrasena?: string } = {};
 
   constructor(
@@ -55,33 +55,53 @@ export class Login {
     if (!this.formularioValido()) return;
 
     this.cargando = true;
-    this.authService.login(this.correo.trim(), this.contrasena).subscribe({
-      next: (res: any) => {
-        this.cargando = false;
 
-        // Si es admin, no permitir acceso por este login
-        if (res.rol === 'admin') {
-          this.errorGeneral = 'Esta cuenta es de administrador. Usa el acceso de administrador.';
+    this.authService.login(this.correo.trim(), this.contrasena)
+      .pipe(
+        timeout(30000),
+        catchError(err => {
+          if (err instanceof TimeoutError) {
+            return throwError(() => ({ timedOut: true }));
+          }
+          return throwError(() => err);
+        })
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.cargando = false;
+
+          if (res.rol === 'admin') {
+            this.errorGeneral = 'Esta cuenta es de administrador. Usa el acceso de administrador.';
+            this.cdr.detectChanges();
+            return;
+          }
+
+          Auth.setToken(res.token);
+          Auth.setRol(res.rol);
+
           this.cdr.detectChanges();
-          return;
-        }
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err: any) => {
+          this.cargando = false;
 
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('rol', res.rol);
-        this.cdr.detectChanges();
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err: any) => {
-        this.cargando = false;
-        const msg: string = err.error?.message || 'Error al iniciar sesión.';
-        if (msg.toLowerCase().includes('incorrectos')) {
-          this.errores.contrasena = 'Correo o contraseña incorrectos.';
-          this.errores.correo     = ' ';
-        } else {
-          this.errorGeneral = msg;
+          if (err?.timedOut) {
+            this.errorGeneral = 'El servidor tardó demasiado. Intenta de nuevo en unos segundos.';
+          } else if (!navigator.onLine) {
+            this.errorGeneral = 'Sin conexión a internet. Verifica tu red.';
+          } else if (err.status === 0) {
+            this.errorGeneral = 'No se pudo conectar al servidor. Intenta de nuevo.';
+          } else {
+            const msg: string = err.error?.message || 'Error al iniciar sesión.';
+            if (msg.toLowerCase().includes('incorrectos')) {
+              this.errores.contrasena = 'Correo o contraseña incorrectos.';
+              this.errores.correo     = ' ';
+            } else {
+              this.errorGeneral = msg;
+            }
+          }
+          this.cdr.detectChanges();
         }
-        this.cdr.detectChanges();
-      }
-    });
+      });
   }
 }
