@@ -204,10 +204,7 @@ $danger:       #e53935;
 .btn-aceptar--error {
   background: linear-gradient(135deg, #c62828 0%, #e53935 100%);
   background-size: 250% 250%;
-
-  &:hover {
-    box-shadow: 0 10px 28px rgba(229, 57, 53, 0.42);
-  }
+  &:hover { box-shadow: 0 10px 28px rgba(229, 57, 53, 0.42); }
 }
 // ─────────────────────────────────────────────
 //  PANEL IZQUIERDO
