@@ -1,11 +1,22 @@
 <!-- src/app/pages/registro/registro.html -->
 
+<!-- ── MODAL ÉXITO ── -->
 <div class="modal-overlay" *ngIf="mostrarModal">
   <div class="modal-card">
-    <div class="modal-icon">✓</div>
+    <div class="modal-icon modal-icon--ok">✓</div>
     <h3>¡Cuenta creada!</h3>
     <p>Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión.</p>
     <button class="btn-aceptar" (click)="irAlLogin()">Aceptar</button>
+  </div>
+</div>
+
+<!-- ── MODAL ERROR / CONFLICTO ── -->
+<div class="modal-overlay" *ngIf="mostrarModalError">
+  <div class="modal-card">
+    <div class="modal-icon modal-icon--error">✕</div>
+    <h3>{{ modalErrorTitulo }}</h3>
+    <p>{{ modalErrorMensaje }}</p>
+    <button class="btn-aceptar btn-aceptar--error" (click)="cerrarModalError()">Entendido</button>
   </div>
 </div>
 
@@ -175,8 +186,6 @@
       Acepto los términos y condiciones de uso
     </label>
     <span class="field-error" *ngIf="errores.terminos">{{ errores.terminos }}</span>
-
-    <p *ngIf="errorGeneral" class="error-general">{{ errorGeneral }}</p>
 
     <button class="btn-crear" (click)="crearCuenta()" [disabled]="cargando" [class.btn-loading]="cargando">
       <span *ngIf="!cargando">Crear Cuenta</span>

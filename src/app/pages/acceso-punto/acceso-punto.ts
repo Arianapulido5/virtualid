@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone, ViewChild, Ele
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import jsQR from 'jsqr';
 
 @Component({
@@ -25,8 +26,6 @@ export class AccesoPunto implements OnInit, OnDestroy {
 
   private stream:       MediaStream | null = null;
   private scanInterval: any;
-
-  private readonly backendUrl = 'https://frumentaceous-overnervously-johnnie.ngrok-free.dev/api/qr/validar';
 
   constructor(
     private route:  ActivatedRoute,
@@ -56,7 +55,6 @@ export class AccesoPunto implements OnInit, OnDestroy {
     this.usuario     = '';
     this.tipoUsuario = '';
     this.estado      = 'escaneando';
-    // Limpiar intervalo anterior y reiniciar escaneo
     clearInterval(this.scanInterval);
     this.cdr.detectChanges();
     setTimeout(() => this.iniciarEscaneo(), 100);
@@ -67,7 +65,6 @@ export class AccesoPunto implements OnInit, OnDestroy {
     this.usuario     = '';
     this.tipoUsuario = '';
     this.estado      = 'escaneando';
-    // Limpiar intervalo anterior y reiniciar escaneo
     clearInterval(this.scanInterval);
     this.cdr.detectChanges();
     setTimeout(() => this.iniciarEscaneo(), 100);
@@ -140,7 +137,7 @@ export class AccesoPunto implements OnInit, OnDestroy {
     clearInterval(this.scanInterval);
     this.cdr.detectChanges();
 
-    this.http.post<any>(this.backendUrl, {
+    this.http.post<any>(environment.qrValidarUrl, {
       token,
       punto_acceso_id: this.puntoId
     }).subscribe({

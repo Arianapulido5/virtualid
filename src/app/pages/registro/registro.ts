@@ -18,6 +18,9 @@ export class Registro {
   cargando       = false;
   aceptaTerminos = false;
   mostrarModal   = false;
+  mostrarModalError = false;      // ← NUEVO
+  modalErrorTitulo  = '';         // ← NUEVO
+  modalErrorMensaje = '';         // ← NUEVO
 
   nombre           = '';
   apellido_paterno = '';
@@ -64,6 +67,18 @@ export class Registro {
   togglePassword() { this.showPassword = !this.showPassword; }
   toggleConfirm()  { this.showConfirm  = !this.showConfirm;  }
 
+  cerrarModalError() {
+    this.mostrarModalError = false;
+    this.cdr.detectChanges();
+  }
+
+  private mostrarError(titulo: string, mensaje: string) {
+    this.modalErrorTitulo  = titulo;
+    this.modalErrorMensaje = mensaje;
+    this.mostrarModalError = true;
+    this.cdr.detectChanges();
+  }
+
   validarNombre() {
     const v = this.nombre.trim();
     if (!v)                                this.errores.nombre = 'El nombre es obligatorio.';
@@ -95,9 +110,9 @@ export class Registro {
   validarNumeroEmpleado() {
     this.numero_empleado = this.numero_empleado.replace(/\D/g, '').slice(0, 10);
     const v = this.numero_empleado;
-    if (!v)               this.errores.numero_empleado = 'El número de empleado es obligatorio.';
+    if (!v)                   this.errores.numero_empleado = 'El número de empleado es obligatorio.';
     else if (v.length !== 10) this.errores.numero_empleado = `Debe tener exactamente 10 dígitos (${v.length}/10).`;
-    else                  this.errores.numero_empleado = undefined;
+    else                      this.errores.numero_empleado = undefined;
   }
   validarTipo() {
     if (!this.tipo) this.errores.tipo = 'Selecciona si eres estudiante o empleado.';
@@ -114,9 +129,9 @@ export class Registro {
     if (this.confirmar.length > 0) this.validarConfirmar();
   }
   validarConfirmar() {
-    if (!this.confirmar)                        this.errores.confirmar = 'Confirma tu contraseña.';
-    else if (this.contrasena !== this.confirmar) this.errores.confirmar = 'Las contraseñas no coinciden.';
-    else                                        this.errores.confirmar = undefined;
+    if (!this.confirmar)                         this.errores.confirmar = 'Confirma tu contraseña.';
+    else if (this.contrasena !== this.confirmar)  this.errores.confirmar = 'Las contraseñas no coinciden.';
+    else                                         this.errores.confirmar = undefined;
   }
   validarTerminos() {
     if (!this.aceptaTerminos) this.errores.terminos = 'Debes aceptar los términos y condiciones.';
@@ -150,6 +165,7 @@ export class Registro {
   }
 
   crearCuenta() {
+    if (this.cargando) return;                          // ← evita doble submit
     this.errorGeneral = '';
     if (!this.formularioValido()) return;
     this.cargando = true;
@@ -178,10 +194,36 @@ export class Registro {
       },
       error: (err: any) => {
         this.cargando = false;
-        const msg: string = err.error?.message ?? 'Error al crear la cuenta.';
-        if (msg.toLowerCase().includes('correo'))        this.errores.correo          = msg;
-        else if (msg.toLowerCase().includes('empleado')) this.errores.numero_empleado = msg;
-        else                                             this.errorGeneral            = msg;
+
+        // Captura el mensaje sin importar la estructura que mande el backend
+        const msg: string =
+          err.error?.message ??
+          err.error?.error   ??
+          err.message        ??
+          'Ocurrió un error inesperado. Intenta de nuevo.';
+
+        const msgLower = msg.toLowerCase();
+
+        if (err.status === 409) {
+          // Conflicto: correo o número de empleado duplicado
+          if (msgLower.includes('correo') || msgLower.includes('email')) {
+            this.mostrarError(
+              '¡Correo ya registrado!',
+              'Este correo electrónico ya tiene una cuenta. Prueba con otro correo o inicia sesión.'
+            );
+          } else if (msgLower.includes('empleado') || msgLower.includes('numero') || msgLower.includes('número')) {
+            this.mostrarError(
+              '¡Número ya registrado!',
+              'Este número de empleado/estudiante ya tiene una cuenta. Verifica el número e intenta de nuevo.'
+            );
+          } else {
+            // 409 genérico — el mensaje del backend va directo al modal
+            this.mostrarError('¡Usuario ya existe!', msg);
+          }
+        } else {
+          // Cualquier otro error (500, red, etc.)
+          this.mostrarError('Error al crear la cuenta', msg);
+        }
       }
     });
   }

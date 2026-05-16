@@ -24,7 +24,7 @@ export class App {
 
   private sinSidebar = [
     '/login', '/registro', '/biometrica',
-    '/olvide-contrasena', '/registro-institucion'
+    '/olvide-contrasena', '/registro-institucion', '/acceso'
   ];
 
   // Rutas con fondo claro → hamburguesa negra

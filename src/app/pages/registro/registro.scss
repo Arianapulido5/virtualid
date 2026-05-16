@@ -190,6 +190,26 @@ $danger:       #e53935;
 }
 
 // ─────────────────────────────────────────────
+//  MODAL VARIANTES (error)
+// ─────────────────────────────────────────────
+.modal-icon--ok {
+  background: linear-gradient(135deg, $blue-dark, $purple-mid);
+}
+
+.modal-icon--error {
+  background: linear-gradient(135deg, #c62828, #e53935);
+  box-shadow: 0 8px 28px rgba(229, 57, 53, 0.35);
+}
+
+.btn-aceptar--error {
+  background: linear-gradient(135deg, #c62828 0%, #e53935 100%);
+  background-size: 250% 250%;
+
+  &:hover {
+    box-shadow: 0 10px 28px rgba(229, 57, 53, 0.42);
+  }
+}
+// ─────────────────────────────────────────────
 //  PANEL IZQUIERDO
 // ─────────────────────────────────────────────
 .left {
