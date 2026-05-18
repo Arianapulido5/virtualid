@@ -5,6 +5,18 @@ import { NgIf, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
 
+// Estructura que devuelve la API de Copomex
+interface CopomexRespuesta {
+  error:   boolean;
+  codigo_postal: string;
+  municipio:     string;
+  ciudad:        string;
+  estado:        string;
+  asentamiento:  string;       // colonia principal (primer resultado)
+  tipo_asentamiento: string;
+  colonias?: string[];         // lista completa de colonias del CP
+}
+
 @Component({
   selector: 'app-registro',
   standalone: true,
@@ -16,6 +28,7 @@ export class Registro {
   showPassword   = false;
   showConfirm    = false;
   cargando       = false;
+  cargandoCP     = false;
   aceptaTerminos = false;
   mostrarModal   = false;
   mostrarModalError = false;
@@ -35,8 +48,17 @@ export class Registro {
   direccion        = '';
   ciudad           = '';
   estado           = '';
+  municipio        = '';
+  colonia          = '';
   codigo_postal    = '';
   fecha_nacimiento = '';
+
+  // Listas para los selects
+  municipiosDisponibles: string[] = [];
+  coloniasDisponibles:   string[] = [];
+
+  // Mapa interno: municipio → colonias (para filtrar al cambiar municipio)
+  private coloniasPorMunicipio: Map<string, string[]> = new Map();
 
   errorGeneral = '';
 
@@ -73,40 +95,33 @@ export class Registro {
   }
 
   private mostrarError(titulo: string, mensaje: string) {
-    this.cargando          = false;   // ← garantía extra: siempre apaga el spinner aquí
+    this.cargando          = false;
     this.modalErrorTitulo  = titulo;
     this.modalErrorMensaje = mensaje;
     this.mostrarModalError = true;
     this.cdr.detectChanges();
   }
 
-  /**
-   * Extrae el mensaje de error de cualquier estructura que mande el backend:
-   * - err.error puede ser un objeto { message, error } o directamente un string
-   * - Si nada funciona, devuelve un mensaje genérico
-   */
   private extraerMensaje(err: any): string {
     try {
-      // Si err.error es un string JSON, intentamos parsearlo
       if (typeof err.error === 'string') {
         try {
           const parsed = JSON.parse(err.error);
           return parsed.message ?? parsed.error ?? err.error;
         } catch {
-          // err.error ya era texto plano
           return err.error;
         }
       }
-      // err.error es un objeto
       if (err.error && typeof err.error === 'object') {
         return err.error.message ?? err.error.error ?? JSON.stringify(err.error);
       }
-      // Último recurso
       return err.message ?? 'Ocurrió un error inesperado. Intenta de nuevo.';
     } catch {
       return 'Ocurrió un error inesperado. Intenta de nuevo.';
     }
   }
+
+  // ── Validaciones ────────────────────────────────────────────────────────────
 
   validarNombre() {
     const v = this.nombre.trim();
@@ -172,18 +187,126 @@ export class Registro {
     if (v && v.length !== 10) this.errores.telefono = 'Debe tener exactamente 10 dígitos.';
     else                      this.errores.telefono = undefined;
   }
-  validarCodigoPostal() {
-    const v = this.codigo_postal.replace(/\D/g, '').slice(0, 5);
-    this.codigo_postal = v;
-    if (v && v.length !== 5) this.errores.codigo_postal = 'Debe tener exactamente 5 dígitos.';
-    else                     this.errores.codigo_postal = undefined;
-  }
   validarFechaNacimiento() {
     if (!this.fecha_nacimiento) { this.errores.fecha_nacimiento = undefined; return; }
     const f = new Date(this.fecha_nacimiento);
     if (f >= new Date()) this.errores.fecha_nacimiento = 'La fecha debe ser anterior a hoy.';
     else                 this.errores.fecha_nacimiento = undefined;
   }
+
+  // ── Lógica de Código Postal con API Copomex ──────────────────────────────
+
+  /**
+   * Consulta la API gratuita de Copomex (datos postales de México).
+   * Endpoint: https://api.copomex.com/query/info_cp/{CP}?type=simplified&token=pruebas
+   *
+   * NOTA: El token "pruebas" es público y funciona para desarrollo.
+   * Para producción obtén tu token en https://copomex.com
+   *
+   * Respuesta esperada: array de asentamientos, cada uno con:
+   *   { municipio, estado, ciudad, asentamiento }
+   */
+  validarCodigoPostal() {
+    const v = this.codigo_postal.replace(/\D/g, '').slice(0, 5);
+    this.codigo_postal = v;
+
+    if (v && v.length !== 5) {
+      this.errores.codigo_postal = 'Debe tener exactamente 5 dígitos.';
+      this._limpiarGeo();
+      return;
+    }
+
+    this.errores.codigo_postal = undefined;
+
+    if (v.length === 5) {
+      this.cargandoCP = true;
+      this._limpiarGeo();
+      this.cdr.detectChanges();
+
+      fetch(`https://api.copomex.com/query/info_cp/${v}?type=simplified&token=pruebas`)
+        .then(res => {
+          if (!res.ok) throw new Error('No encontrado');
+          return res.json();
+        })
+        .then((data: any[]) => {
+          if (!Array.isArray(data) || data.length === 0) throw new Error('Sin datos');
+
+          // Todos los items comparten municipio, estado y ciudad
+          const primero = data[0];
+
+          // ── Estado ──
+          const estadoApi: string = (primero.estado ?? '').toLowerCase();
+          const matchEstado = this.estadosMexico.find(e =>
+            estadoApi.includes(e.toLowerCase()) || e.toLowerCase().includes(estadoApi)
+          );
+          this.estado = matchEstado ?? primero.estado ?? '';
+
+          // ── Ciudad ──
+          this.ciudad = primero.ciudad ?? primero.municipio ?? '';
+
+          // ── Municipios únicos del CP ──
+          const municipiosSet = new Set<string>(
+            data.map((d: any) => d.municipio).filter(Boolean)
+          );
+          this.municipiosDisponibles = Array.from(municipiosSet).sort();
+
+          // ── Mapa municipio → colonias ──
+          this.coloniasPorMunicipio = new Map();
+          data.forEach((d: any) => {
+            if (!d.municipio || !d.asentamiento) return;
+            if (!this.coloniasPorMunicipio.has(d.municipio)) {
+              this.coloniasPorMunicipio.set(d.municipio, []);
+            }
+            this.coloniasPorMunicipio.get(d.municipio)!.push(d.asentamiento);
+          });
+
+          // ── Municipio por defecto (primer resultado) ──
+          const municipioDefault = primero.municipio ?? '';
+          this.municipio = this.municipiosDisponibles.includes(municipioDefault)
+            ? municipioDefault
+            : (this.municipiosDisponibles[0] ?? '');
+
+          // ── Colonias del municipio seleccionado ──
+          this._cargarColoniasDeMunicipio(this.municipio);
+
+          // ── Colonia por defecto (primer asentamiento) ──
+          this.colonia = primero.asentamiento ?? (this.coloniasDisponibles[0] ?? '');
+
+          this.cargandoCP = false;
+          this.cdr.detectChanges();
+        })
+        .catch(() => {
+          this.cargandoCP = false;
+          this._limpiarGeo();
+          this.cdr.detectChanges();
+        });
+    }
+  }
+
+  /** Cuando el usuario cambia manualmente el municipio, recarga las colonias */
+  onMunicipioChange() {
+    this._cargarColoniasDeMunicipio(this.municipio);
+    this.colonia = this.coloniasDisponibles[0] ?? '';
+    this.cdr.detectChanges();
+  }
+
+  private _cargarColoniasDeMunicipio(municipio: string) {
+    const lista = this.coloniasPorMunicipio.get(municipio) ?? [];
+    // Ordenar alfabéticamente y eliminar duplicados
+    this.coloniasDisponibles = [...new Set(lista)].sort();
+  }
+
+  private _limpiarGeo() {
+    this.estado               = '';
+    this.ciudad               = '';
+    this.municipio            = '';
+    this.colonia              = '';
+    this.municipiosDisponibles = [];
+    this.coloniasDisponibles   = [];
+    this.coloniasPorMunicipio  = new Map();
+  }
+
+  // ── Envío ────────────────────────────────────────────────────────────────────
 
   private formularioValido(): boolean {
     this.validarNombre(); this.validarApellidoPaterno(); this.validarApellidoMaterno();
@@ -208,12 +331,14 @@ export class Registro {
       contrasena:       this.contrasena,
       tipo:             this.tipo,
     };
-    if (this.telefono)         datos.telefono         = this.telefono;
-    if (this.direccion.trim()) datos.direccion        = this.direccion.trim();
-    if (this.ciudad.trim())    datos.ciudad           = this.ciudad.trim();
-    if (this.estado)           datos.estado           = this.estado;
-    if (this.codigo_postal)    datos.codigo_postal    = this.codigo_postal;
-    if (this.fecha_nacimiento) datos.fecha_nacimiento = this.fecha_nacimiento;
+    if (this.telefono)             datos.telefono         = this.telefono;
+    if (this.direccion.trim())     datos.direccion        = this.direccion.trim();
+    if (this.ciudad.trim())        datos.ciudad           = this.ciudad.trim();
+    if (this.estado)               datos.estado           = this.estado;
+    if (this.municipio)            datos.municipio        = this.municipio;
+    if (this.colonia)              datos.colonia          = this.colonia;
+    if (this.codigo_postal)        datos.codigo_postal    = this.codigo_postal;
+    if (this.fecha_nacimiento)     datos.fecha_nacimiento = this.fecha_nacimiento;
 
     this.authService.registro(datos).subscribe({
       next: () => {
@@ -222,7 +347,6 @@ export class Registro {
         this.cdr.detectChanges();
       },
       error: (err: any) => {
-        // extraerMensaje maneja cualquier forma que venga el error
         const msg = this.extraerMensaje(err);
         const msgLower = msg.toLowerCase();
         const status = err.status ?? 0;
