@@ -18,9 +18,9 @@ export class Registro {
   cargando       = false;
   aceptaTerminos = false;
   mostrarModal   = false;
-  mostrarModalError = false;      // ← NUEVO
-  modalErrorTitulo  = '';         // ← NUEVO
-  modalErrorMensaje = '';         // ← NUEVO
+  mostrarModalError = false;
+  modalErrorTitulo  = '';
+  modalErrorMensaje = '';
 
   nombre           = '';
   apellido_paterno = '';
@@ -73,10 +73,39 @@ export class Registro {
   }
 
   private mostrarError(titulo: string, mensaje: string) {
+    this.cargando          = false;   // ← garantía extra: siempre apaga el spinner aquí
     this.modalErrorTitulo  = titulo;
     this.modalErrorMensaje = mensaje;
     this.mostrarModalError = true;
     this.cdr.detectChanges();
+  }
+
+  /**
+   * Extrae el mensaje de error de cualquier estructura que mande el backend:
+   * - err.error puede ser un objeto { message, error } o directamente un string
+   * - Si nada funciona, devuelve un mensaje genérico
+   */
+  private extraerMensaje(err: any): string {
+    try {
+      // Si err.error es un string JSON, intentamos parsearlo
+      if (typeof err.error === 'string') {
+        try {
+          const parsed = JSON.parse(err.error);
+          return parsed.message ?? parsed.error ?? err.error;
+        } catch {
+          // err.error ya era texto plano
+          return err.error;
+        }
+      }
+      // err.error es un objeto
+      if (err.error && typeof err.error === 'object') {
+        return err.error.message ?? err.error.error ?? JSON.stringify(err.error);
+      }
+      // Último recurso
+      return err.message ?? 'Ocurrió un error inesperado. Intenta de nuevo.';
+    } catch {
+      return 'Ocurrió un error inesperado. Intenta de nuevo.';
+    }
   }
 
   validarNombre() {
@@ -165,7 +194,7 @@ export class Registro {
   }
 
   crearCuenta() {
-    if (this.cargando) return;                          // ← evita doble submit
+    if (this.cargando) return;
     this.errorGeneral = '';
     if (!this.formularioValido()) return;
     this.cargando = true;
@@ -193,19 +222,12 @@ export class Registro {
         this.cdr.detectChanges();
       },
       error: (err: any) => {
-        this.cargando = false;
-
-        // Captura el mensaje sin importar la estructura que mande el backend
-        const msg: string =
-          err.error?.message ??
-          err.error?.error   ??
-          err.message        ??
-          'Ocurrió un error inesperado. Intenta de nuevo.';
-
+        // extraerMensaje maneja cualquier forma que venga el error
+        const msg = this.extraerMensaje(err);
         const msgLower = msg.toLowerCase();
+        const status = err.status ?? 0;
 
-        if (err.status === 409) {
-          // Conflicto: correo o número de empleado duplicado
+        if (status === 409) {
           if (msgLower.includes('correo') || msgLower.includes('email')) {
             this.mostrarError(
               '¡Correo ya registrado!',
@@ -217,11 +239,9 @@ export class Registro {
               'Este número de empleado/estudiante ya tiene una cuenta. Verifica el número e intenta de nuevo.'
             );
           } else {
-            // 409 genérico — el mensaje del backend va directo al modal
             this.mostrarError('¡Usuario ya existe!', msg);
           }
         } else {
-          // Cualquier otro error (500, red, etc.)
           this.mostrarError('Error al crear la cuenta', msg);
         }
       }
