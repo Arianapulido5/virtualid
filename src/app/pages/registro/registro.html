@@ -105,60 +105,66 @@
       </div>
     </div>
 
-    <!-- CÓDIGO POSTAL + ESTADO -->
-    <div class="row-fields">
-      <div class="field">
-        <label>Código Postal</label>
-        <div class="input-wrapper">
-          <input type="text" placeholder="5 dígitos" maxlength="5"
-            [(ngModel)]="codigo_postal" (ngModelChange)="validarCodigoPostal()"
-            [class.input-error]="errores.codigo_postal"/>
-          <span *ngIf="cargandoCP" class="spinner"
-            style="position:absolute;right:10px;top:50%;transform:translateY(-50%)"></span>
-        </div>
-        <span class="field-error" *ngIf="errores.codigo_postal">{{ errores.codigo_postal }}</span>
-      </div>
-      <div class="field">
-        <label>Estado <span class="opcional" *ngIf="estado && !cargandoCP">(auto)</span></label>
-        <select [(ngModel)]="estado">
-          <option value="">Selecciona</option>
-          <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
-        </select>
-      </div>
+<!-- CÓDIGO POSTAL + ESTADO -->
+<div class="row-fields">
+  <div class="field">
+    <label>Código Postal</label>
+    <div class="input-wrapper">
+      <input type="text" placeholder="5 dígitos" maxlength="5"
+        [(ngModel)]="codigo_postal" (ngModelChange)="validarCodigoPostal()"
+        [class.input-error]="errores.codigo_postal"/>
+      <span *ngIf="cargandoCP" class="spinner"
+        style="position:absolute;right:10px;top:50%;transform:translateY(-50%)"></span>
     </div>
+    <span class="field-error" *ngIf="errores.codigo_postal">{{ errores.codigo_postal }}</span>
+  </div>
+  <div class="field">
+    <label>Estado <span class="opcional" *ngIf="estado && !cargandoCP"></span></label>
+    <select [(ngModel)]="estado">
+      <option value="">Selecciona</option>
+      <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
+    </select>
+  </div>
+</div>
 
-    <!-- CIUDAD + MUNICIPIO -->
-    <div class="row-fields">
-      <div class="field">
-        <label>Ciudad <span class="opcional" *ngIf="ciudad && !cargandoCP">(auto)</span></label>
-        <input type="text" placeholder="Ej. Córdoba" [(ngModel)]="ciudad"/>
-      </div>
-      <div class="field">
-        <label>Municipio <span class="opcional" *ngIf="municipio && !cargandoCP">(auto)</span></label>
-        <select [(ngModel)]="municipio" (ngModelChange)="onMunicipioChange()">
-          <option value="">Selecciona</option>
-          <option *ngFor="let m of municipiosDisponibles" [value]="m">{{ m }}</option>
-        </select>
-      </div>
-    </div>
+<!-- CIUDAD + MUNICIPIO -->
+<div class="row-fields">
+  <div class="field">
+    <label>Ciudad <span class="opcional" *ngIf="ciudad && !cargandoCP"></span></label>
+    <select [(ngModel)]="ciudad" (ngModelChange)="onCiudadChange()">
+      <option value="">
+        {{ cargandoCP ? 'Cargando' : (ciudadesDelEstado.length === 0 ? 'Selecciona' : 'Selecciona ciudad') }}
+      </option>
+      <option *ngFor="let c of ciudadesDelEstado" [value]="c">{{ c }}</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Municipio <span class="opcional" *ngIf="municipio && !cargandoCP"></span></label>
+    <select [(ngModel)]="municipio" (ngModelChange)="onMunicipioChange()">
+      <option value="">
+        {{ cargandoCP ? 'Cargando' : (municipiosDelCiudad.length === 0 ? 'Selecciona' : 'Selecciona municipio') }}
+      </option>
+      <option *ngFor="let m of municipiosDelCiudad" [value]="m">{{ m }}</option>
+    </select>
+  </div>
+</div>
 
-    <!-- COLONIA -->
-    <div class="field">
-      <label>Colonia <span class="opcional" *ngIf="colonia && !cargandoCP">(auto)</span></label>
-      <select [(ngModel)]="colonia">
-        <option value="">
-          {{ cargandoCP ? 'Cargando colonias...' : (coloniasDisponibles.length === 0 ? 'Selecciona' : 'Selecciona una colonia') }}
-        </option>
-        <option *ngFor="let c of coloniasDisponibles" [value]="c">{{ c }}</option>
-      </select>
-    </div>
+<!-- COLONIA -->
+<div class="field">
+  <label>Colonia <span class="opcional" *ngIf="colonia && !cargandoCP"></span></label>
+  <select [(ngModel)]="colonia">
+    <option value="">
+      {{ cargandoCP ? 'Cargando' : (coloniasDelMunicipio.length === 0 ? 'Selecciona' : 'Selecciona colonia') }}
+    </option>
+    <option *ngFor="let c of coloniasDelMunicipio" [value]="c">{{ c }}</option>
+  </select>
+</div>
 
-        <!-- DIRECCIÓN -->
+    <!-- DIRECCIÓN -->
     <div class="field">
       <label>Dirección</label>
       <input type="text" placeholder="Calle, número" [(ngModel)]="direccion"/>
     </div>
-
 
     <!-- CONTRASEÑAS -->
     <div class="row-fields">
