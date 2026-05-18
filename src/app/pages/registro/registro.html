@@ -87,23 +87,24 @@
     <!-- SEPARADOR -->
     <p class="section-label">Información personal <span class="opcional">(opcional)</span></p>
 
-    <!-- TELÉFONO + FECHA -->
-    <div class="row-fields">
-      <div class="field">
-        <label>Teléfono</label>
-        <input type="tel" placeholder="10 dígitos" maxlength="10"
-          [(ngModel)]="telefono" (ngModelChange)="validarTelefono()"
-          [class.input-error]="errores.telefono"/>
-        <span class="field-error" *ngIf="errores.telefono">{{ errores.telefono }}</span>
-      </div>
-      <div class="field">
-        <label>Fecha de nacimiento</label>
-        <input type="date" [max]="hoy"
-          [(ngModel)]="fecha_nacimiento" (ngModelChange)="validarFechaNacimiento()"
-          [class.input-error]="errores.fecha_nacimiento"/>
-        <span class="field-error" *ngIf="errores.fecha_nacimiento">{{ errores.fecha_nacimiento }}</span>
-      </div>
-    </div>
+<!-- TELÉFONO + FECHA -->
+<div class="field">
+  <label>Teléfono</label>
+  <input type="tel" placeholder="10 dígitos" maxlength="10"
+    [(ngModel)]="telefono" (ngModelChange)="validarTelefono()"
+    [class.input-error]="errores.telefono"/>
+  <span class="field-error" *ngIf="errores.telefono">{{ errores.telefono }}</span>
+</div>
+
+<div class="field">
+  <label>Fecha de nacimiento</label>
+  <input type="text" placeholder="dd/mm/aaaa"
+    onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'"
+    [max]="hoy"
+    [(ngModel)]="fecha_nacimiento" (ngModelChange)="validarFechaNacimiento()"
+    [class.input-error]="errores.fecha_nacimiento"/>
+  <span class="field-error" *ngIf="errores.fecha_nacimiento">{{ errores.fecha_nacimiento }}</span>
+</div>
 
 <!-- CÓDIGO POSTAL + ESTADO -->
 <div class="row-fields">
