@@ -47,5 +47,6 @@
         "maxAge": "1h"
       }
     }
-  ]
+  ],
+  "navigationUrls": []
 }

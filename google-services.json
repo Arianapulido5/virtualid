@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "941295886617",
+    "project_id": "virtualid-de261",
+    "storage_bucket": "virtualid-de261.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:941295886617:android:6d27a8454d13a15bd9e588",
+        "android_client_info": {
+          "package_name": "com.tuapp.virtualid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTxg18UonquQL96sA-YAXDNKoGeFfSqLQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

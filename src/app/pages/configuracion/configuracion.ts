@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { GeocodingService } from '../../services/geocoding';
 import { environment } from '../../../environments/environment';
+import { PushNotifications } from '@capacitor/push-notifications';
 
 @Component({
   selector: 'app-configuracion',
@@ -21,7 +22,6 @@ export class Configuracion implements OnInit {
   showIdiomas    = false;
   idiomaActual   = 'Español';
 
-  // ── Ubicación de la institución ──────────────────────────────────────────
   cargandoInstitucion = true;
   institucionNombre   = '';
   direccionGeo        = '';
@@ -42,6 +42,7 @@ export class Configuracion implements OnInit {
 
   ngOnInit(): void {
     this.cargarInstitucion();
+    this.cargarPreferencias();
   }
 
   private get headers(): HttpHeaders {
@@ -50,7 +51,17 @@ export class Configuracion implements OnInit {
     });
   }
 
-  /** Carga la institución a la que pertenece el usuario mediante sus credenciales */
+  private cargarPreferencias(): void {
+    this.http.get<any>(`${this.apiUrl}/usuario/preferencias`, { headers: this.headers })
+      .subscribe({
+        next: (prefs) => {
+          this.notificaciones = prefs.notificaciones_push ?? true;
+          this.cdr.detectChanges();
+        },
+        error: () => {}
+      });
+  }
+
   private cargarInstitucion(): void {
     this.cargandoInstitucion = true;
 
@@ -59,7 +70,6 @@ export class Configuracion implements OnInit {
       { headers: this.headers }
     ).subscribe({
       next: (creds) => {
-        // Tomamos la primera credencial activa para obtener la institución
         const activa = creds.find(c => c.estado === 'activa') ?? creds[0];
         if (!activa) {
           this.cargandoInstitucion = false;
@@ -67,7 +77,6 @@ export class Configuracion implements OnInit {
           return;
         }
 
-        // Obtenemos detalles de la institución a través del endpoint de credencial
         this.http.get<any>(
           `${this.apiUrl}/credenciales/${activa.id}?t=${Date.now()}`,
           { headers: this.headers }
@@ -104,14 +113,34 @@ export class Configuracion implements OnInit {
     });
   }
 
-  toggleIdioma() { this.showIdiomas = !this.showIdiomas; }
+  toggleNotificaciones(): void {
+    this.http.put(
+      `${this.apiUrl}/usuario/preferencias`,
+      { notificaciones_push: this.notificaciones },
+      { headers: this.headers }
+    ).subscribe({
+      next: () => {
+        if (!this.notificaciones) {
+          // Limpiar notificaciones entregadas al desactivar
+          PushNotifications.removeAllDeliveredNotifications();
+        }
+      },
+      error: () => {
+        // Revertir el toggle si falla el servidor
+        this.notificaciones = !this.notificaciones;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
-  seleccionarIdioma(idioma: string) {
+  toggleIdioma(): void { this.showIdiomas = !this.showIdiomas; }
+
+  seleccionarIdioma(idioma: string): void {
     this.idiomaActual = idioma;
     this.showIdiomas  = false;
   }
 
-  cerrarSesion() {
+  cerrarSesion(): void {
     this.router.navigate(['/login'], { replaceUrl: true });
   }
 }

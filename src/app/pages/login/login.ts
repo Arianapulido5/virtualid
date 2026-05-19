@@ -1,8 +1,10 @@
+// src/app/pages/login/login.ts
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
+import { PushService } from '../../services/push.service';
 import { timeout, catchError } from 'rxjs/operators';
 import { TimeoutError, throwError } from 'rxjs';
 
@@ -23,8 +25,9 @@ export class Login {
 
   constructor(
     private authService: Auth,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private router:      Router,
+    private cdr:         ChangeDetectorRef,
+    private pushService: PushService        // ← agregado
   ) {}
 
   togglePassword() { this.showPassword = !this.showPassword; }
@@ -78,6 +81,9 @@ export class Login {
 
           Auth.setToken(res.token);
           Auth.setRol(res.rol);
+
+          // ── Registrar dispositivo para notificaciones push ──
+          this.pushService.inicializar();
 
           this.cdr.detectChanges();
           this.router.navigate(['/dashboard']);

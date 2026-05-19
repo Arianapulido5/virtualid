@@ -1,9 +1,9 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.example.app',
+  appId: 'com.tuapp.virtualid',
   appName: 'virtualid',
-  webDir: 'dist'
+  webDir: 'dist/virtualid/browser'
 };
 
 export default config;

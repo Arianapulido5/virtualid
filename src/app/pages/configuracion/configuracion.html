@@ -38,19 +38,19 @@
     </div>
   </div>
 
-  <!-- ── PREFERENCIAS ───────────────────────────────────── -->
-  <div class="config-section">
-    <h2 class="section-title">Preferencias</h2>
-    <div class="section-body">
-      <div class="config-item">
-        <span>Notificaciones</span>
-        <label class="toggle">
-          <input type="checkbox" [(ngModel)]="notificaciones">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
+<!-- ── PREFERENCIAS ───────────────────────────────────── -->
+<div class="config-section">
+  <h2 class="section-title">Preferencias</h2>
+  <div class="section-body">
+    <div class="config-item">         <!-- ← aquí, reemplaza este bloque -->
+      <span>Notificaciones</span>
+      <label class="toggle">
+        <input type="checkbox" [(ngModel)]="notificaciones" (change)="toggleNotificaciones()">
+        <span class="toggle-slider"></span>
+      </label>
     </div>
   </div>
+</div>
 
   <!-- ── AYUDA ──────────────────────────────────────────── -->
   <div class="config-section">
