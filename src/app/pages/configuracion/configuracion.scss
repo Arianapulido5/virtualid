@@ -466,12 +466,12 @@ $success:      #1a7a4a;
 @media (max-width: 480px) {
   .config-container {
     padding: 0 22px 22px;
-    padding-top: calc(env(safe-area-inset-top, 0px) + 22px);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 19px);
   }
 
   .page-title {
-    font-size: 20px;
-    padding-left: 44px;
+    font-size: 22px;
+    padding-left: 45px;
     margin-bottom: 24px;
   }
 
