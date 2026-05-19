@@ -1,8 +1,7 @@
-<!-- src/app/pages/detalle-acceso-usuario/detalle-acceso-usuario.html -->
 <div class="page-layout">
   <div class="page-body">
 
-    <!-- BACK -->
+    <!-- BACK (fuera del scroll) -->
     <a class="back-link" (click)="volver()" style="cursor:pointer">
       <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2.5"
@@ -12,116 +11,122 @@
       </svg>
     </a>
 
-    <!-- CARGANDO -->
-    <div class="loading-state" *ngIf="cargando">
-      <div class="loading-spinner"></div>
-      <span>Cargando registro…</span>
-    </div>
+    <!-- SCROLL WRAPPER -->
+    <div class="detalle-acceso-scroll-wrapper">
 
-    <ng-container *ngIf="!cargando && acceso">
-
-      <!-- HERO -->
-      <div class="resultado-hero" [ngClass]="acceso.exitoso ? 'exitoso' : 'denegado'">
-        <div class="hero-orb"></div>
-        <div class="hero-orb hero-orb--2"></div>
-        <div class="hero-info">
-          <h1 class="hero-titulo">{{ acceso.exitoso ? 'Acceso Exitoso' : 'Acceso Denegado' }}</h1>
-          <p class="hero-subtitulo">{{ acceso.punto_nombre }} · {{ acceso.institucion_nombre }}</p>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <span class="hero-stat-val">{{ formatHora(acceso.creado_en) }}</span>
-            <span class="hero-stat-lbl">Hora</span>
-          </div>
-          <div class="hero-divider"></div>
-          <div class="hero-stat">
-            <span class="hero-stat-val">{{ formatDia(acceso.creado_en) }}</span>
-            <span class="hero-stat-lbl">Día</span>
-          </div>
-        </div>
+      <!-- CARGANDO -->
+      <div class="loading-state" *ngIf="cargando">
+        <div class="loading-spinner"></div>
+        <span>Cargando registro…</span>
       </div>
 
-      <!-- CARDS GRID -->
-      <div class="detalle-grid">
+      <ng-container *ngIf="!cargando && acceso">
 
-        <!-- CARD LUGAR -->
-        <div class="card lugar-card">
-          <div class="card-accent"></div>
-          <h3 class="card-title"><span>📍</span> Punto de Acceso</h3>
-
-          <div class="lugar-hero">
-            <div class="lugar-icon-big">{{ getTipoIcon(acceso.punto_tipo) }}</div>
-            <div>
-              <p class="lugar-nombre">{{ acceso.punto_nombre }}</p>
-              <p class="lugar-tipo">{{ acceso.punto_tipo | titlecase }}</p>
-            </div>
+        <!-- HERO -->
+        <div class="resultado-hero" [ngClass]="acceso.exitoso ? 'exitoso' : 'denegado'">
+          <div class="hero-orb"></div>
+          <div class="hero-orb hero-orb--2"></div>
+          <div class="hero-info">
+            <h1 class="hero-titulo">{{ acceso.exitoso ? 'Acceso Exitoso' : 'Acceso Denegado' }}</h1>
+            <p class="hero-subtitulo">{{ acceso.punto_nombre }} · {{ acceso.institucion_nombre }}</p>
           </div>
-
-          <div class="info-lista">
-            <div class="info-row">
-              <span class="info-key">Institución</span>
-              <span class="info-val">{{ acceso.institucion_nombre }}</span>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="hero-stat-val">{{ formatHora(acceso.creado_en) }}</span>
+              <span class="hero-stat-lbl">Hora</span>
             </div>
-            <div class="info-row">
-              <span class="info-key">Ubicación</span>
-              <span class="info-val">{{ acceso.ciudad }}, {{ acceso.estado }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-key">Tipo de espacio</span>
-              <span class="info-val" style="text-transform:capitalize">{{ acceso.punto_tipo }}</span>
+            <div class="hero-divider"></div>
+            <div class="hero-stat">
+              <span class="hero-stat-val">{{ formatDia(acceso.creado_en) }}</span>
+              <span class="hero-stat-lbl">Día</span>
             </div>
           </div>
         </div>
 
-        <!-- CARD EVENTO -->
-        <div class="card evento-card">
-          <div class="card-accent card-accent--event"></div>
-          <h3 class="card-title"><span>🕐</span> Detalles del Evento</h3>
+        <!-- CARDS GRID -->
+        <div class="detalle-grid">
 
-          <div class="timeline">
-            <div class="tl-item">
-              <div class="tl-dot tl-dot--date"></div>
-              <div class="tl-body">
-                <span class="tl-lbl">Fecha</span>
-                <span class="tl-val">{{ formatFechaLarga(acceso.creado_en) }}</span>
+          <!-- CARD LUGAR -->
+          <div class="card lugar-card">
+            <div class="card-accent"></div>
+            <h3 class="card-title"><span>📍</span> Punto de Acceso</h3>
+
+            <div class="lugar-hero">
+              <div class="lugar-icon-big">{{ getTipoIcon(acceso.punto_tipo) }}</div>
+              <div>
+                <p class="lugar-nombre">{{ acceso.punto_nombre }}</p>
+                <p class="lugar-tipo">{{ acceso.punto_tipo | titlecase }}</p>
               </div>
             </div>
-            <div class="tl-item">
-              <div class="tl-dot tl-dot--time"></div>
-              <div class="tl-body">
-                <span class="tl-lbl">Hora exacta</span>
-                <span class="tl-val mono">{{ formatHoraExacta(acceso.creado_en) }}</span>
+
+            <div class="info-lista">
+              <div class="info-row">
+                <span class="info-key">Institución</span>
+                <span class="info-val">{{ acceso.institucion_nombre }}</span>
               </div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-dot" [ngClass]="acceso.exitoso ? 'tl-dot--ok' : 'tl-dot--err'"></div>
-              <div class="tl-body">
-                <span class="tl-lbl">Resultado</span>
-                <span class="resultado-inline" [ngClass]="acceso.exitoso ? 'ok' : 'err'">
-                  {{ acceso.exitoso ? 'Acceso permitido' : ' Acceso denegado' }}
-                </span>
+              <div class="info-row">
+                <span class="info-key">Ubicación</span>
+                <span class="info-val">{{ acceso.ciudad }}, {{ acceso.estado }}</span>
               </div>
-            </div>
-            <div class="tl-item" *ngIf="!acceso.exitoso && acceso.motivo_denegacion">
-              <div class="tl-dot tl-dot--warn"></div>
-              <div class="tl-body">
-                <span class="tl-lbl">Motivo</span>
-                <span class="tl-val motivo">{{ acceso.motivo_denegacion }}</span>
+              <div class="info-row">
+                <span class="info-key">Tipo de espacio</span>
+                <span class="info-val" style="text-transform:capitalize">{{ acceso.punto_tipo }}</span>
               </div>
             </div>
           </div>
+
+          <!-- CARD EVENTO -->
+          <div class="card evento-card">
+            <div class="card-accent card-accent--event"></div>
+            <h3 class="card-title"><span>🕐</span> Detalles del Evento</h3>
+
+            <div class="timeline">
+              <div class="tl-item">
+                <div class="tl-dot tl-dot--date"></div>
+                <div class="tl-body">
+                  <span class="tl-lbl">Fecha</span>
+                  <span class="tl-val">{{ formatFechaLarga(acceso.creado_en) }}</span>
+                </div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot tl-dot--time"></div>
+                <div class="tl-body">
+                  <span class="tl-lbl">Hora exacta</span>
+                  <span class="tl-val mono">{{ formatHoraExacta(acceso.creado_en) }}</span>
+                </div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot" [ngClass]="acceso.exitoso ? 'tl-dot--ok' : 'tl-dot--err'"></div>
+                <div class="tl-body">
+                  <span class="tl-lbl">Resultado</span>
+                  <span class="resultado-inline" [ngClass]="acceso.exitoso ? 'ok' : 'err'">
+                    {{ acceso.exitoso ? 'Acceso permitido' : ' Acceso denegado' }}
+                  </span>
+                </div>
+              </div>
+              <div class="tl-item" *ngIf="!acceso.exitoso && acceso.motivo_denegacion">
+                <div class="tl-dot tl-dot--warn"></div>
+                <div class="tl-body">
+                  <span class="tl-lbl">Motivo</span>
+                  <span class="tl-val motivo">{{ acceso.motivo_denegacion }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
+      </ng-container>
+
+      <!-- NOT FOUND -->
+      <div class="empty-state" *ngIf="!cargando && !acceso">
+        <div class="empty-icon">🔍</div>
+        <p>No se encontró el registro de acceso.</p>
+        <button class="btn-volver" (click)="volver()">Volver al historial</button>
       </div>
 
-    </ng-container>
-
-    <!-- NOT FOUND -->
-    <div class="empty-state" *ngIf="!cargando && !acceso">
-      <div class="empty-icon">🔍</div>
-      <p>No se encontró el registro de acceso.</p>
-      <button class="btn-volver" (click)="volver()">Volver al historial</button>
     </div>
+    <!-- fin detalle-acceso-scroll-wrapper -->
 
   </div>
 </div>
