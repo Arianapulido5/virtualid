@@ -43,18 +43,14 @@ export class Registro {
   codigo_postal    = '';
   fecha_nacimiento = '';
 
-  // IDs internos para navegar la API de nitrostudio
-  private _estadoId    = '';   // c_estado  ej: "30"
-  private _municipioId = '';   // c_mnpio   ej: "087"
+  private _estadoId    = '';
+  private _municipioId = '';
 
-  // Listas para los selects
-  ciudadesDelEstado:    string[]                          = [];
-  municipiosDelCiudad:  string[]                          = [];
-  coloniasDelMunicipio: string[]                          = [];
+  ciudadesDelEstado:    string[] = [];
+  municipiosDelCiudad:  string[] = [];
+  coloniasDelMunicipio: string[] = [];
 
-  // Mapa ciudad → lista de municipios (obtenido al cargar el estado)
   private _mapaCiudadMunicipios: Map<string, { id: string; nombre: string }[]> = new Map();
-  // Mapa municipioId → lista de colonias (se carga bajo demanda)
   private _mapaColonias: Map<string, string[]> = new Map();
 
   errorGeneral = '';
@@ -68,7 +64,6 @@ export class Registro {
     'Tabasco','Tamaulipas','Tlaxcala','Veracruz','Yucatán','Zacatecas'
   ];
 
-  // Mapa nombre normalizado → c_estado en la API de nitrostudio
   private readonly estadoIdMap: Record<string, string> = {
     'aguascalientes':     '01', 'baja california':     '02',
     'baja california sur':'03', 'campeche':            '04',
@@ -241,6 +236,8 @@ export class Registro {
   }
 
   // ── Código Postal ─────────────────────────────────────────────────────────
+  // CORRECCIÓN: solo valida el formato sin limpiar ni relanzar la búsqueda.
+  // La búsqueda real solo ocurre cuando el usuario escribe en el input.
 
   validarCodigoPostal() {
     const v = this.codigo_postal.replace(/\D/g, '').slice(0, 5);
@@ -261,9 +258,19 @@ export class Registro {
     }
   }
 
+  // Solo valida el formato — NO limpia ni busca. Usado en formularioValido().
+  private validarCodigoPostalSoloFormato(): boolean {
+    const v = this.codigo_postal;
+    if (v && v.length !== 5) {
+      this.errores.codigo_postal = 'Debe tener exactamente 5 dígitos.';
+      return false;
+    }
+    this.errores.codigo_postal = undefined;
+    return true;
+  }
+
   private async _buscarCP(cp: string) {
     try {
-      // PASO 1 — Obtener info del CP (estado, municipio, colonias)
       const urlCP = `${SEPOMEX_BASE}/cp/${cp}.json`;
       const resCP = await fetch(urlCP, { headers: { Accept: 'application/json' } });
       if (!resCP.ok) throw new Error(`CP no encontrado (${resCP.status})`);
@@ -279,47 +286,28 @@ export class Registro {
       const estadoNorm = this.normalizarEstado(estadoRaw);
       const estadoId   = primero.c_estado ?? this.estadoToId(estadoNorm);
 
-      // Colonias del CP (para preseleccionar más adelante)
-      const coloniasCP = postcodes
-        .map((p: any) => (p.d_asenta ?? '').trim())
-        .filter(Boolean);
-
-      // Municipio del CP
+      const coloniasCP        = postcodes.map((p: any) => (p.d_asenta ?? '').trim()).filter(Boolean);
       const municipioNombreCP = (primero.d_mnpio ?? '').trim();
       const municipioIdCP     = (primero.c_mnpio  ?? '').trim();
 
-      // PASO 2 — Cargar todos los municipios del estado
       const urlEstado = `${SEPOMEX_BASE}/estado/${estadoId}.json`;
       const resEstado = await fetch(urlEstado, { headers: { Accept: 'application/json' } });
       if (!resEstado.ok) throw new Error(`Estado no encontrado (${resEstado.status})`);
 
-      const jsonEstado  = await resEstado.json();
-      const municipios: any[] = jsonEstado?.data?.municipios ?? [];
-      console.log('[Estado] Municipios:', municipios.length);
-
-      // Construir mapa ciudad → municipios
-      // En SEPOMEX la "ciudad" (d_ciudad) agrupa varios municipios.
-      // Usaremos los postcodes del estado para hacer el mapa ciudad→municipios.
+      const jsonEstado         = await resEstado.json();
+      const municipios: any[]  = jsonEstado?.data?.municipios ?? [];
       const postcodesEstado: any[] = jsonEstado?.data?.postcodes ?? [];
+
       this._construirMapaCiudadMunicipios(postcodesEstado, municipios);
 
-      // Ciudades únicas ordenadas del estado
       const ciudadesSet = new Set<string>();
-      postcodesEstado.forEach((p: any) => {
-        const c = (p.d_ciudad ?? '').trim();
-        if (c) ciudadesSet.add(c);
-      });
-      // Agregar municipios como ciudades si d_ciudad está vacío
-      municipios.forEach((m: any) => {
-        if (!ciudadesSet.has(m.d_mnpio)) ciudadesSet.add(m.d_mnpio);
-      });
+      postcodesEstado.forEach((p: any) => { const c = (p.d_ciudad ?? '').trim(); if (c) ciudadesSet.add(c); });
+      municipios.forEach((m: any) => { if (!ciudadesSet.has(m.d_mnpio)) ciudadesSet.add(m.d_mnpio); });
       this.ciudadesDelEstado = [...ciudadesSet].sort();
 
-      // PASO 3 — Asignar estado y detectar ciudad del CP
       this._estadoId = estadoId;
       this.estado    = estadoNorm;
 
-      // Ciudad del CP: buscar en postcodesEstado la ciudad que contiene el municipio del CP
       let ciudadCP = '';
       for (const p of postcodesEstado) {
         if ((p.c_mnpio ?? '') === municipioIdCP && (p.d_ciudad ?? '').trim()) {
@@ -327,17 +315,14 @@ export class Registro {
           break;
         }
       }
-      // Fallback: si no hay d_ciudad, usar el nombre del municipio
       if (!ciudadCP) ciudadCP = municipioNombreCP;
 
       this.ciudad = ciudadCP;
 
-      // PASO 4 — Municipios de esa ciudad
       this._actualizarMunicipios(ciudadCP, municipioNombreCP);
-      this.municipio   = municipioNombreCP;
+      this.municipio    = municipioNombreCP;
       this._municipioId = municipioIdCP;
 
-      // PASO 5 — Colonias del municipio del CP (ya las tenemos del paso 1)
       this._mapaColonias.set(municipioIdCP, coloniasCP.sort());
       this.coloniasDelMunicipio = [...new Set(coloniasCP)].sort();
       this.colonia = this.coloniasDelMunicipio[0] ?? '';
@@ -366,9 +351,7 @@ export class Registro {
     this._actualizarMunicipios(this.ciudad, '');
     this.municipio = this.municipiosDelCiudad[0] ?? '';
 
-    if (this.municipio) {
-      await this._cargarColonias(this.municipio);
-    }
+    if (this.municipio) await this._cargarColonias(this.municipio);
     this.cdr.detectChanges();
   }
 
@@ -379,50 +362,31 @@ export class Registro {
     this.cdr.detectChanges();
   }
 
-  private _construirMapaCiudadMunicipios(
-    postcodes: any[],
-    municipios: any[]
-  ) {
+  private _construirMapaCiudadMunicipios(postcodes: any[], municipios: any[]) {
     this._mapaCiudadMunicipios.clear();
-
-    // Mapa c_mnpio → d_mnpio
     const idToNombre = new Map<string, string>();
     municipios.forEach(m => idToNombre.set(m.c_mnpio, m.d_mnpio));
 
-    // Recorrer postcodesEstado para enlazar ciudad → municipios
     postcodes.forEach((p: any) => {
-      const ciudad   = (p.d_ciudad ?? '').trim();
-      const cMnpio   = (p.c_mnpio  ?? '').trim();
-      const dMnpio   = (idToNombre.get(cMnpio) ?? p.d_mnpio ?? '').trim();
+      const ciudad = (p.d_ciudad ?? '').trim();
+      const cMnpio = (p.c_mnpio  ?? '').trim();
+      const dMnpio = (idToNombre.get(cMnpio) ?? p.d_mnpio ?? '').trim();
       if (!ciudad || !dMnpio) return;
-
-      if (!this._mapaCiudadMunicipios.has(ciudad)) {
-        this._mapaCiudadMunicipios.set(ciudad, []);
-      }
+      if (!this._mapaCiudadMunicipios.has(ciudad)) this._mapaCiudadMunicipios.set(ciudad, []);
       const lista = this._mapaCiudadMunicipios.get(ciudad)!;
-      if (!lista.find(x => x.id === cMnpio)) {
-        lista.push({ id: cMnpio, nombre: dMnpio });
-      }
+      if (!lista.find(x => x.id === cMnpio)) lista.push({ id: cMnpio, nombre: dMnpio });
     });
 
-    // Municipios sin ciudad: mapeados a sí mismos como ciudad
     municipios.forEach(m => {
-      const nombre = m.d_mnpio;
-      if (!this._mapaCiudadMunicipios.has(nombre)) {
-        this._mapaCiudadMunicipios.set(nombre, [{ id: m.c_mnpio, nombre }]);
-      }
+      if (!this._mapaCiudadMunicipios.has(m.d_mnpio))
+        this._mapaCiudadMunicipios.set(m.d_mnpio, [{ id: m.c_mnpio, nombre: m.d_mnpio }]);
     });
   }
 
   private _actualizarMunicipios(ciudad: string, preseleccionar: string) {
     const lista = this._mapaCiudadMunicipios.get(ciudad) ?? [];
     this.municipiosDelCiudad = lista.map(x => x.nombre).sort();
-
-    // Si no hay municipios en el mapa para esa ciudad, al menos mostrar la ciudad misma
-    if (this.municipiosDelCiudad.length === 0 && ciudad) {
-      this.municipiosDelCiudad = [ciudad];
-    }
-
+    if (this.municipiosDelCiudad.length === 0 && ciudad) this.municipiosDelCiudad = [ciudad];
     if (preseleccionar && this.municipiosDelCiudad.includes(preseleccionar)) {
       this.municipio = preseleccionar;
     } else {
@@ -431,28 +395,21 @@ export class Registro {
   }
 
   private async _cargarColonias(municipioNombre: string) {
-    // Buscar el ID del municipio en el mapa
     let municipioId = '';
     for (const [, lista] of this._mapaCiudadMunicipios) {
       const found = lista.find(x => x.nombre === municipioNombre);
       if (found) { municipioId = found.id; break; }
     }
-
-    if (!municipioId) {
-      this.coloniasDelMunicipio = [];
-      return;
-    }
+    if (!municipioId) { this.coloniasDelMunicipio = []; return; }
 
     this._municipioId = municipioId;
 
-    // Si ya están en caché, usar directamente
     if (this._mapaColonias.has(municipioId)) {
       this.coloniasDelMunicipio = this._mapaColonias.get(municipioId)!;
       this.colonia = this.coloniasDelMunicipio[0] ?? '';
       return;
     }
 
-    // Cargar desde la API
     try {
       this.cargandoCP = true;
       this.cdr.detectChanges();
@@ -461,12 +418,9 @@ export class Registro {
       const res = await fetch(url, { headers: { Accept: 'application/json' } });
       if (!res.ok) throw new Error(`Municipio error ${res.status}`);
 
-      const json      = await res.json();
+      const json     = await res.json();
       const posts: any[] = json?.data?.postcodes ?? [];
-
-      const colonias = [...new Set<string>(
-        posts.map((p: any) => (p.d_asenta ?? '').trim()).filter(Boolean)
-      )].sort();
+      const colonias = [...new Set<string>(posts.map((p: any) => (p.d_asenta ?? '').trim()).filter(Boolean))].sort();
 
       this._mapaColonias.set(municipioId, colonias);
       this.coloniasDelMunicipio = colonias;
@@ -497,6 +451,8 @@ export class Registro {
 
   // ── Envío ─────────────────────────────────────────────────────────────────
 
+  // CORRECCIÓN CLAVE: validarCodigoPostal() fue reemplazada por
+  // validarCodigoPostalSoloFormato() para no limpiar los datos geo al hacer submit.
   private formularioValido(): boolean {
     this.validarNombre();
     this.validarApellidoPaterno();
@@ -508,7 +464,7 @@ export class Registro {
     this.validarConfirmar();
     this.validarTerminos();
     this.validarTelefono();
-    this.validarCodigoPostal();
+    this.validarCodigoPostalSoloFormato(); // ← ya no limpia ni relanza búsqueda
     this.validarFechaNacimiento();
     return Object.values(this.errores).every(v => v === undefined);
   }
@@ -536,6 +492,8 @@ export class Registro {
     if (this.colonia)          datos.colonia          = this.colonia;
     if (this.codigo_postal)    datos.codigo_postal    = this.codigo_postal;
     if (this.fecha_nacimiento) datos.fecha_nacimiento = this.fecha_nacimiento;
+
+    console.log('[registro] datos enviados:', JSON.stringify(datos));
 
     this.authService.registro(datos).subscribe({
       next: () => {
