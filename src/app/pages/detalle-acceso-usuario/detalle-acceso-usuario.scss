@@ -117,10 +117,8 @@
 
   &.exitoso {
     background: linear-gradient(135deg, #1a4a2e, var(--success) 40%, #2e6b3e);
-    box-shadow: 0 10px 40px rgba(46,125,50,0.32);
   }
   &.denegado {
-    background: linear-gradient(135deg, #6a1020, var(--red) 40%, #8a2535);
     box-shadow: 0 10px 40px rgba(169,56,69,0.32);
   }
 }
@@ -186,6 +184,8 @@
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   align-items: start;
+  margin-top: 20px; 
+
 }
 
 // ─── CARDS ────────────────────────────────────────────────────────────────────
