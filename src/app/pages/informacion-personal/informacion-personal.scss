@@ -480,6 +480,25 @@ $success:      #1e7e45;
     max-height: calc(100vh - 140px);
   }
 }
+// ── CP loader inline ──────────────────────────────────────────────────────
+.input-wrapper-cp {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .form-input { padding-right: 38px; }
+}
+
+.loader-cp {
+  position: absolute;
+  right: 12px;
+  width: 16px; height: 16px;
+  border: 2.5px solid #ccc;
+  border-top-color: $purple-dark;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
 
 // ─────────────────────────────────────────────
 //  RESPONSIVE

@@ -154,14 +154,6 @@ $success:      #1a7a4a;
     pointer-events: none;
   }
 
-  &:hover {
-    background-color: #fafafa;
-    padding-left: 24px;
-    border-left-color: rgba(77,15,96,0.3);
-    color: $purple-dark;
-    &::before { transform: translateX(0); }
-    .item-arrow { animation: arrowPulse 0.6s ease infinite; }
-  }
 }
 
 .item-arrow {

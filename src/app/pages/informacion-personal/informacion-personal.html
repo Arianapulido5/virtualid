@@ -10,21 +10,21 @@
     </div>
   </div>
 
-    <!-- Título -->
-    <h1 class="page-title">Información Personal</h1>
+  <!-- Título -->
+  <h1 class="page-title">Información Personal</h1>
 
-    <!-- Loader -->
-    <div class="loader-wrap" *ngIf="cargando">
-      <span class="loader"></span>
-      <p>Cargando datos…</p>
-    </div>
+  <!-- Loader -->
+  <div class="loader-wrap" *ngIf="cargando">
+    <span class="loader"></span>
+    <p>Cargando datos…</p>
+  </div>
 
-    <!-- Alerta error -->
-    <div class="alert alert-error" *ngIf="errorApi">{{ errorApi }}</div>
+  <!-- Alerta error -->
+  <div class="alert alert-error" *ngIf="errorApi">{{ errorApi }}</div>
 
-    <!-- SCROLL WRAPPER -->
+  <!-- SCROLL WRAPPER -->
   <div class="info-scroll-wrapper">
-    
+
     <!-- Formulario -->
     <form [formGroup]="form" (ngSubmit)="guardar()" novalidate *ngIf="!cargando">
       <div class="form-grid">
@@ -76,38 +76,62 @@
           <span class="error-msg" *ngIf="mostrarError('fecha_nacimiento')">{{ mensajeError('fecha_nacimiento') }}</span>
         </div>
 
-        <!-- Dirección -->
-        <div class="form-group full-width" [class.has-error]="mostrarError('direccion')">
-          <label class="form-label">Dirección</label>
-          <input class="form-input" type="text" formControlName="direccion"
-                 placeholder="Calle, número, colonia" autocomplete="street-address">
-          <span class="error-msg" *ngIf="mostrarError('direccion')">{{ mensajeError('direccion') }}</span>
-        </div>
-
-        <!-- Ciudad -->
-        <div class="form-group" [class.has-error]="mostrarError('ciudad')">
-          <label class="form-label">Ciudad</label>
-          <input class="form-input" type="text" formControlName="ciudad"
-                 placeholder="Ej. Guadalajara" autocomplete="address-level2">
-          <span class="error-msg" *ngIf="mostrarError('ciudad')">{{ mensajeError('ciudad') }}</span>
+        <!-- Código Postal -->
+        <div class="form-group" [class.has-error]="mostrarError('codigo_postal')">
+          <label class="form-label">Código Postal</label>
+          <div class="input-wrapper-cp">
+            <input class="form-input" type="text" formControlName="codigo_postal"
+                   placeholder="5 dígitos" maxlength="5" autocomplete="postal-code"
+                   (input)="onCodigoPostalInput($event)">
+            <span class="loader-cp" *ngIf="cargandoCP"></span>
+          </div>
+          <span class="error-msg" *ngIf="mostrarError('codigo_postal')">{{ mensajeError('codigo_postal') }}</span>
         </div>
 
         <!-- Estado -->
         <div class="form-group" [class.has-error]="mostrarError('estado')">
           <label class="form-label">Estado</label>
           <select class="form-input" formControlName="estado">
-            <option value="">— Selecciona un estado —</option>
+            <option value="">Selecciona un estado</option>
             <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
           </select>
           <span class="error-msg" *ngIf="mostrarError('estado')">{{ mensajeError('estado') }}</span>
         </div>
 
-        <!-- Código Postal -->
-        <div class="form-group" [class.has-error]="mostrarError('codigo_postal')">
-          <label class="form-label">Código Postal</label>
-          <input class="form-input" type="text" formControlName="codigo_postal"
-                 placeholder="5 dígitos" maxlength="5" autocomplete="postal-code">
-          <span class="error-msg" *ngIf="mostrarError('codigo_postal')">{{ mensajeError('codigo_postal') }}</span>
+        <!-- Ciudad -->
+        <div class="form-group" [class.has-error]="mostrarError('ciudad')">
+          <label class="form-label">Ciudad</label>
+          <select class="form-input" formControlName="ciudad" (change)="onCiudadChange()">
+            <option value="">{{ cargandoCP ? 'Cargando…' : 'Selecciona' }}</option>
+            <option *ngFor="let c of ciudadesDelEstado" [value]="c">{{ c }}</option>
+          </select>
+          <span class="error-msg" *ngIf="mostrarError('ciudad')">{{ mensajeError('ciudad') }}</span>
+        </div>
+
+        <!-- Municipio -->
+        <div class="form-group">
+          <label class="form-label">Municipio</label>
+          <select class="form-input" formControlName="municipio" (change)="onMunicipioChange()">
+            <option value="">{{ cargandoCP ? 'Cargando…' : 'Selecciona' }}</option>
+            <option *ngFor="let m of municipiosDelCiudad" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+
+        <!-- Colonia -->
+        <div class="form-group">
+          <label class="form-label">Colonia</label>
+          <select class="form-input" formControlName="colonia">
+            <option value="">{{ cargandoCP ? 'Cargando…' : 'Selecciona' }}</option>
+            <option *ngFor="let c of coloniasDelMunicipio" [value]="c">{{ c }}</option>
+          </select>
+        </div>
+
+        <!-- Dirección -->
+        <div class="form-group full-width" [class.has-error]="mostrarError('direccion')">
+          <label class="form-label">Dirección</label>
+          <input class="form-input" type="text" formControlName="direccion"
+                 placeholder="Calle, número" autocomplete="street-address">
+          <span class="error-msg" *ngIf="mostrarError('direccion')">{{ mensajeError('direccion') }}</span>
         </div>
 
       </div>
