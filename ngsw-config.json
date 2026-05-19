@@ -27,26 +27,23 @@
       }
     }
   ],
-  "dataGroups": [
-    {
-      "name": "api-auth",
-      "urls": ["/api/auth/**", "/api/informacion/**"],
-      "cacheConfig": {
-        "strategy": "freshness",
-        "maxSize": 100,
-        "maxAge": "3d",
-        "timeout": "10s"
-      }
-    },
-    {
-      "name": "api-data",
-      "urls": ["/api/credenciales/**", "/api/historial/**"],
-      "cacheConfig": {
-        "strategy": "performance",
-        "maxSize": 100,
-        "maxAge": "1h"
-      }
-    }
-  ],
+"dataGroups": [
+  {
+    "name": "api-auth",
+    "urls": [
+      "https://virtualid-api-production.up.railway.app/api/auth/**",
+      "https://virtualid-api-production.up.railway.app/api/informacion/**"
+    ],
+    "cacheConfig": { "strategy": "freshness", "maxSize": 100, "maxAge": "3d", "timeout": "10s" }
+  },
+  {
+    "name": "api-data",
+    "urls": [
+      "https://virtualid-api-production.up.railway.app/api/credenciales/**",
+      "https://virtualid-api-production.up.railway.app/api/historial/**"
+    ],
+    "cacheConfig": { "strategy": "performance", "maxSize": 100, "maxAge": "1h" }
+  }
+],
   "navigationUrls": []
 }

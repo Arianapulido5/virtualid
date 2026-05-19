@@ -17,20 +17,19 @@ export class App {
   private router       = inject(Router);
   private sidebarState = inject(SidebarState);
 
-  showSidebar     = false;
-  isAdmin         = false;
-  menuOpen        = false;
-  isDarkHamburger = false;
+  showSidebar      = false;
+  isAdmin          = false;
+  menuOpen         = false;
+  isDarkHamburger  = false;
 
   private sinSidebar = [
     '/login', '/registro', '/biometrica',
     '/olvide-contrasena', '/registro-institucion', '/acceso'
   ];
 
+  // Rutas con fondo claro → hamburguesa negra
   private fondoClaro = [
-    '/tarjetas', '/historial', '/mensajes', '/configuracion', '/credencial',
-    '/detalle-acceso', '/informacion-personal', '/cambiar', '/ubicacion',
-    '/soporte', '/agregar-credencial'
+    '/tarjetas', '/historial', '/mensajes', '/configuracion', '/credencial', '/detalle-acceso', '/informacion-personal', '/cambiar', '/ubicacion', '/soporte', '/agregar-credencial'
   ];
 
   constructor() {
@@ -38,20 +37,13 @@ export class App {
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe((e: any) => {
         const url: string = e.urlAfterRedirects;
-        this.isAdmin         = url.startsWith('/admin');
-        this.showSidebar     = !this.sinSidebar.some(r => url.startsWith(r));
-        this.isDarkHamburger = this.fondoClaro.some(r => url.startsWith(r));
+        this.isAdmin            = url.startsWith('/admin');
+        this.showSidebar        = !this.sinSidebar.some(r => url.startsWith(r));
+        this.isDarkHamburger    = this.fondoClaro.some(r => url.startsWith(r));
         this.sidebarState.close();
       });
 
     this.sidebarState.isOpen$.subscribe((v: boolean) => this.menuOpen = v);
-
-    // Registrar service worker para notificaciones push
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw-push.js').catch(err => {
-        console.error('Error registrando SW:', err);
-      });
-    }
   }
 
   toggleMenu() { this.sidebarState.toggle(); }
