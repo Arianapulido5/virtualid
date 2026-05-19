@@ -642,11 +642,9 @@ $warning:      #e65100;
 @media (max-width: 480px) {
   .gestion-container {
     padding: 0 22px 22px;
-    padding-top: calc(env(safe-area-inset-top, 0px) + 21px);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 19px);
   }
   
-
-
   .gestion-header {
     flex-direction: column;
     align-items: stretch;
@@ -656,7 +654,7 @@ $warning:      #e65100;
     gap: 20px;
   }
 
-  .page-title { font-size: 20px; }
+  .page-title { font-size: 22px; }
   .page-subtitle { display: none; }
 
   .add-credential-btn {

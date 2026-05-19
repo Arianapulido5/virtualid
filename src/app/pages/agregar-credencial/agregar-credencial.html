@@ -35,198 +35,203 @@
   <h1 class="page-title">Nueva Credencial</h1>
   <p class="page-subtitle">Completa los datos para registrar tu credencial digital</p>
 
-  <!-- CARGANDO -->
-  <div class="punto-loading" *ngIf="cargandoInstituciones">
-    <span class="spinner"></span> Verificando tu institución…
-  </div>
+  <!-- ══ SCROLL WRAPPER ══ -->
+  <div class="agregar-scroll-wrapper">
 
-  <!-- ✅ Sin institución — el dominio del correo no está registrado -->
-  <div class="sin-institucion" *ngIf="!cargandoInstituciones && instituciones.length === 0">
-    <div class="sin-inst-icon">🏫</div>
-    <h3>Sin institución asociada</h3>
-    <p>
-      Tu correo <strong>{{ correoRegistrado }}</strong> no coincide con el dominio
-      de ninguna institución registrada en el sistema.
-    </p>
-    <p>
-      Para solicitar credenciales, tu institución debe estar registrada y tu correo
-      debe usar el dominio institucional (ej: <code>usuario@edu.uc.mx</code>).
-    </p>
-    <button class="btn-cancelar" style="margin-top:8px" routerLink="/tarjetas">
-      Regresar a mis tarjetas
-    </button>
-  </div>
+    <!-- CARGANDO -->
+    <div class="punto-loading" *ngIf="cargandoInstituciones">
+      <span class="spinner"></span> Verificando tu institución…
+    </div>
 
-  <!-- FORMULARIO — solo si tiene institución -->
-  <ng-container *ngIf="!cargandoInstituciones && instituciones.length > 0">
+    <!-- Sin institución -->
+    <div class="sin-institucion" *ngIf="!cargandoInstituciones && instituciones.length === 0">
+      <div class="sin-inst-icon">🏫</div>
+      <h3>Sin institución asociada</h3>
+      <p>
+        Tu correo <strong>{{ correoRegistrado }}</strong> no coincide con el dominio
+        de ninguna institución registrada en el sistema.
+      </p>
+      <p>
+        Para solicitar credenciales, tu institución debe estar registrada y tu correo
+        debe usar el dominio institucional (ej: <code>usuario@edu.uc.mx</code>).
+      </p>
+      <button class="btn-cancelar" style="margin-top:8px" routerLink="/tarjetas">
+        Regresar a mis tarjetas
+      </button>
+    </div>
 
-    <div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+    <!-- FORMULARIO — solo si tiene institución -->
+    <ng-container *ngIf="!cargandoInstituciones && instituciones.length > 0">
 
-    <div class="form-layout">
+      <div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
 
-      <!-- ══ COLUMNA IZQUIERDA ══ -->
-      <div class="form-left">
+      <div class="form-layout">
 
-        <!-- Institución — auto-seleccionada y deshabilitada -->
-        <div class="form-group">
-          <label class="form-label">Institución</label>
-          <select class="form-select" [disabled]="true" [value]="institucionId">
-            <option *ngFor="let inst of instituciones" [value]="inst.id">{{ inst.nombre }}</option>
-          </select>
-          <div class="inst-chip" *ngIf="institucionSeleccionada">
-            <span class="inst-chip-label">{{ institucionSeleccionada.tipo }}</span>
-            <span class="inst-chip-loc">
-              📍 {{ institucionSeleccionada.ciudad }}, {{ institucionSeleccionada.estado }}
-            </span>
+        <!-- ══ COLUMNA IZQUIERDA ══ -->
+        <div class="form-left">
+
+          <!-- Institución — auto-seleccionada y deshabilitada -->
+          <div class="form-group">
+            <label class="form-label">Institución</label>
+            <select class="form-select" [disabled]="true" [value]="institucionId">
+              <option *ngFor="let inst of instituciones" [value]="inst.id">{{ inst.nombre }}</option>
+            </select>
+            <div class="inst-chip" *ngIf="institucionSeleccionada">
+              <span class="inst-chip-label">{{ institucionSeleccionada.tipo }}</span>
+              <span class="inst-chip-loc">
+                📍 {{ institucionSeleccionada.ciudad }}, {{ institucionSeleccionada.estado }}
+              </span>
+            </div>
           </div>
-        </div>
 
-        <!-- Tipo de usuario -->
-        <div class="form-group">
-          <label class="form-label">Tipo de usuario *</label>
-          <div class="radio-group">
-            <label class="radio-option" (click)="onTipoChange('estudiante')">
-              <span class="radio-circle" [class.checked]="tipoUsuario === 'estudiante'"></span>
-              <span>Estudiante</span>
+          <!-- Tipo de usuario -->
+          <div class="form-group">
+            <label class="form-label">Tipo de usuario</label>
+            <div class="radio-group">
+              <label class="radio-option" (click)="onTipoChange('estudiante')">
+                <span class="radio-circle" [class.checked]="tipoUsuario === 'estudiante'"></span>
+                <span>Estudiante</span>
+              </label>
+              <label class="radio-option" (click)="onTipoChange('empleado')">
+                <span class="radio-circle" [class.checked]="tipoUsuario === 'empleado'"></span>
+                <span>Empleado</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Puntos de acceso -->
+          <div class="form-group">
+            <label class="form-label">
+              Punto de acceso
+              <span class="label-hint" *ngIf="tipoElegido">
+                — solo para {{ tipoUsuario === 'estudiante' ? 'estudiantes' : 'empleados' }}
+              </span>
             </label>
-            <label class="radio-option" (click)="onTipoChange('empleado')">
-              <span class="radio-circle" [class.checked]="tipoUsuario === 'empleado'"></span>
-              <span>Empleado</span>
-            </label>
-          </div>
-        </div>
 
-        <!-- Puntos de acceso -->
-        <div class="form-group">
-          <label class="form-label">
-            Punto de acceso *
-            <span class="label-hint" *ngIf="tipoElegido">
-              — solo para {{ tipoUsuario === 'estudiante' ? 'estudiantes' : 'empleados' }}
-            </span>
-          </label>
+            <div class="punto-empty" *ngIf="!tipoElegido">
+              Selecciona primero si eres estudiante o empleado.
+            </div>
+            <div class="punto-loading" *ngIf="tipoElegido && cargandoPuntos">
+              <span class="spinner"></span> Cargando puntos disponibles…
+            </div>
+            <div class="punto-empty"
+                 *ngIf="tipoElegido && !cargandoPuntos && puntos.length === 0">
+              No hay puntos habilitados para
+              <strong>{{ tipoUsuario === 'estudiante' ? 'estudiantes' : 'empleados' }}</strong>
+              en esta institución.
+            </div>
 
-          <div class="punto-empty" *ngIf="!tipoElegido">
-            Selecciona primero si eres estudiante o empleado.
-          </div>
-          <div class="punto-loading" *ngIf="tipoElegido && cargandoPuntos">
-            <span class="spinner"></span> Cargando puntos disponibles…
-          </div>
-          <div class="punto-empty"
-               *ngIf="tipoElegido && !cargandoPuntos && puntos.length === 0">
-            No hay puntos habilitados para
-            <strong>{{ tipoUsuario === 'estudiante' ? 'estudiantes' : 'empleados' }}</strong>
-            en esta institución.
-          </div>
-
-          <div class="puntos-grid" *ngIf="tipoElegido && !cargandoPuntos && puntos.length > 0">
-            <div class="punto-option"
-                 *ngFor="let p of puntos"
-                 [class.selected]="puntoAccesoId === p.id"
-                 (click)="seleccionarPunto(p.id)">
-              <span class="punto-icon">{{ getTipoIcon(p.tipo) }}</span>
-              <div class="punto-info">
-                <span class="punto-nombre">{{ p.nombre }}</span>
-                <span class="punto-desc">{{ p.descripcion || p.tipo }}</span>
-                <span class="punto-nivel nivel-{{ p.nivel_acceso }}">{{ p.nivel_acceso }}</span>
+            <div class="puntos-grid" *ngIf="tipoElegido && !cargandoPuntos && puntos.length > 0">
+              <div class="punto-option"
+                   *ngFor="let p of puntos"
+                   [class.selected]="puntoAccesoId === p.id"
+                   (click)="seleccionarPunto(p.id)">
+                <span class="punto-icon">{{ getTipoIcon(p.tipo) }}</span>
+                <div class="punto-info">
+                  <span class="punto-nombre">{{ p.nombre }}</span>
+                  <span class="punto-desc">{{ p.descripcion || p.tipo }}</span>
+                  <span class="punto-nivel nivel-{{ p.nivel_acceso }}">{{ p.nivel_acceso }}</span>
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- Número de ID -->
+          <div class="form-group">
+            <label class="form-label">Número de identificación</label>
+            <input class="form-input"
+                   [class.input-error]="errNumeroId"
+                   [class.input-ok]="!errNumeroId && numeroId"
+                   type="text"
+                   placeholder="Tu número de empleado / matrícula"
+                   [(ngModel)]="numeroId"
+                   (blur)="validarNumeroId()">
+            <span class="field-error" *ngIf="errNumeroId">⚠ {{ errNumeroId }}</span>
+            <span class="field-ok"    *ngIf="!errNumeroId && numeroId">Coincide con tu registro</span>
+          </div>
+
+          <!-- Correo -->
+          <div class="form-group">
+            <label class="form-label">Correo institucional</label>
+            <input class="form-input"
+                   [class.input-error]="errCorreo"
+                   [class.input-ok]="!errCorreo && correo"
+                   type="email"
+                   [placeholder]="institucionSeleccionada
+                     ? 'correo' + institucionSeleccionada.dominio_correo
+                     : 'correo@institucion.edu'"
+                   [(ngModel)]="correo"
+                   (blur)="validarCorreo()">
+            <span class="field-error" *ngIf="errCorreo">⚠ {{ errCorreo }}</span>
+            <span class="field-ok"    *ngIf="!errCorreo && correo">Coincide con tu registro</span>
+          </div>
+
         </div>
 
-        <!-- Número de ID -->
-        <div class="form-group">
-          <label class="form-label">Número de identificación</label>
-          <input class="form-input"
-                 [class.input-error]="errNumeroId"
-                 [class.input-ok]="!errNumeroId && numeroId"
-                 type="text"
-                 placeholder="Tu número de empleado / matrícula"
-                 [(ngModel)]="numeroId"
-                 (blur)="validarNumeroId()">
-          <span class="field-error" *ngIf="errNumeroId">⚠ {{ errNumeroId }}</span>
-          <span class="field-ok"    *ngIf="!errNumeroId && numeroId">Coincide con tu registro</span>
-        </div>
+        <!-- ══ COLUMNA DERECHA ══ -->
+        <div class="form-right">
 
-        <!-- Correo -->
-        <div class="form-group">
-          <label class="form-label">Correo institucional </label>
-          <input class="form-input"
-                 [class.input-error]="errCorreo"
-                 [class.input-ok]="!errCorreo && correo"
-                 type="email"
-                 [placeholder]="institucionSeleccionada
-                   ? 'correo' + institucionSeleccionada.dominio_correo
-                   : 'correo@institucion.edu'"
-                 [(ngModel)]="correo"
-                 (blur)="validarCorreo()">
-          <span class="field-error" *ngIf="errCorreo">⚠ {{ errCorreo }}</span>
-          <span class="field-ok"    *ngIf="!errCorreo && correo">Coincide con tu registro</span>
-        </div>
+          <div class="info-card blue">
+            <div class="info-icon">ℹ</div>
+            <div>
+              <p class="info-title">Verificación requerida</p>
+              <p class="info-text">
+                Los datos deben coincidir con los que usaste al registrarte.
+                Solo verás puntos habilitados para tu tipo de perfil.
+              </p>
+            </div>
+          </div>
 
-      </div>
-
-      <!-- ══ COLUMNA DERECHA ══ -->
-      <div class="form-right">
-
-        <div class="info-card blue">
-          <div class="info-icon">ℹ</div>
-          <div>
-            <p class="info-title">Verificación requerida</p>
-            <p class="info-text">
-              Los datos deben coincidir con los que usaste al registrarte.
-              Solo verás puntos habilitados para tu tipo de perfil.
+          <div class="info-card white">
+            <p class="requisitos-title">Requisitos</p>
+            <ul class="requisitos-list">
+              <li>✓ El correo debe ser el de tu registro</li>
+              <li>✓ El número debe ser tu número de empleado/matrícula</li>
+              <li>✓ Institución registrada en el sistema</li>
+              <li>✓ Punto de acceso disponible para tu tipo</li>
+            </ul>
+            <p class="requisitos-nota">
+              El proceso de verificación puede tomar de 24 a 48 horas.
             </p>
           </div>
-        </div>
 
-        <div class="info-card white">
-          <p class="requisitos-title">Requisitos</p>
-          <ul class="requisitos-list">
-            <li>✓ El correo debe ser el de tu registro</li>
-            <li>✓ El número debe ser tu número de empleado/matrícula</li>
-            <li>✓ Institución registrada en el sistema</li>
-            <li>✓ Punto de acceso disponible para tu tipo</li>
-          </ul>
-          <p class="requisitos-nota">
-            El proceso de verificación puede tomar de 24 a 48 horas.
-          </p>
-        </div>
+          <div class="resumen-card" *ngIf="institucionSeleccionada && puntoSeleccionado">
+            <p class="requisitos-title">Resumen</p>
+            <div class="resumen-row">
+              <span class="resumen-label">Institución</span>
+              <span class="resumen-val">{{ institucionSeleccionada.nombre }}</span>
+            </div>
+            <div class="resumen-row">
+              <span class="resumen-label">Tipo</span>
+              <span class="resumen-val" style="text-transform:capitalize">{{ tipoUsuario }}</span>
+            </div>
+            <div class="resumen-row">
+              <span class="resumen-label">Punto</span>
+              <span class="resumen-val">{{ puntoSeleccionado.nombre }}</span>
+            </div>
+            <div class="resumen-row">
+              <span class="resumen-label">Nivel acceso</span>
+              <span class="resumen-val" style="text-transform:capitalize">
+                {{ puntoSeleccionado.nivel_acceso }}
+              </span>
+            </div>
+          </div>
 
-        <div class="resumen-card" *ngIf="institucionSeleccionada && puntoSeleccionado">
-          <p class="requisitos-title">Resumen</p>
-          <div class="resumen-row">
-            <span class="resumen-label">Institución</span>
-            <span class="resumen-val">{{ institucionSeleccionada.nombre }}</span>
-          </div>
-          <div class="resumen-row">
-            <span class="resumen-label">Tipo</span>
-            <span class="resumen-val" style="text-transform:capitalize">{{ tipoUsuario }}</span>
-          </div>
-          <div class="resumen-row">
-            <span class="resumen-label">Punto</span>
-            <span class="resumen-val">{{ puntoSeleccionado.nombre }}</span>
-          </div>
-          <div class="resumen-row">
-            <span class="resumen-label">Nivel acceso</span>
-            <span class="resumen-val" style="text-transform:capitalize">
-              {{ puntoSeleccionado.nivel_acceso }}
-            </span>
-          </div>
         </div>
-
       </div>
-    </div>
 
-    <div class="form-actions">
-      <button class="btn-agregar"
-              (click)="agregar()"
-              [disabled]="enviando || !formularioValido">
-        {{ enviando ? 'Guardando…' : 'Agregar Credencial' }}
-      </button>
-      <button class="btn-cancelar" routerLink="/tarjetas">Cancelar</button>
+      <div class="form-actions">
+        <button class="btn-agregar"
+                (click)="agregar()"
+                [disabled]="enviando || !formularioValido">
+          {{ enviando ? 'Guardando…' : 'Agregar Credencial' }}
+        </button>
+        <button class="btn-cancelar" routerLink="/tarjetas">Cancelar</button>
+      </div>
 
-    </div>
+    </ng-container>
 
-  </ng-container>
+  </div>
+  <!-- fin agregar-scroll-wrapper -->
 
 </div>
