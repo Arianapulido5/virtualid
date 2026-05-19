@@ -33,21 +33,21 @@
     <!-- NOMBRE -->
     <div class="row-fields">
       <div class="field">
-        <label>Nombre(s) *</label>
+        <label>Nombre(s)</label>
         <input type="text" placeholder="Guillermo"
           [(ngModel)]="nombre" (ngModelChange)="validarNombre()"
           [class.input-error]="errores.nombre"/>
         <span class="field-error" *ngIf="errores.nombre">{{ errores.nombre }}</span>
       </div>
       <div class="field">
-        <label>Apellido paterno *</label>
+        <label>Apellido paterno</label>
         <input type="text" placeholder="Castellanos"
           [(ngModel)]="apellido_paterno" (ngModelChange)="validarApellidoPaterno()"
           [class.input-error]="errores.apellido_paterno"/>
         <span class="field-error" *ngIf="errores.apellido_paterno">{{ errores.apellido_paterno }}</span>
       </div>
       <div class="field">
-        <label>Apellido materno *</label>
+        <label>Apellido materno </label>
         <input type="text" placeholder="Pérez"
           [(ngModel)]="apellido_materno" (ngModelChange)="validarApellidoMaterno()"
           [class.input-error]="errores.apellido_materno"/>
@@ -57,7 +57,7 @@
 
     <!-- CORREO -->
     <div class="field">
-      <label>Correo electrónico *</label>
+      <label>Correo electrónico</label>
       <input type="email" placeholder="guillermo@email.com"
         [(ngModel)]="correo" (ngModelChange)="validarCorreo()"
         [class.input-error]="errores.correo"/>
@@ -67,14 +67,14 @@
     <!-- NÚMERO EMPLEADO + TIPO -->
     <div class="row-fields">
       <div class="field" style="flex:2">
-        <label>Número de empleado/estudiante *</label>
+        <label>Número de empleado o estudiante</label>
         <input type="text" placeholder="2021XXXXXX" maxlength="10"
           [(ngModel)]="numero_empleado" (ngModelChange)="validarNumeroEmpleado()"
           [class.input-error]="errores.numero_empleado"/>
         <span class="field-error" *ngIf="errores.numero_empleado">{{ errores.numero_empleado }}</span>
       </div>
       <div class="field" style="flex:1">
-        <label>Tipo *</label>
+        <label>Tipo</label>
         <select [(ngModel)]="tipo" [class.input-error]="errores.tipo" (ngModelChange)="validarTipo()">
           <option value="">Selecciona</option>
           <option value="estudiante">Estudiante</option>
