@@ -1,7 +1,6 @@
-<!-- src/app/pages/informacion-personal/informacion-personal.html -->
 <div class="info-container">
 
-  <!-- MODAL ÉXITO -->
+  <!-- MODAL ÉXITO (fuera del scroll) -->
   <div class="modal-overlay" *ngIf="mostrarModal">
     <div class="modal-card">
       <div class="modal-icon">✓</div>
@@ -11,124 +10,120 @@
     </div>
   </div>
 
-  <!-- Volver -->
-  <a class="back-link" routerLink="/configuracion">
-    <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-         fill="none" stroke="currentColor" stroke-width="2.5"
-         stroke-linecap="round" stroke-linejoin="round">
-      <line x1="19" y1="12" x2="5" y2="12"/>
-      <polyline points="12 19 5 12 12 5"/>
-    </svg>
-  </a>
+    <!-- Título -->
+    <h1 class="page-title">Información Personal</h1>
 
-  <!-- Título -->
-  <h1 class="page-title">Información Personal</h1>
+    <!-- Loader -->
+    <div class="loader-wrap" *ngIf="cargando">
+      <span class="loader"></span>
+      <p>Cargando datos…</p>
+    </div>
 
-  <!-- Loader -->
-  <div class="loader-wrap" *ngIf="cargando">
-    <span class="loader"></span>
-    <p>Cargando datos…</p>
+    <!-- Alerta error -->
+    <div class="alert alert-error" *ngIf="errorApi">{{ errorApi }}</div>
+
+    <!-- SCROLL WRAPPER -->
+  <div class="info-scroll-wrapper">
+    
+    <!-- Formulario -->
+    <form [formGroup]="form" (ngSubmit)="guardar()" novalidate *ngIf="!cargando">
+      <div class="form-grid">
+
+        <!-- Nombre -->
+        <div class="form-group" [class.has-error]="mostrarError('nombre')">
+          <label class="form-label">Nombre <span class="req"></span></label>
+          <input class="form-input" type="text" formControlName="nombre"
+                 placeholder="Ej. María" autocomplete="given-name">
+          <span class="error-msg" *ngIf="mostrarError('nombre')">{{ mensajeError('nombre') }}</span>
+        </div>
+
+        <!-- Apellido Paterno -->
+        <div class="form-group" [class.has-error]="mostrarError('apellido_paterno')">
+          <label class="form-label">Apellido Paterno <span class="req"></span></label>
+          <input class="form-input" type="text" formControlName="apellido_paterno"
+                 placeholder="Ej. García" autocomplete="family-name">
+          <span class="error-msg" *ngIf="mostrarError('apellido_paterno')">{{ mensajeError('apellido_paterno') }}</span>
+        </div>
+
+        <!-- Apellido Materno -->
+        <div class="form-group" [class.has-error]="mostrarError('apellido_materno')">
+          <label class="form-label">Apellido Materno <span class="req"></span></label>
+          <input class="form-input" type="text" formControlName="apellido_materno"
+                 placeholder="Ej. López" autocomplete="additional-name">
+          <span class="error-msg" *ngIf="mostrarError('apellido_materno')">{{ mensajeError('apellido_materno') }}</span>
+        </div>
+
+        <!-- Correo -->
+        <div class="form-group" [class.has-error]="mostrarError('correo')">
+          <label class="form-label">Correo Electrónico <span class="req"></span></label>
+          <input class="form-input" type="email" formControlName="correo"
+                 placeholder="Ej. maria@ejemplo.com" autocomplete="email">
+          <span class="error-msg" *ngIf="mostrarError('correo')">{{ mensajeError('correo') }}</span>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="form-group" [class.has-error]="mostrarError('telefono')">
+          <label class="form-label">Teléfono</label>
+          <input class="form-input" type="tel" formControlName="telefono"
+                 placeholder="10 dígitos" maxlength="10" autocomplete="tel">
+          <span class="error-msg" *ngIf="mostrarError('telefono')">{{ mensajeError('telefono') }}</span>
+        </div>
+
+        <!-- Fecha de nacimiento -->
+        <div class="form-group" [class.has-error]="mostrarError('fecha_nacimiento')">
+          <label class="form-label">Fecha de Nacimiento</label>
+          <input class="form-input" type="date" formControlName="fecha_nacimiento" [max]="hoy">
+          <span class="error-msg" *ngIf="mostrarError('fecha_nacimiento')">{{ mensajeError('fecha_nacimiento') }}</span>
+        </div>
+
+        <!-- Dirección -->
+        <div class="form-group full-width" [class.has-error]="mostrarError('direccion')">
+          <label class="form-label">Dirección</label>
+          <input class="form-input" type="text" formControlName="direccion"
+                 placeholder="Calle, número, colonia" autocomplete="street-address">
+          <span class="error-msg" *ngIf="mostrarError('direccion')">{{ mensajeError('direccion') }}</span>
+        </div>
+
+        <!-- Ciudad -->
+        <div class="form-group" [class.has-error]="mostrarError('ciudad')">
+          <label class="form-label">Ciudad</label>
+          <input class="form-input" type="text" formControlName="ciudad"
+                 placeholder="Ej. Guadalajara" autocomplete="address-level2">
+          <span class="error-msg" *ngIf="mostrarError('ciudad')">{{ mensajeError('ciudad') }}</span>
+        </div>
+
+        <!-- Estado -->
+        <div class="form-group" [class.has-error]="mostrarError('estado')">
+          <label class="form-label">Estado</label>
+          <select class="form-input" formControlName="estado">
+            <option value="">— Selecciona un estado —</option>
+            <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
+          </select>
+          <span class="error-msg" *ngIf="mostrarError('estado')">{{ mensajeError('estado') }}</span>
+        </div>
+
+        <!-- Código Postal -->
+        <div class="form-group" [class.has-error]="mostrarError('codigo_postal')">
+          <label class="form-label">Código Postal</label>
+          <input class="form-input" type="text" formControlName="codigo_postal"
+                 placeholder="5 dígitos" maxlength="5" autocomplete="postal-code">
+          <span class="error-msg" *ngIf="mostrarError('codigo_postal')">{{ mensajeError('codigo_postal') }}</span>
+        </div>
+
+      </div>
+
+      <!-- Botones -->
+      <div class="form-actions">
+        <button type="submit" class="btn-guardar" [disabled]="guardando">
+          <span *ngIf="!guardando">Guardar Cambios</span>
+          <span *ngIf="guardando" class="spinner"></span>
+        </button>
+        <button type="button" class="btn-cancelar" routerLink="/configuracion">Cancelar</button>
+      </div>
+
+    </form>
+
   </div>
+  <!-- fin info-scroll-wrapper -->
 
-  <!-- Alerta error -->
-  <div class="alert alert-error" *ngIf="errorApi">{{ errorApi }}</div>
-
-  <!-- Formulario -->
-  <form [formGroup]="form" (ngSubmit)="guardar()" novalidate *ngIf="!cargando">
-    <div class="form-grid">
-
-      <!-- Nombre -->
-      <div class="form-group" [class.has-error]="mostrarError('nombre')">
-        <label class="form-label">Nombre <span class="req">*</span></label>
-        <input class="form-input" type="text" formControlName="nombre"
-               placeholder="Ej. María" autocomplete="given-name">
-        <span class="error-msg" *ngIf="mostrarError('nombre')">{{ mensajeError('nombre') }}</span>
-      </div>
-
-      <!-- Apellido Paterno -->
-      <div class="form-group" [class.has-error]="mostrarError('apellido_paterno')">
-        <label class="form-label">Apellido Paterno <span class="req">*</span></label>
-        <input class="form-input" type="text" formControlName="apellido_paterno"
-               placeholder="Ej. García" autocomplete="family-name">
-        <span class="error-msg" *ngIf="mostrarError('apellido_paterno')">{{ mensajeError('apellido_paterno') }}</span>
-      </div>
-
-      <!-- Apellido Materno -->
-      <div class="form-group" [class.has-error]="mostrarError('apellido_materno')">
-        <label class="form-label">Apellido Materno <span class="req">*</span></label>
-        <input class="form-input" type="text" formControlName="apellido_materno"
-               placeholder="Ej. López" autocomplete="additional-name">
-        <span class="error-msg" *ngIf="mostrarError('apellido_materno')">{{ mensajeError('apellido_materno') }}</span>
-      </div>
-
-      <!-- Correo -->
-      <div class="form-group" [class.has-error]="mostrarError('correo')">
-        <label class="form-label">Correo Electrónico <span class="req">*</span></label>
-        <input class="form-input" type="email" formControlName="correo"
-               placeholder="Ej. maria@ejemplo.com" autocomplete="email">
-        <span class="error-msg" *ngIf="mostrarError('correo')">{{ mensajeError('correo') }}</span>
-      </div>
-
-      <!-- Teléfono -->
-      <div class="form-group" [class.has-error]="mostrarError('telefono')">
-        <label class="form-label">Teléfono</label>
-        <input class="form-input" type="tel" formControlName="telefono"
-               placeholder="10 dígitos" maxlength="10" autocomplete="tel">
-        <span class="error-msg" *ngIf="mostrarError('telefono')">{{ mensajeError('telefono') }}</span>
-      </div>
-
-      <!-- Fecha de nacimiento -->
-      <div class="form-group" [class.has-error]="mostrarError('fecha_nacimiento')">
-        <label class="form-label">Fecha de Nacimiento</label>
-        <input class="form-input" type="date" formControlName="fecha_nacimiento" [max]="hoy">
-        <span class="error-msg" *ngIf="mostrarError('fecha_nacimiento')">{{ mensajeError('fecha_nacimiento') }}</span>
-      </div>
-
-      <!-- Dirección -->
-      <div class="form-group full-width" [class.has-error]="mostrarError('direccion')">
-        <label class="form-label">Dirección</label>
-        <input class="form-input" type="text" formControlName="direccion"
-               placeholder="Calle, número, colonia" autocomplete="street-address">
-        <span class="error-msg" *ngIf="mostrarError('direccion')">{{ mensajeError('direccion') }}</span>
-      </div>
-
-      <!-- Ciudad -->
-      <div class="form-group" [class.has-error]="mostrarError('ciudad')">
-        <label class="form-label">Ciudad</label>
-        <input class="form-input" type="text" formControlName="ciudad"
-               placeholder="Ej. Guadalajara" autocomplete="address-level2">
-        <span class="error-msg" *ngIf="mostrarError('ciudad')">{{ mensajeError('ciudad') }}</span>
-      </div>
-
-      <!-- Estado -->
-      <div class="form-group" [class.has-error]="mostrarError('estado')">
-        <label class="form-label">Estado</label>
-        <select class="form-input" formControlName="estado">
-          <option value="">— Selecciona un estado —</option>
-          <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
-        </select>
-        <span class="error-msg" *ngIf="mostrarError('estado')">{{ mensajeError('estado') }}</span>
-      </div>
-
-      <!-- Código Postal -->
-      <div class="form-group" [class.has-error]="mostrarError('codigo_postal')">
-        <label class="form-label">Código Postal</label>
-        <input class="form-input" type="text" formControlName="codigo_postal"
-               placeholder="5 dígitos" maxlength="5" autocomplete="postal-code">
-        <span class="error-msg" *ngIf="mostrarError('codigo_postal')">{{ mensajeError('codigo_postal') }}</span>
-      </div>
-
-    </div>
-
-    <!-- Botones -->
-    <div class="form-actions">
-      <button type="submit" class="btn-guardar" [disabled]="guardando">
-        <span *ngIf="!guardando">Guardar Cambios</span>
-        <span *ngIf="guardando" class="spinner"></span>
-      </button>
-      <button type="button" class="btn-cancelar" routerLink="/configuracion">Cancelar</button>
-
-    </div>
-
-  </form>
 </div>

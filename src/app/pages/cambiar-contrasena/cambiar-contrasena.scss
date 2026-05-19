@@ -363,12 +363,12 @@ $success:      #2e7d32;
 @media (max-width: 768px) {
   .cambiar-container {
     padding: 0 25px 25px;
-    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 19px);
   }
 
   .page-title {
     font-size: 22px;
-    padding-left: 35px;
+    padding-left: 45px;
   }
 
   .page-subtitle {

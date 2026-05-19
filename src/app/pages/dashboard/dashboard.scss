@@ -655,9 +655,7 @@ $warning:      #e65100;
 // ─────────────────────────────────────────────
 //  RESPONSIVE
 // ─────────────────────────────────────────────
-@media (max-width: 900px) {
-  .dash-body { grid-template-columns: 1fr 260px; }
-}
+
 
 @media (max-width: 800px) {
     .dash-body {
