@@ -95,7 +95,7 @@
       </div>
       <div class="form-card">
         <div class="field">
-          <label class="field-label">Asunto *</label>
+          <label class="field-label">Asunto</label>
           <input class="field-input" type="text" placeholder="Describe brevemente tu problema" [(ngModel)]="form.asunto" />
         </div>
         <div class="field">
@@ -105,7 +105,7 @@
           </select>
         </div>
         <div class="field">
-          <label class="field-label">Mensaje *</label>
+          <label class="field-label">Mensaje</label>
           <textarea class="field-textarea" rows="5" placeholder="Explica con detalle tu problema..." [(ngModel)]="form.mensaje"></textarea>
         </div>
         <div class="form-actions">
@@ -120,6 +120,7 @@
   </ng-container>
 
   <!-- ═══ DETALLE ═══ -->
+   
   <ng-container *ngIf="vista === 'detalle' && detalle">
     <div class="notif-detalle vista-detalle">
       <button class="btn-volver" (click)="volverALista()">
@@ -132,7 +133,7 @@
       </button>
       <div class="detalle-header">
         <h2 class="detalle-tipo">{{ detalle.tipo | uppercase }}</h2>
-        <p class="detalle-meta">#T-{{ detalle.id }} · {{ detalle.asunto }}</p>
+        <p class="detalle-meta">{{ detalle.asunto }}</p>
         <p class="detalle-tiempo-texto">{{ tiempoRelativo(detalle.creado_en) }}</p>
       </div>
 

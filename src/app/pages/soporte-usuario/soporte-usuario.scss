@@ -900,15 +900,15 @@
 @media (max-width: 480px) {
   .notificaciones-container {
     padding: 0 22px 22px;
-    padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 19px);
   }
 
   .page-header {
-    padding-left: 35px;
+    padding-left: 45px;
     margin-bottom: 16px;
   }
 
-  .page-title { font-size: 20px; }
+  .page-title { font-size: 22px; }
   .notificacion-item { padding: 12px 14px; gap: 8px; }
   .tabs .tab { padding: 10px 12px; font-size: 12px; }
   .mensajes-scroll { height: 260px; }
@@ -918,9 +918,9 @@
     padding-left: 0;
 
     h2.detalle-tipo {
-      padding-left: 30px;
-       padding-top: calc(env(safe-area-inset-top, 0px) + -60px);
-      margin-bottom: 10;
+      padding: 0 22px 22px;
+      font-size: 22px;
+      padding-left: 45px;
     }
 
     p.detalle-meta {
@@ -942,6 +942,8 @@
 
   h2.detalle-tipo {
     margin-bottom: 0;
+          font-size: 22px;
+
   }
 
   p.detalle-meta {
