@@ -642,19 +642,19 @@ $warning:      #e65100;
 @media (max-width: 480px) {
   .gestion-container {
     padding: 0 22px 22px;
-    padding-top: calc(env(safe-area-inset-top, 0px) + 19px);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 19px);// altura
   }
   
   .gestion-header {
     flex-direction: column;
     align-items: stretch;
     flex-wrap: nowrap;
-    padding-left: 45px;
+    padding-left: 45px;// lejos
     min-height: 50px;
     gap: 20px;
   }
 
-  .page-title { font-size: 22px; }
+  .page-title { font-size: 22px; }// tamaño letra
   .page-subtitle { display: none; }
 
   .add-credential-btn {
