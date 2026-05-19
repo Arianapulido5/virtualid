@@ -135,7 +135,7 @@
 
         <!-- Número de ID -->
         <div class="form-group">
-          <label class="form-label">Número de identificación *</label>
+          <label class="form-label">Número de identificación</label>
           <input class="form-input"
                  [class.input-error]="errNumeroId"
                  [class.input-ok]="!errNumeroId && numeroId"
@@ -144,12 +144,12 @@
                  [(ngModel)]="numeroId"
                  (blur)="validarNumeroId()">
           <span class="field-error" *ngIf="errNumeroId">⚠ {{ errNumeroId }}</span>
-          <span class="field-ok"    *ngIf="!errNumeroId && numeroId">✓ Coincide con tu registro</span>
+          <span class="field-ok"    *ngIf="!errNumeroId && numeroId">Coincide con tu registro</span>
         </div>
 
         <!-- Correo -->
         <div class="form-group">
-          <label class="form-label">Correo institucional *</label>
+          <label class="form-label">Correo institucional </label>
           <input class="form-input"
                  [class.input-error]="errCorreo"
                  [class.input-ok]="!errCorreo && correo"
@@ -160,7 +160,7 @@
                  [(ngModel)]="correo"
                  (blur)="validarCorreo()">
           <span class="field-error" *ngIf="errCorreo">⚠ {{ errCorreo }}</span>
-          <span class="field-ok"    *ngIf="!errCorreo && correo">✓ Coincide con tu registro</span>
+          <span class="field-ok"    *ngIf="!errCorreo && correo">Coincide con tu registro</span>
         </div>
 
       </div>
