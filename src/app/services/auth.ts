@@ -1,3 +1,4 @@
+// src/app/services/auth.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -14,6 +15,8 @@ export interface InfoPersonalData {
   direccion?:        string;
   ciudad?:           string;
   estado?:           string;
+  municipio?:        string;
+  colonia?:          string;
   codigo_postal?:    string;
   fecha_nacimiento?: string;
 }
@@ -65,10 +68,13 @@ export class Auth {
     correo:            string;
     numero_empleado:   string;
     contrasena:        string;
+    tipo?:             string;
     telefono?:         string;
     direccion?:        string;
     ciudad?:           string;
     estado?:           string;
+    municipio?:        string;
+    colonia?:          string;
     codigo_postal?:    string;
     fecha_nacimiento?: string;
   }) {
