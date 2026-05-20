@@ -36,24 +36,25 @@ export class PushService {
     }
   }
 
-  async desactivar(): Promise<void> {
-    try {
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.getSubscription();
-      if (sub) {
-        await sub.unsubscribe();
-        const headers = new HttpHeaders({
-          Authorization: `Bearer ${Auth.getToken()}`
-        });
-        this.http.delete(
-          `${environment.apiUrl}/push/suscripcion`,
-          { headers, body: { endpoint: sub.endpoint } }
-        ).subscribe();
-      }
-    } catch (err) {
-      console.error('Error al desactivar push:', err);
+async desactivar(): Promise<void> {
+  try {
+    if (!('serviceWorker' in navigator)) return;
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      await sub.unsubscribe();
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${Auth.getToken()}`
+      });
+      this.http.delete(
+        `${environment.apiUrl}/push/suscripcion`,
+        { headers, body: { endpoint: sub.endpoint } }
+      ).subscribe();
     }
+  } catch (err) {
+    console.error('Error al desactivar push:', err);
   }
+}
 
   private guardarSuscripcion(suscripcion: PushSubscription): void {
     const headers = new HttpHeaders({

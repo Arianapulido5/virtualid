@@ -52,16 +52,19 @@ export class Configuracion implements OnInit {
     });
   }
 
-  private cargarPreferencias(): void {
-    this.http.get<any>(`${this.apiUrl}/usuario/preferencias`, { headers: this.headers })
-      .subscribe({
-        next: (prefs) => {
-          this.notificaciones = prefs.notificaciones_push ?? true;
-          this.cdr.detectChanges();
-        },
-        error: () => {}
-      });
-  }
+private cargarPreferencias(): void {
+  this.http.get<any>(`${this.apiUrl}/usuario/preferencias`, { headers: this.headers })
+    .subscribe({
+      next: (prefs) => {
+        console.log('PREFERENCIAS:', prefs);
+        this.notificaciones = prefs.notificaciones_push ?? true;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.log('ERROR PREFERENCIAS:', err.status, err.error);
+      }
+    });
+}
 
   private cargarInstitucion(): void {
     this.cargandoInstitucion = true;
@@ -115,28 +118,34 @@ export class Configuracion implements OnInit {
   }
 
   toggleNotificaciones(): void {
-    if (this.notificaciones) {
-      this.pushService.inicializar().then(() => {
-        this.http.put(
-          `${this.apiUrl}/usuario/preferencias`,
-          { notificaciones_push: true },
-          { headers: this.headers }
-        ).subscribe();
-      });
-    } else {
-      this.pushService.desactivar();
+  console.log('TOGGLE valor actual:', this.notificaciones);
+  if (this.notificaciones) {
+    this.pushService.inicializar().then(() => {
       this.http.put(
         `${this.apiUrl}/usuario/preferencias`,
-        { notificaciones_push: false },
+        { notificaciones_push: true },
         { headers: this.headers }
       ).subscribe({
-        error: () => {
-          this.notificaciones = true;
-          this.cdr.detectChanges();
-        }
+        next: (r) => console.log('PUT OK:', r),
+        error: (e) => console.log('PUT ERROR:', e.status, e.error)
       });
-    }
+    });
+  } else {
+    this.pushService.desactivar();
+    this.http.put(
+      `${this.apiUrl}/usuario/preferencias`,
+      { notificaciones_push: false },
+      { headers: this.headers }
+    ).subscribe({
+      next: (r) => console.log('PUT OK:', r),
+      error: (e) => {
+        console.log('PUT ERROR:', e.status, e.error);
+        this.notificaciones = true;
+        this.cdr.detectChanges();
+      }
+    });
   }
+}
 
   toggleIdioma(): void { this.showIdiomas = !this.showIdiomas; }
 
