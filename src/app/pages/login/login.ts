@@ -70,24 +70,19 @@ export class Login {
         })
       )
       .subscribe({
-        next: (res: any) => {
-          this.cargando = false;
-
-          if (res.rol === 'admin') {
-            this.errorGeneral = 'Esta cuenta es de administrador. Usa el acceso de administrador.';
-            this.cdr.detectChanges();
-            return;
-          }
-
-          Auth.setToken(res.token);
-          Auth.setRol(res.rol);
-
-          // ── Registrar dispositivo para notificaciones push ──
-          this.pushService.inicializar();
-
-          this.cdr.detectChanges();
-          this.router.navigate(['/dashboard']);
-        },
+      next: (res: any) => {
+  this.cargando = false;
+  if (res.rol === 'admin') {
+    this.errorGeneral = 'Esta cuenta es de administrador. Usa el acceso de administrador.';
+    this.cdr.detectChanges();
+    return;
+  }
+  Auth.setToken(res.token);
+  Auth.setRol(res.rol);
+  // ← quitar this.pushService.inicializar(); de aquí
+  this.cdr.detectChanges();
+  this.router.navigate(['/dashboard']);
+},
         error: (err: any) => {
           this.cargando = false;
 

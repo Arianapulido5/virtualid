@@ -1,3 +1,4 @@
+// src/app/services/push.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
@@ -32,6 +33,25 @@ export class PushService {
       this.guardarSuscripcion(suscripcion);
     } catch (err) {
       console.error('Error al suscribirse a push:', err);
+    }
+  }
+
+  async desactivar(): Promise<void> {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        await sub.unsubscribe();
+        const headers = new HttpHeaders({
+          Authorization: `Bearer ${Auth.getToken()}`
+        });
+        this.http.delete(
+          `${environment.apiUrl}/push/suscripcion`,
+          { headers, body: { endpoint: sub.endpoint } }
+        ).subscribe();
+      }
+    } catch (err) {
+      console.error('Error al desactivar push:', err);
     }
   }
 

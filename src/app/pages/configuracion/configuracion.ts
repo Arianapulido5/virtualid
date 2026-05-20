@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { GeocodingService } from '../../services/geocoding';
 import { environment } from '../../../environments/environment';
-import { PushNotifications } from '@capacitor/push-notifications';
+import { PushService } from '../../services/push.service';
 
 @Component({
   selector: 'app-configuracion',
@@ -34,10 +34,11 @@ export class Configuracion implements OnInit {
   private apiUrl = environment.apiUrl;
 
   constructor(
-    private router:    Router,
-    private http:      HttpClient,
-    private geocoding: GeocodingService,
-    private cdr:       ChangeDetectorRef
+    private router:      Router,
+    private http:        HttpClient,
+    private geocoding:   GeocodingService,
+    private cdr:         ChangeDetectorRef,
+    private pushService: PushService
   ) {}
 
   ngOnInit(): void {
@@ -114,23 +115,27 @@ export class Configuracion implements OnInit {
   }
 
   toggleNotificaciones(): void {
-    this.http.put(
-      `${this.apiUrl}/usuario/preferencias`,
-      { notificaciones_push: this.notificaciones },
-      { headers: this.headers }
-    ).subscribe({
-      next: () => {
-        if (!this.notificaciones) {
-          // Limpiar notificaciones entregadas al desactivar
-          PushNotifications.removeAllDeliveredNotifications();
+    if (this.notificaciones) {
+      this.pushService.inicializar().then(() => {
+        this.http.put(
+          `${this.apiUrl}/usuario/preferencias`,
+          { notificaciones_push: true },
+          { headers: this.headers }
+        ).subscribe();
+      });
+    } else {
+      this.pushService.desactivar();
+      this.http.put(
+        `${this.apiUrl}/usuario/preferencias`,
+        { notificaciones_push: false },
+        { headers: this.headers }
+      ).subscribe({
+        error: () => {
+          this.notificaciones = true;
+          this.cdr.detectChanges();
         }
-      },
-      error: () => {
-        // Revertir el toggle si falla el servidor
-        this.notificaciones = !this.notificaciones;
-        this.cdr.detectChanges();
-      }
-    });
+      });
+    }
   }
 
   toggleIdioma(): void { this.showIdiomas = !this.showIdiomas; }
