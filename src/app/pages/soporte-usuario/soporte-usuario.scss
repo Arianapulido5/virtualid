@@ -289,7 +289,7 @@
   border-radius: 14px;
   border: 1.5px solid var(--border);
   overflow-y: auto;
-  max-height: calc(100vh - 340px);
+  max-height: calc(100vh - 34px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.06);
 
   &::-webkit-scrollbar { width: 4px; }
@@ -821,6 +821,18 @@
 
   &:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 10px 28px rgba(77,15,96,0.42); }
   &:active { transform: translateY(0) scale(0.97); }
+}
+
+.notificaciones-list-wrapper {
+  overflow-y: auto;
+  max-height: calc(100vh - 340px);
+  border-radius: 14px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar { display: none; }
+
+  @media (max-width: 768px) { max-height: calc(100vh - 320px); }
+  @media (max-width: 480px) { max-height: calc(100vh - 300px); }
 }
 
 // ─────────────────────────────────────────────

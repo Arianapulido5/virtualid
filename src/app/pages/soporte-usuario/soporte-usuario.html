@@ -49,41 +49,38 @@
 
     <div class="estado-txt" *ngIf="cargando">Cargando mensajes...</div>
 
-    <div class="notificaciones-list" *ngIf="!cargando">
-
-      <div class="notificacion-item"
-        *ngFor="let t of ticketsFiltrados"
-        (click)="abrirDetalle(t)"
-        [class.no-leida]="+t.mensajes_nuevos_admin > 0">
-
-        <div class="avatar" [style.background-color]="colorTipo(t.tipo)">
-          {{ inicialTipo(t.tipo) }}
+    <div class="notificaciones-list-wrapper">
+      <div class="notificaciones-list" *ngIf="!cargando">
+        <div class="notificacion-item"
+          *ngFor="let t of ticketsFiltrados"
+          (click)="abrirDetalle(t)"
+          [class.no-leida]="+t.mensajes_nuevos_admin > 0">
+          <div class="avatar" [style.background-color]="colorTipo(t.tipo)">
+            {{ inicialTipo(t.tipo) }}
+          </div>
+          <div class="notif-info">
+            <span class="notif-nombre">{{ t.asunto }}</span>
+            <span class="notif-rol">{{ t.tipo }}</span>
+          </div>
+          <div class="notif-meta">
+            <span class="hora">{{ fechaUltimoMensaje(t.ultimo_mensaje_en || t.creado_en) }}</span>
+            <span class="counter-nuevos" *ngIf="+t.mensajes_nuevos_admin > 0">
+              {{ t.mensajes_nuevos_admin }}
+            </span>
+          </div>
         </div>
 
-        <div class="notif-info">
-          <span class="notif-nombre">{{ t.asunto }}</span>
-          <span class="notif-rol">{{ t.tipo }}</span>
+        <div class="empty-state" *ngIf="ticketsFiltrados.length === 0">
+          <p>{{ mensajeEmpty() }}</p>
+          <button class="btn-nuevo-lg"
+            *ngIf="filtroActivo === 'Todos' || filtroActivo === 'Enviados'"
+            (click)="vista = 'nuevo'">
+            Enviar mi primer mensaje
+          </button>
         </div>
-
-        <div class="notif-meta">
-          <span class="hora">{{ fechaUltimoMensaje(t.ultimo_mensaje_en || t.creado_en) }}</span>
-          <span class="counter-nuevos" *ngIf="+t.mensajes_nuevos_admin > 0">
-            {{ t.mensajes_nuevos_admin }}
-          </span>
-        </div>
-
       </div>
-
-      <div class="empty-state" *ngIf="ticketsFiltrados.length === 0">
-        <p>{{ mensajeEmpty() }}</p>
-        <button class="btn-nuevo-lg"
-          *ngIf="filtroActivo === 'Todos' || filtroActivo === 'Enviados'"
-          (click)="vista = 'nuevo'">
-          Enviar mi primer mensaje
-        </button>
-      </div>
-
     </div>
+
   </ng-container>
 
   <!-- ═══ NUEVO MENSAJE ═══ -->
@@ -120,7 +117,6 @@
   </ng-container>
 
   <!-- ═══ DETALLE ═══ -->
-   
   <ng-container *ngIf="vista === 'detalle' && detalle">
     <div class="notif-detalle vista-detalle">
       <button class="btn-volver" (click)="volverALista()">
@@ -136,12 +132,10 @@
         <p class="detalle-meta">{{ detalle.asunto }}</p>
         <p class="detalle-tiempo-texto">{{ tiempoRelativo(detalle.creado_en) }}</p>
       </div>
-
       <div class="estado-info-bar">
         <span class="badge-estado" [ngClass]="badgeClass(detalle)">{{ labelEstado(detalle) }}</span>
         <span class="estado-descripcion">{{ descripcionEstado(detalle) }}</span>
       </div>
-
       <div class="chat-wrapper">
         <div class="mensajes-scroll" #chatScroll>
           <div *ngFor="let m of detalle.mensajes"
@@ -156,7 +150,6 @@
             </span>
           </div>
         </div>
-
         <div class="respuesta-bar" *ngIf="detalle.estado !== 'Resuelto'">
           <input class="respuesta-input" type="text"
             placeholder="Escribe un mensaje..."
@@ -164,12 +157,10 @@
             (keyup.enter)="enviarRespuesta()" />
           <button class="btn-enviar-msg" (click)="enviarRespuesta()">Enviar</button>
         </div>
-
         <div class="resuelto-notice" *ngIf="detalle.estado === 'Resuelto'">
           ✓ Este mensaje fue marcado como resuelto
         </div>
       </div>
-
     </div>
   </ng-container>
 
