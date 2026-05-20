@@ -579,6 +579,34 @@ $text-muted:  #9298a4;
   padding-left: 0.25rem;
   animation: fadeIn 0.4s ease 0.4s both;
 }
+.notificaciones-list-wrapper {
+  overflow-y: auto;
+  max-height: calc(100vh - 280px);
+  border-radius: 0 0 12px 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar { display: none; }
+
+  @media (max-width: 768px) {
+    max-height: calc(100vh - 260px);
+  }
+
+  @media (max-width: 480px) {
+    max-height: calc(100vh - 240px);
+    padding-bottom: 80px;
+  }
+}
+
+.notificaciones-list {
+  background: $white;
+  border: 1px solid $border;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
 
 
 // ─────────────────────────────────────────────

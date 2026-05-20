@@ -35,40 +35,35 @@
     </div>
 
     <!-- Lista -->
-    <div class="notificaciones-list">
-      <div
-        class="notificacion-item"
-        *ngFor="let notif of notificacionesFiltradas"
-        (click)="abrirNotificacion(notif)"
-        [class.no-leida]="!notif.leida"
-      >
-        <!-- Columna 1: Avatar -->
-        <div class="avatar" [style.background-color]="notif.avatarColor">
-          {{ notif.iniciales }}
-        </div>
-
-        <!-- Columna 2: Nombre + Rol en la misma línea -->
-        <div class="notif-info">
-          <span class="notif-nombre">{{ notif.nombre }}</span>
-          <span class="notif-rol">{{ notif.rol }}</span>
-        </div>
-
-        <!-- Columna 3: Hora + Fecha -->
-        <div class="notif-tiempo">
-          <span class="hora">{{ notif.hora }}</span>
-          <span class="fecha">{{ notif.fecha }}</span>
-        </div>
-
-        <!-- Columna 4: Mensaje -->
-        <div class="notif-mensaje">
-          {{ notif.asunto }}
-        </div>
+<div class="notificaciones-list-wrapper">
+  <div class="notificaciones-list">
+    <div
+      class="notificacion-item"
+      *ngFor="let notif of notificacionesFiltradas"
+      (click)="abrirNotificacion(notif)"
+      [class.no-leida]="!notif.leida"
+    >
+      <div class="avatar" [style.background-color]="notif.avatarColor">
+        {{ notif.iniciales }}
       </div>
-
-      <div class="empty-state" *ngIf="notificacionesFiltradas.length === 0">
-        <p>No se encontraron notificaciones.</p>
+      <div class="notif-info">
+        <span class="notif-nombre">{{ notif.nombre }}</span>
+        <span class="notif-rol">{{ notif.rol }}</span>
+      </div>
+      <div class="notif-tiempo">
+        <span class="hora">{{ notif.hora }}</span>
+        <span class="fecha">{{ notif.fecha }}</span>
+      </div>
+      <div class="notif-mensaje">
+        {{ notif.asunto }}
       </div>
     </div>
+
+    <div class="empty-state" *ngIf="notificacionesFiltradas.length === 0">
+      <p>No se encontraron notificaciones.</p>
+    </div>
+  </div>
+</div>
 
   </ng-container>
 
