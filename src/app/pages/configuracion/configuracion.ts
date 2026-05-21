@@ -31,9 +31,9 @@ export class Configuracion implements OnInit {
   cargandoGeo         = false;
 
   // Biometría
-  cargandoBiometrica    = true;   // mientras consulta el estado
-  biometricaSoportada   = false;  // el dispositivo soporta WebAuthn
-  procesandoBiometrica  = false;  // durante activación/desactivación
+  cargandoBiometrica    = true;
+  biometricaSoportada   = true;  // optimista por defecto, no bloqueamos navegación
+  procesandoBiometrica  = false;
 
   idiomas = ['Español', 'English', 'Français', 'Deutsch', 'Português', 'Italiano'];
 
@@ -53,8 +53,10 @@ export class Configuracion implements OnInit {
     this.cargarPreferencias();
     this.cargarEstadoBiometrica();
 
-    // Detectar soporte del dispositivo
     BiometricaService.soportado().then((ok) => {
+      console.log('🔬 biometricaSoportada:', ok);
+      console.log('🌐 isSecureContext:', window.isSecureContext);
+      console.log('🔑 PublicKeyCredential exists:', !!window.PublicKeyCredential);
       this.biometricaSoportada = ok;
       this.cdr.detectChanges();
     });
@@ -72,7 +74,7 @@ export class Configuracion implements OnInit {
     this.cargandoBiometrica = true;
     this.bioService.obtenerEstado().subscribe({
       next: (estado) => {
-        this.biometrica        = estado.activa;
+        this.biometrica         = estado.activa;
         this.cargandoBiometrica = false;
         this.cdr.detectChanges();
       },
@@ -85,44 +87,34 @@ export class Configuracion implements OnInit {
 
   // ── Toggle biometría ─────────────────────────────────────────────────────
 
-  // configuracion.ts — toggleBiometrica() corregido
-toggleBiometrica(): void {
-  if (this.procesandoBiometrica) return;
+  toggleBiometrica(): void {
+    if (this.procesandoBiometrica) return;
 
-  // El checkbox ya cambió; leemos el nuevo valor desde el evento
-  // en lugar de confiar en this.biometrica directamente
-  const queremoActivar = this.biometrica; // true = el usuario acaba de marcarlo
+    const queremoActivar = this.biometrica; // el checkbox ya actualizó el valor
 
-  if (queremoActivar) {
-    // Verificar soporte antes de navegar
-    BiometricaService.soportado().then((ok) => {
-      if (!ok) {
-        // Revertir el toggle
-        this.biometrica = false;
-        this.cdr.detectChanges();
-        return;
-      }
+    if (queremoActivar) {
+      // Navegar directo a la pantalla de registro — ella maneja el error si no hay soporte
       this.router.navigate(['/biometrica']);
-    });
-  } else {
-    // Desactivar
-    this.procesandoBiometrica = true;
-    this.cdr.detectChanges();
+    } else {
+      // Desactivar biometría
+      this.procesandoBiometrica = true;
+      this.cdr.detectChanges();
 
-    this.bioService.desactivar().subscribe({
-      next: () => {
-        this.biometrica          = false;
-        this.procesandoBiometrica = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.biometrica          = true; // revertir
-        this.procesandoBiometrica = false;
-        this.cdr.detectChanges();
-      },
-    });
+      this.bioService.desactivar().subscribe({
+        next: () => {
+          this.biometrica           = false;
+          this.procesandoBiometrica = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          // Revertir si falló
+          this.biometrica           = true;
+          this.procesandoBiometrica = false;
+          this.cdr.detectChanges();
+        },
+      });
+    }
   }
-}
 
   // ── Preferencias (notificaciones) ────────────────────────────────────────
 
@@ -188,12 +180,12 @@ toggleBiometrica(): void {
             })
             .subscribe({
               next: (detalle) => {
-                this.institucionNombre    = detalle.institucion_nombre ?? '';
-                this.radioMetros          = detalle.inst_radio ?? null;
+                this.institucionNombre   = detalle.institucion_nombre ?? '';
+                this.radioMetros         = detalle.inst_radio ?? null;
                 const lat = detalle.inst_lat ?? null;
                 const lng = detalle.inst_lng ?? null;
-                this.tieneUbicacion       = !!(lat && lng);
-                this.cargandoInstitucion  = false;
+                this.tieneUbicacion      = !!(lat && lng);
+                this.cargandoInstitucion = false;
                 this.cdr.detectChanges();
 
                 if (lat && lng) {
@@ -227,5 +219,4 @@ toggleBiometrica(): void {
     this.idiomaActual = idioma;
     this.showIdiomas  = false;
   }
-
 }
