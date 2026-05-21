@@ -50,12 +50,11 @@
         <!-- Spinner durante operación -->
         <div class="bio-toggle-spinner" *ngIf="procesandoBiometrica"></div>
 
-        <!-- Sin [disabled], la página /biometrica maneja el error de soporte -->
         <label class="toggle" *ngIf="!procesandoBiometrica">
           <input
             type="checkbox"
-            [checked]="biometrica"
-            (change)="toggleBiometrica()"
+            [(ngModel)]="biometrica"
+            (ngModelChange)="toggleBiometrica()"
           />
           <span class="toggle-slider"></span>
         </label>
