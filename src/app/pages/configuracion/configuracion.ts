@@ -85,39 +85,44 @@ export class Configuracion implements OnInit {
 
   // ── Toggle biometría ─────────────────────────────────────────────────────
 
-  toggleBiometrica(): void {
-    if (this.procesandoBiometrica) return;
+  // configuracion.ts — toggleBiometrica() corregido
+toggleBiometrica(): void {
+  if (this.procesandoBiometrica) return;
 
-    if (this.biometrica) {
-      // El toggle está ON → el usuario quiere ACTIVAR
-      // Verificar soporte antes
-      if (!this.biometricaSoportada) {
+  // El checkbox ya cambió; leemos el nuevo valor desde el evento
+  // en lugar de confiar en this.biometrica directamente
+  const queremoActivar = this.biometrica; // true = el usuario acaba de marcarlo
+
+  if (queremoActivar) {
+    // Verificar soporte antes de navegar
+    BiometricaService.soportado().then((ok) => {
+      if (!ok) {
+        // Revertir el toggle
         this.biometrica = false;
         this.cdr.detectChanges();
         return;
       }
-      // Redirigir a pantalla de registro biométrico
       this.router.navigate(['/biometrica']);
-    } else {
-      // El toggle está OFF → el usuario quiere DESACTIVAR
-      this.procesandoBiometrica = true;
-      this.cdr.detectChanges();
+    });
+  } else {
+    // Desactivar
+    this.procesandoBiometrica = true;
+    this.cdr.detectChanges();
 
-      this.bioService.desactivar().subscribe({
-        next: () => {
-          this.biometrica          = false;
-          this.procesandoBiometrica = false;
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          // Revertir si falló
-          this.biometrica          = true;
-          this.procesandoBiometrica = false;
-          this.cdr.detectChanges();
-        },
-      });
-    }
+    this.bioService.desactivar().subscribe({
+      next: () => {
+        this.biometrica          = false;
+        this.procesandoBiometrica = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.biometrica          = true; // revertir
+        this.procesandoBiometrica = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
+}
 
   // ── Preferencias (notificaciones) ────────────────────────────────────────
 
