@@ -70,20 +70,24 @@ export class Configuracion implements OnInit {
 
   // ── Estado biométrico ────────────────────────────────────────────────────
 
-  private cargarEstadoBiometrica(): void {
-    this.cargandoBiometrica = true;
-    this.bioService.obtenerEstado().subscribe({
-      next: (estado) => {
+private cargarEstadoBiometrica(): void {
+  this.cargandoBiometrica = true;
+  this.bioService.obtenerEstado().subscribe({
+    next: (estado) => {
+      setTimeout(() => {
         this.biometrica         = estado.activa;
         this.cargandoBiometrica = false;
         this.cdr.detectChanges();
-      },
-      error: () => {
+      }, 0);
+    },
+    error: () => {
+      setTimeout(() => {
         this.cargandoBiometrica = false;
         this.cdr.detectChanges();
-      },
-    });
-  }
+      }, 0);
+    },
+  });
+}
 
   // ── Toggle biometría ─────────────────────────────────────────────────────
 

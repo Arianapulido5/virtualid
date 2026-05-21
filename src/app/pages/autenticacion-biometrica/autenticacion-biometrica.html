@@ -1,11 +1,7 @@
-<!-- src/app/pages/autenticacion-biometrica/autenticacion-biometrica.html -->
 <div class="bio-bg">
   <div class="bio-card">
 
-    <!-- ══ ÍCONO CENTRAL ══ -->
     <div class="bio-icon-wrap" [class.pulsing]="estado === 'cargando'">
-
-      <!-- Idle / Error: candado -->
       <svg *ngIf="estado === 'idle' || estado === 'error'"
            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="bio-svg">
         <rect x="14" y="28" width="36" height="26" rx="5" fill="rgba(255,255,255,0.18)"/>
@@ -15,10 +11,8 @@
         <rect x="30" y="42" width="4" height="6" rx="2" fill="rgba(255,255,255,0.7)"/>
       </svg>
 
-      <!-- Cargando: spinner -->
       <div *ngIf="estado === 'cargando'" class="bio-spinner"></div>
 
-      <!-- Éxito: check -->
       <svg *ngIf="estado === 'exito'"
            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="bio-svg success-svg">
         <circle cx="32" cy="32" r="28" fill="rgba(46,125,50,0.3)"/>
@@ -28,58 +22,40 @@
       </svg>
     </div>
 
-    <!-- ══ TEXTOS ══ -->
     <ng-container [ngSwitch]="modo">
 
-      <!-- MODO REGISTRO -->
       <ng-container *ngSwitchCase="'registro'">
         <h2 *ngIf="estado === 'idle'">Activar biometría</h2>
         <p  *ngIf="estado === 'idle'">
           Registra tu huella dactilar o Face ID para acceder sin contraseña.
           Elige el método que prefieras.
         </p>
-
         <h2 *ngIf="estado === 'cargando'">Escaneando...</h2>
         <p  *ngIf="estado === 'cargando'">{{ mensaje }}</p>
-
         <h2 *ngIf="estado === 'exito'" class="txt-exito">¡Listo!</h2>
         <p  *ngIf="estado === 'exito'">{{ mensaje }}</p>
-
         <h2 *ngIf="estado === 'error'" class="txt-error">No se pudo registrar</h2>
         <p  *ngIf="estado === 'error'" class="txt-error-sub">{{ mensaje }}</p>
       </ng-container>
 
-      <!-- MODO LOGIN -->
       <ng-container *ngSwitchCase="'login'">
         <h2 *ngIf="estado === 'idle' || estado === 'cargando'">Verificación biométrica</h2>
         <p  *ngIf="estado === 'idle' || estado === 'cargando'">Usa tu huella o Face ID para entrar.</p>
-
         <h2 *ngIf="estado === 'exito'" class="txt-exito">¡Bienvenido!</h2>
         <p  *ngIf="estado === 'exito'">Acceso autorizado.</p>
-
         <h2 *ngIf="estado === 'error'" class="txt-error">No se pudo verificar</h2>
         <p  *ngIf="estado === 'error'" class="txt-error-sub">{{ mensaje }}</p>
       </ng-container>
 
     </ng-container>
 
-    <!-- Aviso sin soporte -->
-    <div class="aviso-sin-soporte" *ngIf="!soportado && estado === 'idle'">
-      ⚠️ Tu dispositivo no soporta autenticación biométrica por plataforma.
-    </div>
-
-    <!-- ══ BOTONES ══ -->
     <div class="bio-btns" *ngIf="estado !== 'exito'">
 
-      <!-- REGISTRO idle: botones SEPARADOS huella y face id -->
       <ng-container *ngIf="modo === 'registro' && estado === 'idle'">
 
-        <!-- Botón Huella dactilar -->
         <button
           class="btn-bio btn-filled btn-huella"
-          [disabled]="!soportado"
           (click)="registrarHuella()">
-          <!-- Ícono huella -->
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"
                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
             <path d="M12 2a10 10 0 0 1 10 10"/>
@@ -91,12 +67,9 @@
           Registrar huella dactilar
         </button>
 
-        <!-- Botón Face ID -->
         <button
           class="btn-bio btn-outline btn-face"
-          [disabled]="!soportado"
           (click)="registrarFaceId()">
-          <!-- Ícono cara -->
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"
                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
             <path d="M9 3H5a2 2 0 0 0-2 2v4"/>
@@ -112,7 +85,6 @@
 
       </ng-container>
 
-      <!-- LOGIN idle -->
       <button
         class="btn-bio btn-filled"
         *ngIf="modo === 'login' && estado === 'idle'"
@@ -120,7 +92,6 @@
         Usar huella / Face ID
       </button>
 
-      <!-- Reintentar tras error -->
       <button
         class="btn-bio btn-filled"
         *ngIf="estado === 'error'"
@@ -128,7 +99,6 @@
         Reintentar
       </button>
 
-      <!-- Cancelar / usar contraseña -->
       <button
         class="btn-bio btn-outline"
         *ngIf="modo === 'login' && estado !== 'cargando'"

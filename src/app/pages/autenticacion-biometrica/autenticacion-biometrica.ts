@@ -1,4 +1,3 @@
-// src/app/pages/autenticacion-biometrica/autenticacion-biometrica.ts
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -18,9 +17,8 @@ export class AutenticacionBiometrica implements OnInit {
   modo: Modo     = 'registro';
   estado: Estado = 'idle';
   mensaje        = '';
-  soportado      = true;
+  soportado      = true; // optimista, el error del navegador se muestra en estado='error'
 
-  // Para modo login
   correo             = '';
   userId: number | null = null;
   optsAutenticacion: any = null;
@@ -44,25 +42,21 @@ export class AutenticacionBiometrica implements OnInit {
       this.modo = 'registro';
     }
 
+    // Solo informativo, ya no bloquea los botones
     BiometricaService.soportado().then((ok) => {
       this.soportado = ok;
       this.cdr.detectChanges();
     });
   }
 
-  // ── REGISTRO ──────────────────────────────────────────────────────────────
-
-  /** Lanza el diálogo nativo del dispositivo (huella O Face ID — el SO elige) */
   registrar(): void {
     this._iniciarRegistro();
   }
 
-  /** Botón específico huella — agrega hint al navegador si lo soporta */
   registrarHuella(): void {
     this._iniciarRegistro('fingerprint');
   }
 
-  /** Botón específico Face ID — agrega hint al navegador si lo soporta */
   registrarFaceId(): void {
     this._iniciarRegistro('face');
   }
@@ -84,19 +78,19 @@ export class AutenticacionBiometrica implements OnInit {
         setTimeout(() => this.router.navigate(['/configuracion']), 1500);
       },
       error: (err) => {
-        this.estado  = 'error';
-        const raw    = err?.error?.message ?? err?.message ?? '';
+        this.estado = 'error';
+        const raw   = err?.error?.message ?? err?.message ?? '';
         if (raw.toLowerCase().includes('cancel') || raw.toLowerCase().includes('notallowed')) {
           this.mensaje = 'Registro cancelado. Inténtalo de nuevo.';
+        } else if (raw === '') {
+          this.mensaje = 'No se pudo registrar la biometría. Verifica que tu dispositivo soporte esta función.';
         } else {
-          this.mensaje = raw || 'No se pudo registrar la biometría.';
+          this.mensaje = raw;
         }
         this.cdr.detectChanges();
       },
     });
   }
-
-  // ── LOGIN BIOMÉTRICO ──────────────────────────────────────────────────────
 
   private iniciarLoginBiometrico(): void {
     this.estado  = 'cargando';
@@ -141,8 +135,6 @@ export class AutenticacionBiometrica implements OnInit {
       },
     });
   }
-
-  // ── HELPERS ───────────────────────────────────────────────────────────────
 
   usarContrasena(): void { this.router.navigate(['/login']); }
 
