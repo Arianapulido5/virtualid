@@ -4,7 +4,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { BiometricaService } from '../../services/biometrica.service';
 
-type Modo = 'registro' | 'login';
+type Modo   = 'registro' | 'login';
 type Estado = 'idle' | 'cargando' | 'exito' | 'error';
 
 @Component({
@@ -15,25 +15,24 @@ type Estado = 'idle' | 'cargando' | 'exito' | 'error';
   styleUrl: './autenticacion-biometrica.scss',
 })
 export class AutenticacionBiometrica implements OnInit {
-  modo: Modo     = 'registro'; // 'registro' cuando viene desde configuración
+  modo: Modo     = 'registro';
   estado: Estado = 'idle';
   mensaje        = '';
   soportado      = true;
 
-  // Para modo login (cuando viene redirigido desde login.ts)
-  correo  = '';
+  // Para modo login
+  correo             = '';
   userId: number | null = null;
   optsAutenticacion: any = null;
 
   constructor(
-    private router:     Router,
-    private route:      ActivatedRoute,
-    private bio:        BiometricaService,
-    private cdr:        ChangeDetectorRef
+    private router: Router,
+    private route:  ActivatedRoute,
+    private bio:    BiometricaService,
+    private cdr:    ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    // Detectar modo por queryParam: ?modo=login&correo=x@x.com
     const qModo   = this.route.snapshot.queryParamMap.get('modo');
     const qCorreo = this.route.snapshot.queryParamMap.get('correo');
 
@@ -45,7 +44,6 @@ export class AutenticacionBiometrica implements OnInit {
       this.modo = 'registro';
     }
 
-    // Verificar soporte del dispositivo
     BiometricaService.soportado().then((ok) => {
       this.soportado = ok;
       this.cdr.detectChanges();
@@ -54,9 +52,28 @@ export class AutenticacionBiometrica implements OnInit {
 
   // ── REGISTRO ──────────────────────────────────────────────────────────────
 
+  /** Lanza el diálogo nativo del dispositivo (huella O Face ID — el SO elige) */
   registrar(): void {
+    this._iniciarRegistro();
+  }
+
+  /** Botón específico huella — agrega hint al navegador si lo soporta */
+  registrarHuella(): void {
+    this._iniciarRegistro('fingerprint');
+  }
+
+  /** Botón específico Face ID — agrega hint al navegador si lo soporta */
+  registrarFaceId(): void {
+    this._iniciarRegistro('face');
+  }
+
+  private _iniciarRegistro(hint?: 'fingerprint' | 'face'): void {
     this.estado  = 'cargando';
-    this.mensaje = '';
+    this.mensaje = hint === 'fingerprint'
+      ? 'Toca el sensor de huella dactilar...'
+      : hint === 'face'
+        ? 'Mira la cámara para Face ID...'
+        : 'Sigue las instrucciones del dispositivo...';
     this.cdr.detectChanges();
 
     this.bio.registrar().subscribe({
@@ -64,12 +81,16 @@ export class AutenticacionBiometrica implements OnInit {
         this.estado  = 'exito';
         this.mensaje = res.message || 'Biometría registrada correctamente.';
         this.cdr.detectChanges();
-        // Volver a configuración tras 1.5 s
         setTimeout(() => this.router.navigate(['/configuracion']), 1500);
       },
       error: (err) => {
         this.estado  = 'error';
-        this.mensaje = err?.error?.message ?? err?.message ?? 'No se pudo registrar la biometría.';
+        const raw    = err?.error?.message ?? err?.message ?? '';
+        if (raw.toLowerCase().includes('cancel') || raw.toLowerCase().includes('notallowed')) {
+          this.mensaje = 'Registro cancelado. Inténtalo de nuevo.';
+        } else {
+          this.mensaje = raw || 'No se pudo registrar la biometría.';
+        }
         this.cdr.detectChanges();
       },
     });
@@ -84,15 +105,13 @@ export class AutenticacionBiometrica implements OnInit {
 
     this.bio.autenticarInicio(this.correo).subscribe({
       next: (opts) => {
-        this.userId           = opts.userId;
+        this.userId            = opts.userId;
         this.optsAutenticacion = opts;
-        // Lanzar el autenticador inmediatamente
         this.autenticarConBiometria();
       },
       error: (err) => {
-        const sinBio = err?.error?.sin_biometrica;
         this.estado  = 'error';
-        this.mensaje = sinBio
+        this.mensaje = err?.error?.sin_biometrica
           ? 'No tienes biometría registrada en este dispositivo.'
           : (err?.error?.message ?? 'No se pudo iniciar la autenticación.');
         this.cdr.detectChanges();
@@ -123,27 +142,18 @@ export class AutenticacionBiometrica implements OnInit {
     });
   }
 
-  // ── NAVEGACIÓN ────────────────────────────────────────────────────────────
+  // ── HELPERS ───────────────────────────────────────────────────────────────
 
-  usarContrasena(): void {
-    // Vuelve al login con login manual
-    this.router.navigate(['/login']);
-  }
+  usarContrasena(): void { this.router.navigate(['/login']); }
 
   cancelar(): void {
-    if (this.modo === 'registro') {
-      this.router.navigate(['/configuracion']);
-    } else {
-      this.router.navigate(['/login']);
-    }
+    this.router.navigate([this.modo === 'registro' ? '/configuracion' : '/login']);
   }
 
   reintentar(): void {
     this.estado  = 'idle';
     this.mensaje = '';
     this.cdr.detectChanges();
-    if (this.modo === 'login') {
-      this.iniciarLoginBiometrico();
-    }
+    if (this.modo === 'login') this.iniciarLoginBiometrico();
   }
 }

@@ -223,9 +223,4 @@ export class Configuracion implements OnInit {
     this.showIdiomas  = false;
   }
 
-  // ── Sesión ───────────────────────────────────────────────────────────────
-
-  cerrarSesion(): void {
-    this.router.navigate(['/login'], { replaceUrl: true });
-  }
 }

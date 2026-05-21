@@ -2,36 +2,45 @@
 <div class="bio-bg">
   <div class="bio-card">
 
-    <!-- ÍCONO CENTRAL -->
+    <!-- ══ ÍCONO CENTRAL ══ -->
     <div class="bio-icon-wrap" [class.pulsing]="estado === 'cargando'">
-      <!-- Idle / Registro -->
-      <svg *ngIf="estado === 'idle' || estado === 'error'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="bio-svg">
+
+      <!-- Idle / Error: candado -->
+      <svg *ngIf="estado === 'idle' || estado === 'error'"
+           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="bio-svg">
         <rect x="14" y="28" width="36" height="26" rx="5" fill="rgba(255,255,255,0.18)"/>
-        <path d="M22 28v-9a10 10 0 0 1 20 0v9" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-linecap="round"/>
+        <path d="M22 28v-9a10 10 0 0 1 20 0v9"
+              fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-linecap="round"/>
         <circle cx="32" cy="42" r="5" fill="white"/>
         <rect x="30" y="42" width="4" height="6" rx="2" fill="rgba(255,255,255,0.7)"/>
       </svg>
 
-      <!-- Cargando -->
+      <!-- Cargando: spinner -->
       <div *ngIf="estado === 'cargando'" class="bio-spinner"></div>
 
-      <!-- Éxito -->
-      <svg *ngIf="estado === 'exito'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="bio-svg success-svg">
+      <!-- Éxito: check -->
+      <svg *ngIf="estado === 'exito'"
+           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="bio-svg success-svg">
         <circle cx="32" cy="32" r="28" fill="rgba(46,125,50,0.3)"/>
-        <polyline points="20,34 28,42 44,22" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <polyline points="20,34 28,42 44,22"
+                  fill="none" stroke="white" stroke-width="5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
 
-    <!-- TÍTULO Y SUBTÍTULO -->
+    <!-- ══ TEXTOS ══ -->
     <ng-container [ngSwitch]="modo">
 
       <!-- MODO REGISTRO -->
       <ng-container *ngSwitchCase="'registro'">
         <h2 *ngIf="estado === 'idle'">Activar biometría</h2>
-        <p  *ngIf="estado === 'idle'">Registra tu huella dactilar o Face ID para acceder sin contraseña.</p>
+        <p  *ngIf="estado === 'idle'">
+          Registra tu huella dactilar o Face ID para acceder sin contraseña.
+          Elige el método que prefieras.
+        </p>
 
         <h2 *ngIf="estado === 'cargando'">Escaneando...</h2>
-        <p  *ngIf="estado === 'cargando'">Toca el sensor de huella o mira la cámara.</p>
+        <p  *ngIf="estado === 'cargando'">{{ mensaje }}</p>
 
         <h2 *ngIf="estado === 'exito'" class="txt-exito">¡Listo!</h2>
         <p  *ngIf="estado === 'exito'">{{ mensaje }}</p>
@@ -54,24 +63,56 @@
 
     </ng-container>
 
-    <!-- AVISO SIN SOPORTE -->
+    <!-- Aviso sin soporte -->
     <div class="aviso-sin-soporte" *ngIf="!soportado && estado === 'idle'">
       ⚠️ Tu dispositivo no soporta autenticación biométrica por plataforma.
     </div>
 
-    <!-- BOTONES -->
+    <!-- ══ BOTONES ══ -->
     <div class="bio-btns" *ngIf="estado !== 'exito'">
 
-      <!-- REGISTRO idle -->
-      <button
-        class="btn-bio btn-filled"
-        *ngIf="modo === 'registro' && estado === 'idle'"
-        [disabled]="!soportado"
-        (click)="registrar()">
-        Registrar huella / Face ID
-      </button>
+      <!-- REGISTRO idle: botones SEPARADOS huella y face id -->
+      <ng-container *ngIf="modo === 'registro' && estado === 'idle'">
 
-      <!-- LOGIN idle — si llegó aquí sin auto-iniciar -->
+        <!-- Botón Huella dactilar -->
+        <button
+          class="btn-bio btn-filled btn-huella"
+          [disabled]="!soportado"
+          (click)="registrarHuella()">
+          <!-- Ícono huella -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"
+               fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M12 2a10 10 0 0 1 10 10"/>
+            <path d="M12 6a6 6 0 0 1 6 6c0 4-1.5 7-4 9"/>
+            <path d="M12 10a2 2 0 0 1 2 2c0 2-.5 5-2 6"/>
+            <path d="M6 12a6 6 0 0 1 6-6"/>
+            <path d="M2 12a10 10 0 0 1 10-10"/>
+          </svg>
+          Registrar huella dactilar
+        </button>
+
+        <!-- Botón Face ID -->
+        <button
+          class="btn-bio btn-outline btn-face"
+          [disabled]="!soportado"
+          (click)="registrarFaceId()">
+          <!-- Ícono cara -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"
+               fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M9 3H5a2 2 0 0 0-2 2v4"/>
+            <path d="M15 3h4a2 2 0 0 1 2 2v4"/>
+            <path d="M9 21H5a2 2 0 0 1-2-2v-4"/>
+            <path d="M15 21h4a2 2 0 0 0 2-2v-4"/>
+            <circle cx="9" cy="10" r="1" fill="currentColor"/>
+            <circle cx="15" cy="10" r="1" fill="currentColor"/>
+            <path d="M9 15a3 3 0 0 0 6 0"/>
+          </svg>
+          Registrar Face ID
+        </button>
+
+      </ng-container>
+
+      <!-- LOGIN idle -->
       <button
         class="btn-bio btn-filled"
         *ngIf="modo === 'login' && estado === 'idle'"
