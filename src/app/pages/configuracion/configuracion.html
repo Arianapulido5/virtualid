@@ -28,29 +28,63 @@
   <div class="config-section">
     <h2 class="section-title">Seguridad</h2>
     <div class="section-body">
+
+      <!-- Skeleton mientras carga -->
+      <div class="config-item" *ngIf="cargandoBiometrica">
+        <span style="opacity:0.4">Autenticación biométrica</span>
+        <div class="bio-toggle-skeleton"></div>
+      </div>
+
+      <!-- Toggle real -->
+      <div class="config-item" *ngIf="!cargandoBiometrica">
+        <div class="bio-toggle-info">
+          <span>Autenticación biométrica</span>
+          <span class="bio-toggle-sub" *ngIf="!biometricaSoportada">
+            No disponible en este dispositivo
+          </span>
+          <span class="bio-toggle-sub bio-toggle-sub--activa" *ngIf="biometricaSoportada && biometrica">
+            Activa · toca para desactivar
+          </span>
+          <span class="bio-toggle-sub" *ngIf="biometricaSoportada && !biometrica">
+            Inactiva · toca para activar
+          </span>
+        </div>
+
+        <!-- Spinner durante operación -->
+        <div class="bio-toggle-spinner" *ngIf="procesandoBiometrica"></div>
+
+        <!-- Toggle deshabilitado si no hay soporte o está procesando -->
+        <label class="toggle" *ngIf="!procesandoBiometrica">
+          <input
+            type="checkbox"
+            [checked]="biometrica"
+            [disabled]="!biometricaSoportada"
+            (change)="toggleBiometrica()"
+          />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── PREFERENCIAS ───────────────────────────────────── -->
+  <div class="config-section">
+    <h2 class="section-title">Preferencias</h2>
+    <div class="section-body">
       <div class="config-item">
-        <span>Autenticación biométrica</span>
+        <span>Notificaciones</span>
         <label class="toggle">
-          <input type="checkbox" [(ngModel)]="biometrica">
+          <input
+            type="checkbox"
+            [(ngModel)]="notificaciones"
+            (change)="toggleNotificaciones()"
+          />
           <span class="toggle-slider"></span>
         </label>
       </div>
     </div>
   </div>
-
-<!-- ── PREFERENCIAS ───────────────────────────────────── -->
-<div class="config-section">
-  <h2 class="section-title">Preferencias</h2>
-  <div class="section-body">
-    <div class="config-item">         <!-- ← aquí, reemplaza este bloque -->
-      <span>Notificaciones</span>
-      <label class="toggle">
-        <input type="checkbox" [(ngModel)]="notificaciones" (change)="toggleNotificaciones()">
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-  </div>
-</div>
 
   <!-- ── AYUDA ──────────────────────────────────────────── -->
   <div class="config-section">
@@ -61,6 +95,11 @@
         <span class="item-arrow">›</span>
       </a>
     </div>
+  </div>
+
+  <!-- ── FOOTER ─────────────────────────────────────────── -->
+  <div class="config-footer">
+    <span class="footer-link danger" (click)="cerrarSesion()">Cerrar sesión</span>
   </div>
 
 </div>

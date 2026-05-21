@@ -25,6 +25,48 @@
     </div>
   </div>
 
+  <!-- ══ MODAL: VERIFICANDO BIOMETRÍA ══ -->
+  <div class="modal-overlay" *ngIf="bioVerificando" (click)="$event.stopPropagation()">
+    <div class="modal-card qr-modal-card">
+      <div class="modal-icon-simple">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="56" height="56" fill="none">
+          <circle cx="24" cy="24" r="22" fill="rgba(77,15,96,0.12)"/>
+          <path d="M24 14a10 10 0 0 1 10 10c0 6-2 10-6 13" stroke="#4D0F60" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M14 24a10 10 0 0 1 10-10" stroke="#4D0F60" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M24 20a4 4 0 0 1 4 4c0 3-1 7-4 9" stroke="#6B2080" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M20 24a4 4 0 0 1 4-4" stroke="#6B2080" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="24" cy="24" r="1.5" fill="#4D0F60"/>
+        </svg>
+      </div>
+      <h3>Verificando identidad</h3>
+      <p>Toca el sensor de huella o usa Face ID para continuar.</p>
+      <div class="qr-spinner" style="margin-top: 4px;"></div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: ERROR BIOMÉTRICO ══ -->
+  <div class="modal-overlay" *ngIf="bioError && !bioVerificando" (click)="cerrarBioError()">
+    <div class="modal-card qr-modal-card" (click)="$event.stopPropagation()">
+      <button class="modal-close-btn" (click)="cerrarBioError()">✕</button>
+      <div class="modal-icon-warn">🔒</div>
+      <h3>No se pudo verificar</h3>
+      <p>{{ bioError }}</p>
+      <button
+        class="btn-aceptar-modal btn-aceptar-solo"
+        *ngIf="bioError.includes('Configuración')"
+        (click)="cerrarBioError(); irAConfiguracion()">
+        Ir a Configuración
+      </button>
+      <button
+        class="btn-cancelar-modal"
+        style="width:100%; margin-top: 8px;"
+        *ngIf="!bioError.includes('Configuración')"
+        (click)="cerrarBioError()">
+        Cerrar
+      </button>
+    </div>
+  </div>
+
   <!-- ══ MODAL SOLICITANDO UBICACIÓN ══ -->
   <div class="modal-overlay" *ngIf="geoSolicitando && !qrVisible" (click)="cancelarGeo()">
     <div class="modal-card qr-modal-card" (click)="$event.stopPropagation()">

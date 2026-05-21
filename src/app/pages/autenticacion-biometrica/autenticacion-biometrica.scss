@@ -1,197 +1,234 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:wght@400;500&display=swap');
+// src/app/pages/autenticacion-biometrica/autenticacion-biometrica.scss
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500&display=swap');
 
+$purple-dark: #4D0F60;
+$purple-mid:  #6B2080;
+$blue-dark:   #32488C;
+$bg:          #EDF2F4;
+$white:       #ffffff;
+$text-main:   #111118;
+$text-soft:   #4A4D56;
+$success:     #2e7d32;
+$danger:      #A93845;
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(40px) scale(0.93); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0); }
+  33%       { transform: translate(30px, -50px); }
+  66%       { transform: translate(-20px, 25px); }
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0); }
+  50%       { transform: translate(-40px, 35px); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
+  50%       { transform: scale(1.06); box-shadow: 0 0 0 20px rgba(255,255,255,0); }
+}
+@keyframes successPop {
+  0%   { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+  60%  { transform: scale(1.15) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── FONDO ─────────────────────────────────────────────────────────────────────
 .bio-bg {
+  position: fixed;
+  inset: 0;
   display: flex;
-  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 24px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+  background: linear-gradient(145deg, $purple-dark 0%, #3a0b48 30%, $blue-dark 70%, #1e2d5c 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 10s ease infinite;
+  box-sizing: border-box;
+  overflow: hidden;
   font-family: 'Open Sans', sans-serif;
-}
 
-.sidebar {
-  width: 200px;
-  background-color: #4D0F60;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 20px;
-  gap: 14px;
-  flex-shrink: 0;
-
-  .logo-circle {
-    width: 70px;
-    height: 70px;
-    background-color: #32488C;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
+  &::before {
+    content: '';
+    position: absolute;
+    width: 480px; height: 480px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(107,32,128,0.3) 0%, transparent 70%);
+    top: -180px; left: -120px; pointer-events: none;
+    animation: orbFloat1 14s ease-in-out infinite;
   }
-
-  .brand {
-    color: white;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 1px;
+  &::after {
+    content: '';
+    position: absolute;
+    width: 360px; height: 360px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(63,91,169,0.25) 0%, transparent 70%);
+    bottom: -120px; right: -90px; pointer-events: none;
+    animation: orbFloat2 11s ease-in-out infinite;
   }
 }
 
-.content {
-  flex: 1;
-  background-color: #EDF2F4;
+// ── CARD ──────────────────────────────────────────────────────────────────────
+.bio-card {
+  background: $bg;
+  border-radius: 28px;
+  padding: 52px 36px 40px;
+  width: 100%;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 18px;
-  padding: 40px 20px;
+  text-align: center;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.12) inset;
+  animation: cardIn 0.6s cubic-bezier(.34,1.2,.64,1) both;
 }
 
-.lock-circle {
-  width: 180px;
-  height: 180px;
-  background-color: #32488C;
+// ── ÍCONO ─────────────────────────────────────────────────────────────────────
+.bio-icon-wrap {
+  width: 110px; height: 110px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
+  background: linear-gradient(135deg, $purple-dark, $blue-dark);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 34px rgba(77,15,96,0.45);
+  transition: box-shadow 0.3s;
+  margin-bottom: 4px;
 
-  svg {
-    width: 90px;
-    height: 90px;
-  }
+  &.pulsing { animation: iconPulse 1.4s ease-in-out infinite; }
 }
 
+.bio-svg {
+  width: 56px; height: 56px;
+  animation: fadeInUp 0.4s ease both;
+
+  &.success-svg { animation: successPop 0.5s cubic-bezier(.34,1.56,.64,1) both; }
+}
+
+// ── SPINNER ───────────────────────────────────────────────────────────────────
+.bio-spinner {
+  width: 48px; height: 48px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top-color: $white;
+  border-right-color: rgba(255,255,255,0.6);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+// ── TEXTOS ───────────────────────────────────────────────────────────────────
 h2 {
   font-family: 'Montserrat', sans-serif;
-  font-size: 26px;
-  font-weight: 700;
-  color: #0F0C0C;
-  margin: 0;
-  text-align: center;
+  font-size: 24px; font-weight: 800;
+  color: $text-main; margin: 0;
+  animation: fadeInUp 0.45s ease 0.1s both;
 }
 
 p {
-  font-size: 14px;
-  color: #4A4D56;
-  margin: 0;
+  font-size: 14px; color: $text-soft;
+  line-height: 1.6; margin: 0;
+  animation: fadeInUp 0.45s ease 0.18s both;
+}
+
+.txt-exito   { color: $success; }
+.txt-error   { color: $danger; }
+.txt-error-sub { color: darken($danger, 5%); font-size: 13px; }
+
+// ── AVISO SIN SOPORTE ─────────────────────────────────────────────────────────
+.aviso-sin-soporte {
+  font-size: 12.5px;
+  color: darken($danger, 5%);
+  background: rgba(169,56,69,0.08);
+  border: 1px solid rgba(169,56,69,0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  width: 100%;
+  box-sizing: border-box;
   text-align: center;
+  animation: fadeInUp 0.4s ease both;
 }
 
-.buttons {
+// ── BOTONES ───────────────────────────────────────────────────────────────────
+.bio-btns {
   display: flex;
-  gap: 14px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: 6px;
+  animation: fadeInUp 0.5s ease 0.28s both;
 }
 
-.btn-filled {
-  padding: 12px 28px;
-  background-color: #4D0F60;
-  color: white;
+.btn-bio {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s, background 0.2s;
   border: none;
-  border-radius: 8px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
 
-  &:hover { background-color: #3a0b48; }
-}
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
 
-.btn-outline {
-  padding: 12px 28px;
-  background-color: white;
-  color: #4D0F60;
-  border: 2px solid #4D0F60;
-  border-radius: 8px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  &.btn-filled {
+    background: linear-gradient(135deg, $purple-dark, $blue-dark);
+    color: $white;
+    box-shadow: 0 6px 20px rgba(77,15,96,0.35);
 
-  &:hover {
-    background-color: #4D0F60;
-    color: white;
-  }
-}
-
-.password-link {
-  color: #4A4D56;
-  font-size: 13px;
-  text-decoration: underline;
-  cursor: pointer;
-  margin-top: 4px;
-
-  &:hover { color: #4D0F60; }
-}
-
-// Tablets
-@media (max-width: 768px) {
-  .bio-bg {
-    flex-direction: column;
+    &:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(77,15,96,0.45);
+    }
+    &:active:not(:disabled) { transform: translateY(0); }
   }
 
-  .sidebar {
-    width: 100%;
-    flex-direction: row;
-    padding: 20px 28px;
-    gap: 16px;
+  &.btn-outline {
+    background: $white;
+    color: $purple-dark;
+    border: 2px solid $purple-dark;
 
-    .logo-circle {
-      width: 50px;
-      height: 50px;
-      font-size: 15px;
+    &:hover:not(:disabled) {
+      background: $purple-dark;
+      color: $white;
+      transform: translateY(-2px);
+    }
+    &:active:not(:disabled) { transform: translateY(0); }
+  }
+
+  &.btn-ghost {
+    background: transparent;
+    color: $text-soft;
+    border: 1.5px solid #ccc;
+
+    &:hover:not(:disabled) {
+      border-color: $text-soft;
+      background: rgba(0,0,0,0.04);
+      transform: translateY(-1px);
     }
   }
-
-  .lock-circle {
-    width: 140px;
-    height: 140px;
-
-    svg { width: 70px; height: 70px; }
-  }
-
-  h2 { font-size: 22px; }
 }
 
-// Móviles
+// ── RESPONSIVE ────────────────────────────────────────────────────────────────
 @media (max-width: 480px) {
-  .sidebar {
-    padding: 16px 20px;
-
-    .logo-circle {
-      width: 42px;
-      height: 42px;
-      font-size: 13px;
-    }
-
-    .brand { font-size: 13px; }
+  .bio-card {
+    padding: 40px 24px 32px;
+    border-radius: 20px;
   }
-
-  .lock-circle {
-    width: 110px;
-    height: 110px;
-
-    svg { width: 55px; height: 55px; }
-  }
-
+  .bio-icon-wrap { width: 90px; height: 90px; }
+  .bio-svg       { width: 46px; height: 46px; }
   h2 { font-size: 20px; }
-
-  .btn-filled, .btn-outline {
-    width: 100%;
-    text-align: center;
-  }
-
-  .buttons {
-    width: 100%;
-    flex-direction: column;
-  }
 }

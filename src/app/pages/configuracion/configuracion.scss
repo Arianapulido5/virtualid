@@ -435,6 +435,51 @@ $success:      #1a7a4a;
 .idioma-nombre { flex: 1; }
 .idioma-check  { color: $purple-dark; font-weight: 700; font-size: 14px; animation: fadeIn 0.2s ease both; }
 
+
+
+// ── AGREGAR AL FINAL de src/app/pages/configuracion/configuracion.scss ──────
+
+// Info del toggle biométrico
+.bio-toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.bio-toggle-sub {
+  font-size: 11px;
+  color: #aaa;
+  font-family: 'Open Sans', sans-serif;
+
+  &--activa { color: $success; }
+}
+
+// Skeleton del toggle
+.bio-toggle-skeleton {
+  width: 50px; height: 28px;
+  border-radius: 28px;
+  background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.3s infinite;
+  flex-shrink: 0;
+}
+
+// Spinner inline durante activación/desactivación
+.bio-toggle-spinner {
+  width: 24px; height: 24px;
+  border: 3px solid #e8e0f0;
+  border-top-color: $purple-dark;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
 // ─────────────────────────────────────────────
 //  RESPONSIVE
 // ─────────────────────────────────────────────

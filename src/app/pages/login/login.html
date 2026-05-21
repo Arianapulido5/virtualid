@@ -1,4 +1,6 @@
+<!-- src/app/pages/login/login.html -->
 <div class="login-bg">
+  <div class="login-bg-orb3"></div>
   <div class="card">
     <div class="logo-circle">VID</div>
     <h2>Iniciar Sesión</h2>
@@ -29,12 +31,10 @@
           autocomplete="new-password"
         />
         <button class="eye-btn" (click)="togglePassword()" type="button" tabindex="-1">
-          <!-- showPassword=false → contraseña oculta → ojo CON diagonal -->
           <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
             <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
           </svg>
-          <!-- showPassword=true → contraseña visible → ojo SIN diagonal -->
           <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
           </svg>
@@ -51,17 +51,43 @@
     <!-- ERROR GENERAL -->
     <p *ngIf="errorGeneral" class="error-general">{{ errorGeneral }}</p>
 
-    <!-- BOTÓN -->
-    <button class="btn-login" (click)="iniciarSesion()" [disabled]="cargando">
+    <!-- BOTÓN INICIO DE SESIÓN MANUAL -->
+    <button class="btn-login" (click)="iniciarSesion()" [disabled]="cargando || verificandoBio">
       <span *ngIf="!cargando">Iniciar Sesión</span>
       <span *ngIf="cargando" class="spinner"></span>
     </button>
 
-    <!-- LINKS DE REGISTRO -->
+    <!-- SEPARADOR -->
+    <div class="divider-row" *ngIf="biometricaDisponible">
+      <div class="divider"></div>
+      <span class="divider-txt">o</span>
+      <div class="divider"></div>
+    </div>
+
+    <!-- BOTÓN BIOMÉTRICO -->
+    <button
+      class="btn-bio-login"
+      *ngIf="biometricaDisponible"
+      (click)="iniciarBiometria()"
+      [disabled]="cargando || verificandoBio">
+      <span *ngIf="!verificandoBio">
+        <!-- Huella / Face ID icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20">
+          <path d="M12 2a5 5 0 0 1 5 5"/>
+          <path d="M7 7a5 5 0 0 1 10 0"/>
+          <path d="M12 12a2 2 0 0 1 2 2v4"/>
+          <path d="M10 14a2 2 0 0 1 4 0"/>
+          <path d="M4 10a8 8 0 0 1 16 0"/>
+          <path d="M2 14s2 6 10 6 10-6 10-6"/>
+        </svg>
+        Acceder con huella / Face ID
+      </span>
+      <span *ngIf="verificandoBio" class="spinner spinner-dark"></span>
+    </button>
+
+    <!-- LINK DE REGISTRO -->
     <a routerLink="/registro" class="register-link">
       ¿No tienes cuenta? Regístrate aquí
     </a>
-
-   
   </div>
 </div>

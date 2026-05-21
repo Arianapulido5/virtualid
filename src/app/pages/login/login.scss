@@ -501,6 +501,70 @@ h2 {
   }
 }
 
+// ── AGREGAR AL FINAL de src/app/pages/login/login.scss ──────────────────────
+// (El resto del archivo no cambia)
+
+// Separador con texto "o"
+.divider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  animation: fadeInUp 0.45s ease 0.64s both;
+
+  .divider {
+    flex: 1;
+    height: 1px;
+    background: #d8dce6;
+    animation: none; // anula la animación del .divider original
+  }
+
+  .divider-txt {
+    font-size: 12px;
+    color: #aaa;
+    font-family: 'Open Sans', sans-serif;
+    flex-shrink: 0;
+  }
+}
+
+// Botón biométrico
+.btn-bio-login {
+  width: 100%;
+  padding: 13px;
+  background: $white;
+  color: $purple-dark;
+  border: 2px solid $purple-dark;
+  border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.22s, color 0.22s, transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+  animation: fadeInUp 0.5s ease 0.68s both;
+
+  svg { flex-shrink: 0; }
+
+  &:hover:not(:disabled) {
+    background: $purple-dark;
+    color: $white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(77,15,96,0.3);
+  }
+  &:active:not(:disabled) { transform: translateY(0); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// Spinner oscuro (para botón blanco)
+.spinner-dark {
+  border-color: rgba(77,15,96,0.2) !important;
+  border-top-color: $purple-dark !important;
+  border-right-color: rgba(77,15,96,0.5) !important;
+}
+
 // ─────────────────────────────────────────────
 //  RESPONSIVE
 // ─────────────────────────────────────────────

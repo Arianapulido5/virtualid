@@ -1,73 +1,67 @@
 {
-  "hash": "b8e35a4e",
-  "configHash": "7dedd090",
+  "hash": "41f40b95",
+  "configHash": "6fab6d43",
   "lockfileHash": "4fdc30e9",
-  "browserHash": "68c63e80",
+  "browserHash": "77bfeb7b",
   "optimized": {
     "@angular/cdk/layout": {
       "src": "../../../../../../node_modules/@angular/cdk/fesm2022/layout.mjs",
       "file": "@angular_cdk_layout.js",
-      "fileHash": "a4ce8354",
+      "fileHash": "35dbc4e4",
       "needsInterop": false
     },
     "@angular/common": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
-      "fileHash": "5f14fe25",
+      "fileHash": "54b3314e",
       "needsInterop": false
     },
     "@angular/common/http": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
       "file": "@angular_common_http.js",
-      "fileHash": "0f6dc2ff",
+      "fileHash": "749d4bbd",
       "needsInterop": false
     },
     "@angular/core": {
       "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
       "file": "@angular_core.js",
-      "fileHash": "805b52dd",
+      "fileHash": "2fcb6832",
       "needsInterop": false
     },
     "@angular/forms": {
       "src": "../../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
       "file": "@angular_forms.js",
-      "fileHash": "b1f07836",
+      "fileHash": "74f4408b",
       "needsInterop": false
     },
     "@angular/platform-browser": {
       "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
-      "fileHash": "7fa7f13d",
+      "fileHash": "4b5fbb69",
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
-      "fileHash": "17af59cc",
-      "needsInterop": false
-    },
-    "@capacitor/push-notifications": {
-      "src": "../../../../../../node_modules/@capacitor/push-notifications/dist/esm/index.js",
-      "file": "@capacitor_push-notifications.js",
-      "fileHash": "bb189a8c",
+      "fileHash": "22e73f4f",
       "needsInterop": false
     },
     "jsqr": {
       "src": "../../../../../../node_modules/jsqr/dist/jsQR.js",
       "file": "jsqr.js",
-      "fileHash": "bfe7cc47",
+      "fileHash": "a9bc3436",
       "needsInterop": true
     },
     "rxjs": {
       "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
       "file": "rxjs.js",
-      "fileHash": "7fc8c25a",
+      "fileHash": "59d25ed8",
       "needsInterop": false
     },
     "rxjs/operators": {
       "src": "../../../../../../node_modules/rxjs/dist/esm5/operators/index.js",
       "file": "rxjs_operators.js",
-      "fileHash": "e7c50f1f",
+      "fileHash": "110d2596",
       "needsInterop": false
     }
   },
