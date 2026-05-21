@@ -39,13 +39,10 @@
       <div class="config-item" *ngIf="!cargandoBiometrica">
         <div class="bio-toggle-info">
           <span>Autenticación biométrica</span>
-          <span class="bio-toggle-sub" *ngIf="!biometricaSoportada">
-            No disponible en este dispositivo
-          </span>
-          <span class="bio-toggle-sub bio-toggle-sub--activa" *ngIf="biometricaSoportada && biometrica">
+          <span class="bio-toggle-sub bio-toggle-sub--activa" *ngIf="biometrica">
             Activa · toca para desactivar
           </span>
-          <span class="bio-toggle-sub" *ngIf="biometricaSoportada && !biometrica">
+          <span class="bio-toggle-sub" *ngIf="!biometrica">
             Inactiva · toca para activar
           </span>
         </div>
@@ -53,12 +50,11 @@
         <!-- Spinner durante operación -->
         <div class="bio-toggle-spinner" *ngIf="procesandoBiometrica"></div>
 
-        <!-- Toggle deshabilitado si no hay soporte o está procesando -->
+        <!-- Sin [disabled], la página /biometrica maneja el error de soporte -->
         <label class="toggle" *ngIf="!procesandoBiometrica">
           <input
             type="checkbox"
             [checked]="biometrica"
-            [disabled]="!biometricaSoportada"
             (change)="toggleBiometrica()"
           />
           <span class="toggle-slider"></span>
@@ -96,6 +92,5 @@
       </a>
     </div>
   </div>
-
 
 </div>

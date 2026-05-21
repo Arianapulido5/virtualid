@@ -31,9 +31,9 @@ export class Configuracion implements OnInit {
   cargandoGeo         = false;
 
   // Biometría
-  cargandoBiometrica    = true;
-  biometricaSoportada   = true;  // optimista por defecto, no bloqueamos navegación
-  procesandoBiometrica  = false;
+  cargandoBiometrica   = true;
+  biometricaSoportada  = true;
+  procesandoBiometrica = false;
 
   idiomas = ['Español', 'English', 'Français', 'Deutsch', 'Português', 'Italiano'];
 
@@ -56,7 +56,7 @@ export class Configuracion implements OnInit {
     BiometricaService.soportado().then((ok) => {
       console.log('🔬 biometricaSoportada:', ok);
       console.log('🌐 isSecureContext:', window.isSecureContext);
-      console.log('🔑 PublicKeyCredential exists:', !!window.PublicKeyCredential);
+      console.log('🔑 PublicKeyCredential:', !!window.PublicKeyCredential);
       this.biometricaSoportada = ok;
       this.cdr.detectChanges();
     });
@@ -90,13 +90,12 @@ export class Configuracion implements OnInit {
   toggleBiometrica(): void {
     if (this.procesandoBiometrica) return;
 
-    const queremoActivar = this.biometrica; // el checkbox ya actualizó el valor
+    const queremoActivar = this.biometrica;
 
     if (queremoActivar) {
-      // Navegar directo a la pantalla de registro — ella maneja el error si no hay soporte
+      // Navegar a registro — esa pantalla maneja si no hay soporte
       this.router.navigate(['/biometrica']);
     } else {
-      // Desactivar biometría
       this.procesandoBiometrica = true;
       this.cdr.detectChanges();
 
@@ -107,7 +106,6 @@ export class Configuracion implements OnInit {
           this.cdr.detectChanges();
         },
         error: () => {
-          // Revertir si falló
           this.biometrica           = true;
           this.procesandoBiometrica = false;
           this.cdr.detectChanges();
