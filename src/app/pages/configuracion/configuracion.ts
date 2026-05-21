@@ -1,9 +1,11 @@
 // src/app/pages/configuracion/configuracion.ts
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { GeocodingService } from '../../services/geocoding';
 import { environment } from '../../../environments/environment';
 import { PushService } from '../../services/push.service';
@@ -16,7 +18,7 @@ import { BiometricaService } from '../../services/biometrica.service';
   templateUrl: './configuracion.html',
   styleUrls: ['./configuracion.scss'],
 })
-export class Configuracion implements OnInit {
+export class Configuracion implements OnInit, OnDestroy {
 
   biometrica     = false;
   notificaciones = true;
@@ -30,14 +32,14 @@ export class Configuracion implements OnInit {
   tieneUbicacion      = false;
   cargandoGeo         = false;
 
-  // Biometría
   cargandoBiometrica   = true;
   biometricaSoportada  = true;
   procesandoBiometrica = false;
 
   idiomas = ['Español', 'English', 'Français', 'Deutsch', 'Português', 'Italiano'];
 
-  private apiUrl = environment.apiUrl;
+  private apiUrl     = environment.apiUrl;
+  private routerSub?: Subscription;
 
   constructor(
     private router:      Router,
@@ -54,12 +56,23 @@ export class Configuracion implements OnInit {
     this.cargarEstadoBiometrica();
 
     BiometricaService.soportado().then((ok) => {
-      console.log('🔬 biometricaSoportada:', ok);
-      console.log('🌐 isSecureContext:', window.isSecureContext);
-      console.log('🔑 PublicKeyCredential:', !!window.PublicKeyCredential);
-      this.biometricaSoportada = ok;
-      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.biometricaSoportada = ok;
+        this.cdr.detectChanges();
+      }, 0);
     });
+
+    this.routerSub = this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => {
+        if (e.urlAfterRedirects === '/configuracion') {
+          this.cargarEstadoBiometrica();
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
   }
 
   private get headers(): HttpHeaders {
@@ -68,28 +81,24 @@ export class Configuracion implements OnInit {
     });
   }
 
-  // ── Estado biométrico ────────────────────────────────────────────────────
-
-private cargarEstadoBiometrica(): void {
-  this.cargandoBiometrica = true;
-  this.bioService.obtenerEstado().subscribe({
-    next: (estado) => {
-      setTimeout(() => {
-        this.biometrica         = estado.activa;
-        this.cargandoBiometrica = false;
-        this.cdr.detectChanges();
-      }, 0);
-    },
-    error: () => {
-      setTimeout(() => {
-        this.cargandoBiometrica = false;
-        this.cdr.detectChanges();
-      }, 0);
-    },
-  });
-}
-
-  // ── Toggle biometría ─────────────────────────────────────────────────────
+  private cargarEstadoBiometrica(): void {
+    this.cargandoBiometrica = true;
+    this.bioService.obtenerEstado().subscribe({
+      next: (estado) => {
+        setTimeout(() => {
+          this.biometrica         = estado.activa;
+          this.cargandoBiometrica = false;
+          this.cdr.detectChanges();
+        }, 0);
+      },
+      error: () => {
+        setTimeout(() => {
+          this.cargandoBiometrica = false;
+          this.cdr.detectChanges();
+        }, 0);
+      },
+    });
+  }
 
   toggleBiometrica(): void {
     if (this.procesandoBiometrica) return;
@@ -97,7 +106,6 @@ private cargarEstadoBiometrica(): void {
     const queremoActivar = this.biometrica;
 
     if (queremoActivar) {
-      // Navegar a registro — esa pantalla maneja si no hay soporte
       this.router.navigate(['/biometrica']);
     } else {
       this.procesandoBiometrica = true;
@@ -117,8 +125,6 @@ private cargarEstadoBiometrica(): void {
       });
     }
   }
-
-  // ── Preferencias (notificaciones) ────────────────────────────────────────
 
   private cargarPreferencias(): void {
     this.http
@@ -159,8 +165,6 @@ private cargarEstadoBiometrica(): void {
         });
     }
   }
-
-  // ── Institución ──────────────────────────────────────────────────────────
 
   private cargarInstitucion(): void {
     this.cargandoInstitucion = true;
@@ -212,8 +216,6 @@ private cargarEstadoBiometrica(): void {
         },
       });
   }
-
-  // ── Idioma ───────────────────────────────────────────────────────────────
 
   toggleIdioma(): void { this.showIdiomas = !this.showIdiomas; }
 
