@@ -1,4 +1,6 @@
 // src/app/pages/autenticacion-biometrica/autenticacion-biometrica.scss
+// REEMPLAZA el contenido completo de este archivo
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500&display=swap');
 
 $purple-dark: #4D0F60;
@@ -11,6 +13,7 @@ $text-soft:   #4A4D56;
 $success:     #2e7d32;
 $danger:      #A93845;
 
+// ── KEYFRAMES ─────────────────────────────────────────────────────────────────
 @keyframes gradientShift {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
@@ -29,13 +32,7 @@ $danger:      #A93845;
   0%, 100% { transform: translate(0, 0); }
   50%       { transform: translate(-40px, 35px); }
 }
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-@keyframes iconPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
-  50%       { transform: scale(1.06); box-shadow: 0 0 0 20px rgba(255,255,255,0); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 @keyframes successPop {
   0%   { transform: scale(0.5) rotate(-10deg); opacity: 0; }
   60%  { transform: scale(1.15) rotate(3deg); opacity: 1; }
@@ -44,6 +41,34 @@ $danger:      #A93845;
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes arcRotate {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -250; }
+}
+@keyframes arcRotate2 {
+  from { stroke-dashoffset: -125; }
+  to   { stroke-dashoffset: 125; }
+}
+@keyframes scanLineMove {
+  0%   { transform: translateY(0); opacity: 1; }
+  45%  { opacity: 1; }
+  50%  { transform: translateY(160px); opacity: 0; }
+  51%  { transform: translateY(0); opacity: 0; }
+  55%  { opacity: 1; }
+  100% { transform: translateY(160px); opacity: 1; }
+}
+@keyframes huellaOndula {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
+}
+@keyframes instruccionSlide {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
+  50%       { transform: scale(1.06); box-shadow: 0 0 0 20px rgba(255,255,255,0); }
 }
 
 // ── FONDO ─────────────────────────────────────────────────────────────────────
@@ -98,9 +123,16 @@ $danger:      #A93845;
   z-index: 1;
   box-shadow: 0 32px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.12) inset;
   animation: cardIn 0.6s cubic-bezier(.34,1.2,.64,1) both;
+
+  // Modo cámara: fondo oscuro, sin padding extra
+  &.face-mode {
+    background: #0a0a0f;
+    padding: 0;
+    overflow: hidden;
+  }
 }
 
-// ── ÍCONO ─────────────────────────────────────────────────────────────────────
+// ── ÍCONO BASE ────────────────────────────────────────────────────────────────
 .bio-icon-wrap {
   width: 110px; height: 110px;
   border-radius: 50%;
@@ -109,61 +141,30 @@ $danger:      #A93845;
   box-shadow: 0 10px 34px rgba(77,15,96,0.45);
   transition: box-shadow 0.3s;
   margin-bottom: 4px;
-
   &.pulsing { animation: iconPulse 1.4s ease-in-out infinite; }
 }
 
 .bio-svg {
   width: 56px; height: 56px;
   animation: fadeInUp 0.4s ease both;
-
   &.success-svg { animation: successPop 0.5s cubic-bezier(.34,1.56,.64,1) both; }
 }
 
-// ── SPINNER ───────────────────────────────────────────────────────────────────
-.bio-spinner {
-  width: 48px; height: 48px;
-  border: 4px solid rgba(255,255,255,0.2);
-  border-top-color: $white;
-  border-right-color: rgba(255,255,255,0.6);
-  border-radius: 50%;
-  animation: spin 0.75s linear infinite;
-}
-
-// ── TEXTOS ───────────────────────────────────────────────────────────────────
+// ── TEXTOS ────────────────────────────────────────────────────────────────────
 h2 {
   font-family: 'Montserrat', sans-serif;
-  font-size: 24px; font-weight: 800;
+  font-size: 22px; font-weight: 800;
   color: $text-main; margin: 0;
   animation: fadeInUp 0.45s ease 0.1s both;
 }
-
 p {
   font-size: 14px; color: $text-soft;
   line-height: 1.6; margin: 0;
   animation: fadeInUp 0.45s ease 0.18s both;
 }
-
 .txt-exito     { color: $success; }
 .txt-error     { color: $danger; }
-.txt-error-sub {
-  color: color-mix(in srgb, $danger 90%, black);
-  font-size: 13px;
-}
-
-// ── AVISO SIN SOPORTE ─────────────────────────────────────────────────────────
-.aviso-sin-soporte {
-  font-size: 12.5px;
-  color: color-mix(in srgb, $danger 90%, black);
-  background: rgba(169,56,69,0.08);
-  border: 1px solid rgba(169,56,69,0.25);
-  border-radius: 10px;
-  padding: 10px 14px;
-  width: 100%;
-  box-sizing: border-box;
-  text-align: center;
-  animation: fadeInUp 0.4s ease both;
-}
+.txt-error-sub { color: darken($danger, 5%); font-size: 13px; }
 
 // ── BOTONES ───────────────────────────────────────────────────────────────────
 .bio-btns {
@@ -182,23 +183,20 @@ p {
   font-family: 'Montserrat', sans-serif;
   font-size: 14px; font-weight: 700;
   cursor: pointer;
-  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s, background 0.2s;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s, background 0.2s;
 
   svg { flex-shrink: 0; transition: transform 0.25s cubic-bezier(.34,1.56,.64,1); }
-
   &:disabled { opacity: 0.45; cursor: not-allowed; }
 
-  // Botón principal (huella) — relleno morado
   &.btn-filled {
     background: linear-gradient(135deg, $purple-dark, $blue-dark);
     color: $white;
     box-shadow: 0 6px 20px rgba(77,15,96,0.35);
-
     &:hover:not(:disabled) {
       transform: translateY(-3px);
       box-shadow: 0 12px 28px rgba(77,15,96,0.45);
@@ -207,12 +205,10 @@ p {
     &:active:not(:disabled) { transform: translateY(0); }
   }
 
-  // Botón secundario (face id) — contorno
   &.btn-outline {
     background: $white;
     color: $purple-dark;
     border: 2px solid $purple-dark;
-
     &:hover:not(:disabled) {
       background: $purple-dark;
       color: $white;
@@ -222,12 +218,10 @@ p {
     &:active:not(:disabled) { transform: translateY(0); }
   }
 
-  // Botón fantasma (cancelar)
   &.btn-ghost {
     background: transparent;
     color: $text-soft;
     border: 1.5px solid #ccc;
-
     &:hover:not(:disabled) {
       border-color: $text-soft;
       background: rgba(0,0,0,0.04);
@@ -236,14 +230,185 @@ p {
   }
 }
 
-// ── RESPONSIVE ────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+//  FACE ID — INTRO
+// ─────────────────────────────────────────────────────────────────────────────
+.face-intro-icon {
+  width: 160px; height: 160px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 8px;
+
+  svg { width: 100%; height: 100%; }
+}
+
+.arc-anim {
+  stroke-dasharray: 80 170;
+  animation: arcRotate 3s linear infinite;
+}
+.arc-anim-2 {
+  stroke-dasharray: 80 170;
+  animation: arcRotate2 3s linear infinite;
+}
+
+.scan-line {
+  stroke-dasharray: 4 4;
+  opacity: 0.4;
+  animation: scanLineMove 2.5s ease-in-out infinite;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  FACE ID — CÁMARA
+// ─────────────────────────────────────────────────────────────────────────────
+.face-camera-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #000;
+  overflow: hidden;
+  border-radius: 28px;
+}
+
+.face-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);     // espejo para cámara frontal
+  display: block;
+}
+
+.face-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.face-overlay-svg {
+  width: 100%;
+  height: 100%;
+}
+
+// Arco de progreso animado suavemente
+.face-progress-arc {
+  transition: stroke-dasharray 0.2s linear;
+}
+
+// Línea de escaneo
+.face-scan-line {
+  transition: y1 0.08s linear, y2 0.08s linear;
+  filter: drop-shadow(0 0 3px rgba(255,255,255,0.6));
+}
+
+// Instrucción flotante sobre la cámara
+.face-instruccion {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  padding: 20px 24px 28px;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 80px;
+}
+
+.face-instruccion-text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: $white;
+  text-align: center;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+  animation: instruccionSlide 0.4s ease both;
+}
+
+// Error superpuesto a la cámara
+.face-error {
+  padding: 24px 36px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+
+  p {
+    font-size: 14px;
+    color: $danger;
+    margin-bottom: 16px;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  HUELLA DACTILAR — INTRO
+// ─────────────────────────────────────────────────────────────────────────────
+.huella-icon-wrap {
+  width: 160px; height: 160px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 8px;
+}
+
+.huella-svg-intro {
+  width: 100%; height: 100%;
+  animation: huellaOndula 3s ease-in-out infinite;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  HUELLA DACTILAR — SENSOR
+// ─────────────────────────────────────────────────────────────────────────────
+.huella-sensor-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  padding: 20px 36px 32px;
+  box-sizing: border-box;
+}
+
+.huella-sensor-svg {
+  width: 220px; height: 220px;
+}
+
+// Pulso del fondo circular cuando espera
+.huella-pulse {
+  animation: huellaOndula 1.5s ease-in-out infinite;
+}
+
+// Anillo de progreso
+.huella-progress-circle {
+  transition: stroke-dasharray 0.5s ease;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.5));
+}
+
+// Líneas de huella (opacidad cambia con JS)
+svg path, svg line {
+  transition: opacity 0.5s ease;
+}
+
+.huella-instruccion {
+  text-align: center;
+
+  p {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: $text-main;
+    margin: 0;
+    animation: instruccionSlide 0.4s ease both;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  RESPONSIVE
+// ─────────────────────────────────────────────────────────────────────────────
 @media (max-width: 480px) {
   .bio-card {
-    padding: 40px 24px 32px;
+    padding: 36px 22px 28px;
     border-radius: 20px;
+    &.face-mode { padding: 0; border-radius: 24px; }
   }
   .bio-icon-wrap { width: 90px; height: 90px; }
   .bio-svg       { width: 46px; height: 46px; }
   h2             { font-size: 20px; }
   .btn-bio       { font-size: 13px; padding: 13px 16px; }
+  .face-intro-icon { width: 130px; height: 130px; }
+  .huella-icon-wrap { width: 130px; height: 130px; }
+  .huella-sensor-svg { width: 180px; height: 180px; }
 }

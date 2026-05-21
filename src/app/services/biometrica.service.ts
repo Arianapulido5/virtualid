@@ -5,8 +5,6 @@ import { Observable, from, throwError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
-// ── Helpers de conversión base64url ↔ ArrayBuffer ──────────────────────────
-
 function base64urlToBuffer(base64url: string): ArrayBuffer {
   const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
   const padded  = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
@@ -16,6 +14,17 @@ function base64urlToBuffer(base64url: string): ArrayBuffer {
   return bytes.buffer;
 }
 
+function toBuffer(val: any): ArrayBuffer {
+  if (typeof val === 'string') return base64urlToBuffer(val);
+  if (val instanceof ArrayBuffer) return val;
+  if (ArrayBuffer.isView(val)) return (val as ArrayBufferView).buffer as ArrayBuffer;
+  if (typeof val === 'object' && val !== null) {
+    const arr = Object.values(val) as number[];
+    return new Uint8Array(arr).buffer;
+  }
+  return base64urlToBuffer(String(val));
+}
+
 function bufferToBase64url(buffer: ArrayBuffer): string {
   const bytes  = new Uint8Array(buffer);
   let binary   = '';
@@ -23,7 +32,6 @@ function bufferToBase64url(buffer: ArrayBuffer): string {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
-// Serializa la respuesta del autenticador para enviarla al backend
 function serializarCredencial(cred: PublicKeyCredential): any {
   const response = cred.response as AuthenticatorAttestationResponse;
   return {
@@ -52,35 +60,31 @@ function serializarAssercion(cred: PublicKeyCredential): any {
   };
 }
 
-// Prepara las opciones del servidor para llamar a navigator.credentials.create
 function prepararOpcionesRegistro(opts: any): PublicKeyCredentialCreationOptions {
   return {
     ...opts,
-    challenge: base64urlToBuffer(opts.challenge),
+    challenge: toBuffer(opts.challenge),
     user: {
       ...opts.user,
-      id: base64urlToBuffer(opts.user.id),
+      id: toBuffer(opts.user.id),
     },
     excludeCredentials: (opts.excludeCredentials ?? []).map((c: any) => ({
       ...c,
-      id: base64urlToBuffer(c.id),
+      id: toBuffer(c.id),
     })),
   };
 }
 
-// Prepara las opciones del servidor para llamar a navigator.credentials.get
 function prepararOpcionesAutenticacion(opts: any): PublicKeyCredentialRequestOptions {
   return {
     ...opts,
-    challenge: base64urlToBuffer(opts.challenge),
+    challenge: toBuffer(opts.challenge),
     allowCredentials: (opts.allowCredentials ?? []).map((c: any) => ({
       ...c,
-      id: base64urlToBuffer(c.id),
+      id: toBuffer(c.id),
     })),
   };
 }
-
-// ── Servicio ────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
 export class BiometricaService {
@@ -94,15 +98,11 @@ export class BiometricaService {
     });
   }
 
-  /** ¿El navegador soporta WebAuthn con plataforma? */
   static soportado(): Promise<boolean> {
     if (!window.PublicKeyCredential) return Promise.resolve(false);
     return PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
   }
 
-  // ── REGISTRO ──────────────────────────────────────────────────────────────
-
-  /** Paso 1 + 2: inicia y completa el registro biométrico */
   registrar(): Observable<{ message: string }> {
     return this.http
       .post<any>(`${this.api}/biometrica/registrar-inicio`, {}, { headers: this.headers() })
@@ -120,7 +120,6 @@ export class BiometricaService {
           );
         }),
         catchError((err) => {
-          // El usuario canceló o el dispositivo no soporta
           if (err?.name === 'NotAllowedError') {
             return throwError(() => ({ message: 'Registro cancelado por el usuario.' }));
           }
@@ -129,14 +128,10 @@ export class BiometricaService {
       );
   }
 
-  // ── AUTENTICACIÓN (login sin contraseña) ──────────────────────────────────
-
-  /** Paso 1: solicita opciones de autenticación para un correo */
   autenticarInicio(correo: string): Observable<any> {
     return this.http.post<any>(`${this.api}/biometrica/autenticar-inicio`, { correo });
   }
 
-  /** Paso 2: completa la autenticación con el autenticador local */
   autenticarFin(userId: number, opts: any): Observable<{ token: string; rol: string; tipo: string }> {
     const publicKey = prepararOpcionesAutenticacion(opts);
     return from(
@@ -158,9 +153,6 @@ export class BiometricaService {
     );
   }
 
-  // ── VERIFICACIÓN (para generar QR desde sesión activa) ───────────────────
-
-  /** Verifica biometría en sesión activa (antes de generar QR) */
   verificar(): Observable<{ verificado: boolean }> {
     return this.http
       .post<any>(`${this.api}/biometrica/verificar-inicio`, {}, { headers: this.headers() })
@@ -185,8 +177,6 @@ export class BiometricaService {
         })
       );
   }
-
-  // ── ESTADO Y DESACTIVACIÓN ────────────────────────────────────────────────
 
   obtenerEstado(): Observable<{ activa: boolean; credenciales: any[] }> {
     return this.http.get<any>(`${this.api}/biometrica/estado`, { headers: this.headers() });
