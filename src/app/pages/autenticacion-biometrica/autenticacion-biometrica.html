@@ -4,11 +4,9 @@
   <div class="bio-card" [class.camara-mode]="pantalla === 'camara'">
 
     <!-- ══════════════════════════════════════════════
-         PANTALLA: INTRO  (imagen 1)
+         PANTALLA: CORREO (login sin correo en URL)
     ══════════════════════════════════════════════ -->
-    <ng-container *ngIf="pantalla === 'intro'">
-
-      <!-- Botón volver -->
+    <ng-container *ngIf="pantalla === 'correo'">
       <button class="btn-back" (click)="cancelar()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -16,11 +14,51 @@
         </svg>
       </button>
 
-      <!-- Ícono animado: círculo de ticks + cara -->
+      <div class="correo-wrap">
+        <div class="correo-icono">
+          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="38" fill="rgba(0,122,255,0.08)" stroke="rgba(0,122,255,0.2)" stroke-width="1.5"/>
+            <path d="M26 30a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H30a4 4 0 0 1-4-4V30z"
+                  stroke="#007AFF" stroke-width="2" fill="none"/>
+            <path d="M26 30l14 10 14-10" stroke="#007AFF" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+        <h2 class="intro-title">Acceso con Face ID</h2>
+        <p class="intro-desc">Escribe tu correo para buscar tu cara registrada.</p>
+
+        <div class="correo-field">
+          <input
+            type="email"
+            placeholder="usuario@email.com"
+            [(ngModel)]="correoLogin"
+            (ngModelChange)="correoError = ''"
+            class="correo-input"
+            [class.correo-input--error]="correoError"
+          />
+          <span class="correo-error" *ngIf="correoError">{{ correoError }}</span>
+        </div>
+
+        <div class="intro-btns">
+          <button class="btn-empezar" (click)="continuarConCorreo()">Continuar</button>
+        </div>
+      </div>
+    </ng-container>
+
+
+    <!-- ══════════════════════════════════════════════
+         PANTALLA: INTRO
+    ══════════════════════════════════════════════ -->
+    <ng-container *ngIf="pantalla === 'intro'">
+      <button class="btn-back" (click)="cancelar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+
       <div class="face-intro-wrap">
         <svg class="face-intro-svg" viewBox="0 0 240 240"
              fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Ticks del círculo exterior -->
           <g class="ticks-group">
             <ng-container *ngFor="let tick of ticksArray; let i = index">
               <line
@@ -31,72 +69,50 @@
                 stroke="#D0D0D5" stroke-width="2.5" stroke-linecap="round"/>
             </ng-container>
           </g>
-          <!-- Cara estilo Face ID -->
           <circle cx="120" cy="120" r="56" stroke="#C8C8CC" stroke-width="1.5" fill="none"/>
-          <!-- Ojos -->
           <rect x="100" y="100" width="8" height="12" rx="4" fill="#888"/>
           <rect x="132" y="100" width="8" height="12" rx="4" fill="#888"/>
-          <!-- Nariz -->
-          <path d="M115 118 Q120 126 125 118" stroke="#888" stroke-width="2"
-                fill="none" stroke-linecap="round"/>
-          <!-- Boca -->
-          <path d="M108 132 Q120 143 132 132" stroke="#888" stroke-width="2.5"
-                fill="none" stroke-linecap="round"/>
-          <!-- Arcos de esquina (tipo Face ID) -->
-          <path d="M78 100 Q78 88 90 88" stroke="#888" stroke-width="2.5"
-                fill="none" stroke-linecap="round"/>
-          <path d="M150 100 Q150 88 162 88" stroke="#888" stroke-width="2.5"
-                fill="none" stroke-linecap="round"/>
-          <path d="M78 140 Q78 152 90 152" stroke="#888" stroke-width="2.5"
-                fill="none" stroke-linecap="round"/>
-          <path d="M162 140 Q162 152 150 152" stroke="#888" stroke-width="2.5"
-                fill="none" stroke-linecap="round"/>
+          <path d="M115 118 Q120 126 125 118" stroke="#888" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M108 132 Q120 143 132 132" stroke="#888" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M78 100 Q78 88 90 88" stroke="#888" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M150 100 Q150 88 162 88" stroke="#888" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M78 140 Q78 152 90 152" stroke="#888" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M162 140 Q162 152 150 152" stroke="#888" stroke-width="2.5" fill="none" stroke-linecap="round"/>
         </svg>
       </div>
 
-      <h2 class="intro-title">Cómo configurar Face ID</h2>
+      <h2 class="intro-title">
+        {{ modo === 'registro' ? 'Cómo configurar Face ID' : 'Verificación facial' }}
+      </h2>
       <p class="intro-desc">
-        Primero, sitúa tu cara dentro del marco de la cámara.
-        Después, mueve tu cabeza circularmente de forma que se
-        muestren todos los ángulos de tu cara.
+        {{ modo === 'registro'
+          ? 'Sitúa tu cara dentro del marco y mueve tu cabeza circularmente para registrar todos los ángulos.'
+          : 'Sitúa tu cara dentro del marco. El sistema verificará que eres tú.' }}
       </p>
 
       <div class="intro-btns">
         <button class="btn-empezar" (click)="empezar()">Empezar</button>
       </div>
-
     </ng-container>
 
 
     <!-- ══════════════════════════════════════════════
-         PANTALLA: CÁMARA ACTIVA  (imagen 2)
+         PANTALLA: CÁMARA ACTIVA
     ══════════════════════════════════════════════ -->
     <ng-container *ngIf="pantalla === 'camara'">
-
       <div class="camara-wrap">
-
-        <!-- Video -->
         <video #videoRef autoplay playsinline muted class="camara-video"></video>
-        <!-- Canvas face-api (oculto para procesar) -->
         <canvas #canvasRef class="camara-canvas"></canvas>
 
-        <!-- Overlay SVG con círculo de progreso -->
         <div class="camara-overlay">
-          <svg viewBox="0 0 320 400" class="overlay-svg"
-               xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 320 400" class="overlay-svg" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <!-- Máscara oval para oscurecer el exterior -->
               <mask id="face-mask">
                 <rect width="320" height="400" fill="white"/>
                 <ellipse cx="160" cy="185" rx="115" ry="140" fill="black"/>
               </mask>
             </defs>
-
-            <!-- Oscurecimiento exterior -->
-            <rect width="320" height="400"
-                  fill="rgba(0,0,0,0.62)" mask="url(#face-mask)"/>
-
-            <!-- Ticks del borde (tipo imagen 2) -->
+            <rect width="320" height="400" fill="rgba(0,0,0,0.62)" mask="url(#face-mask)"/>
             <g class="overlay-ticks">
               <ng-container *ngFor="let t of ticksArray48; let i = index">
                 <line
@@ -105,38 +121,28 @@
                   [attr.x2]="(115 + 22) * Math.cos(i * tick48Angle) + 160"
                   [attr.y2]="(140 + 22) * Math.sin(i * tick48Angle) + 185"
                   [attr.stroke]="tickColor(i)"
-                  stroke-width="3"
-                  stroke-linecap="round"
-                  class="tick-line"/>
+                  stroke-width="3" stroke-linecap="round" class="tick-line"/>
               </ng-container>
             </g>
-
-            <!-- Línea de escaneo animada -->
             <line *ngIf="escaneando"
                   [attr.y1]="scanLineY" [attr.y2]="scanLineY"
                   x1="50" x2="270"
-                  stroke="rgba(255,255,255,0.45)"
-                  stroke-width="1.5"
-                  class="scan-line-anim"/>
+                  stroke="rgba(255,255,255,0.45)" stroke-width="1.5" class="scan-line-anim"/>
           </svg>
         </div>
 
-        <!-- Instrucción abajo -->
         <div class="instruccion-wrap">
           <p class="instruccion-txt" [class.cambiando]="instrCambiando">
             {{ instruccionActual }}
           </p>
         </div>
-
       </div>
 
-      <!-- Error de cámara -->
       <div class="camara-error" *ngIf="errorCamara">
         <p>{{ errorCamara }}</p>
         <button class="btn-reintentar" (click)="reintentar()">Reintentar</button>
         <button class="btn-cancelar-link" (click)="cancelar()">Cancelar</button>
       </div>
-
     </ng-container>
 
 
@@ -147,41 +153,43 @@
       <div class="exito-wrap">
         <div class="exito-icono">
           <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="60" cy="60" r="55" fill="rgba(52,199,89,0.15)"
-                    stroke="rgba(52,199,89,0.4)" stroke-width="1.5"/>
+            <circle cx="60" cy="60" r="55" fill="rgba(52,199,89,0.15)" stroke="rgba(52,199,89,0.4)" stroke-width="1.5"/>
             <circle cx="60" cy="60" r="40" fill="rgba(52,199,89,0.2)"/>
-            <polyline points="38,62 52,76 82,46"
-                      fill="none" stroke="#34C759" stroke-width="6"
-                      stroke-linecap="round" stroke-linejoin="round"
-                      class="check-stroke"/>
+            <polyline points="38,62 52,76 82,46" fill="none" stroke="#34C759" stroke-width="6"
+                      stroke-linecap="round" stroke-linejoin="round" class="check-stroke"/>
           </svg>
         </div>
-        <h2 class="exito-titulo">¡Face ID configurado!</h2>
-        <p class="exito-desc">Tu rostro fue registrado correctamente.</p>
+        <h2 class="exito-titulo">
+          {{ modo === 'registro' ? '¡Face ID configurado!' : '¡Bienvenido!' }}
+        </h2>
+        <p class="exito-desc">
+          {{ modo === 'registro'
+            ? 'Tu rostro fue registrado correctamente.'
+            : 'Identidad verificada correctamente.' }}
+        </p>
       </div>
     </ng-container>
 
 
     <!-- ══════════════════════════════════════════════
-         PANTALLA: ERROR GLOBAL
+         PANTALLA: ERROR
     ══════════════════════════════════════════════ -->
     <ng-container *ngIf="pantalla === 'error'">
       <div class="error-global-wrap">
         <div class="error-icono">
           <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="60" cy="60" r="55" fill="rgba(255,59,48,0.12)"
-                    stroke="rgba(255,59,48,0.35)" stroke-width="1.5"/>
-            <line x1="40" y1="40" x2="80" y2="80" stroke="#FF3B30"
-                  stroke-width="6" stroke-linecap="round"/>
-            <line x1="80" y1="40" x2="40" y2="80" stroke="#FF3B30"
-                  stroke-width="6" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="55" fill="rgba(255,59,48,0.12)" stroke="rgba(255,59,48,0.35)" stroke-width="1.5"/>
+            <line x1="40" y1="40" x2="80" y2="80" stroke="#FF3B30" stroke-width="6" stroke-linecap="round"/>
+            <line x1="80" y1="40" x2="40" y2="80" stroke="#FF3B30" stroke-width="6" stroke-linecap="round"/>
           </svg>
         </div>
-        <h2 class="error-titulo">No se pudo registrar</h2>
+        <h2 class="error-titulo">No se pudo verificar</h2>
         <p class="error-desc">{{ errorMensaje }}</p>
         <div class="error-btns">
           <button class="btn-empezar" (click)="reintentar()">Intentar de nuevo</button>
-          <button class="btn-cancelar-link" (click)="cancelar()">Cancelar</button>
+          <button class="btn-cancelar-link" (click)="cancelar()">
+            {{ modo === 'registro' ? 'Cancelar' : 'Usar contraseña' }}
+          </button>
         </div>
       </div>
     </ng-container>

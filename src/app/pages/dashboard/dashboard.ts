@@ -1,5 +1,5 @@
 // src/app/pages/dashboard/dashboard.ts
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone, ViewChild, ElementRef } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -41,6 +41,9 @@ interface Acceso {
 })
 export class Dashboard implements OnInit, OnDestroy {
 
+  @ViewChild('faceVideoRef')  faceVideoRef!:  ElementRef<HTMLVideoElement>;
+  @ViewChild('faceCanvasRef') faceCanvasRef!: ElementRef<HTMLCanvasElement>;
+
   private apiBase = environment.apiUrl;
 
   nombreUsuario  = '';
@@ -64,16 +67,26 @@ export class Dashboard implements OnInit, OnDestroy {
   geoError       = '';
   geoSolicitando = false;
 
-  // Verificación biométrica para QR
-  bioVerificando   = false;   // mostrando modal "verifica tu biometría"
-  bioError         = '';      // si falla la verificación
-  bioRequerida     = false;   // la institución requiere bio (siempre true en nuestro caso)
+  // ── Verificación facial para QR ────────────────────────────────────────────
+  // Estados: idle → scanning → processing → done/error
+  faceModalVisible  = false;   // modal con cámara activa
+  faceScanning      = false;   // cámara en marcha
+  faceProcessing    = false;   // enviando descriptor al backend
+  faceError         = '';      // mensaje de error facial
+  faceScanLineY     = 60;      // línea de escaneo animada
+  bioError          = '';      // error visible al usuario (sin cámara)
+  bioVerificando    = false;   // legacy — ya no usado, mantenido por compatibilidad
+
+  private faceStream:   MediaStream | null = null;
+  private faceInterval: any = null;
+  private scanLineInterval: any = null;
+  private faceApiLoaded = false;
+  private pendingCredForQR: Credencial | null = null;
 
   // Carrusel horizontal
   activeCardIndex = 0;
   carouselOffset  = 0;
 
-  // Swipe tracking
   private touchStartX  = 0;
   private touchStartY  = 0;
   private mouseStartX  = 0;
@@ -81,6 +94,7 @@ export class Dashboard implements OnInit, OnDestroy {
   private dragDeltaX   = 0;
 
   private countdownInterval: any;
+  private timers: any[] = [];
 
   constructor(
     private auth:      Auth,
@@ -173,6 +187,8 @@ export class Dashboard implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearInterval(this.countdownInterval);
+    this.limpiarCamaraFacial();
+    this.timers.forEach(t => clearTimeout(t));
   }
 
   // ── Carrusel ──────────────────────────────────────────────────────────────
@@ -221,7 +237,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   getCardClass(index: number): string {
     const d = index - this.activeCardIndex;
-    if (d === 0)            return 'is-active';
+    if (d === 0)             return 'is-active';
     if (d === -1 || d === 1) return 'is-adjacent';
     return 'is-far';
   }
@@ -229,6 +245,7 @@ export class Dashboard implements OnInit, OnDestroy {
   // ── Navegación ────────────────────────────────────────────────────────────
 
   irAHistorial(): void { this.router.navigate(['/historial']); }
+  irAConfiguracion(): void { this.router.navigate(['/configuracion']); }
   verDetalleAcceso(id: number): void { this.router.navigate(['/detalle-acceso', id]); }
 
   // ── Geo helpers ───────────────────────────────────────────────────────────
@@ -236,52 +253,204 @@ export class Dashboard implements OnInit, OnDestroy {
   cancelarGeo(): void { this.geoSolicitando = false; this.credencialQR = null; this.cdr.detectChanges(); }
   cerrarGeoError(): void { this.geoError = ''; this.cdr.detectChanges(); }
   reintentarQR(): void { if (this.credencialQR) { this.geoError = ''; this.mostrarQR(this.credencialQR); } }
+  cerrarBioError(): void { this.bioError = ''; this.cdr.detectChanges(); }
 
-  // ── Modal biométrico ──────────────────────────────────────────────────────
-
-  cerrarBioError(): void { this.bioError = ''; this.bioVerificando = false; this.cdr.detectChanges(); }
-
-  // ── GENERAR QR (flujo: bio → geo → token) ─────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  FLUJO PRINCIPAL: bio facial → geo → QR
+  // ═══════════════════════════════════════════════════════════════════════════
 
   mostrarQR(cred: Credencial): void {
-    if (this.qrGenerando) return;
+    if (this.qrGenerando || this.faceScanning) return;
+    this.pendingCredForQR = cred;
+    this.credencialQR     = cred;
+    this.bioError         = '';
+    this.geoError         = '';
+    this.abrirModalFacial();
+  }
 
-    this.credencialQR   = cred;
-    this.geoError       = '';
-    this.bioError       = '';
+  // ── Paso 1: abrir modal con cámara ────────────────────────────────────────
+
+  private async abrirModalFacial(): Promise<void> {
+    this.faceModalVisible = true;
+    this.faceScanning     = false;
+    this.faceProcessing   = false;
+    this.faceError        = '';
     this.cdr.detectChanges();
 
-    // PASO 1: verificar biometría
-    this.bioVerificando = true;
+    // Esperar un tick para que el DOM monte el <video>
+    await this.delay(120);
+    await this.cargarFaceApi();
+    await this.iniciarCamaraFacial();
+  }
+
+  cerrarModalFacial(): void {
+    this.limpiarCamaraFacial();
+    this.faceModalVisible = false;
+    this.pendingCredForQR = null;
+    this.credencialQR     = null;
+    this.cdr.detectChanges();
+  }
+
+  reintentarFacial(): void {
+    this.faceError = '';
+    this.abrirModalFacial();
+  }
+
+  // ── Carga face-api.js ─────────────────────────────────────────────────────
+
+  private cargarFaceApi(): Promise<void> {
+    if (this.faceApiLoaded || (window as any).faceapi) {
+      this.faceApiLoaded = true;
+      return Promise.resolve();
+    }
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
+      script.onload = async () => {
+        this.faceApiLoaded = true;
+        await this.cargarModelos();
+        resolve();
+      };
+      script.onerror = () => reject(new Error('No se pudo cargar face-api.js'));
+      document.head.appendChild(script);
+    });
+  }
+
+  private async cargarModelos(): Promise<void> {
+    const faceapi   = (window as any).faceapi;
+    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model';
+    try {
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+      ]);
+    } catch {
+      const ALT = 'https://justadudewhohacks.github.io/face-api.js/models';
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(ALT),
+        faceapi.nets.faceLandmark68Net.loadFromUri(ALT),
+        faceapi.nets.faceRecognitionNet.loadFromUri(ALT),
+      ]);
+    }
+  }
+
+  // ── Paso 2: iniciar cámara ────────────────────────────────────────────────
+
+  private async iniciarCamaraFacial(): Promise<void> {
+    try {
+      this.faceStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false,
+      });
+
+      const video = this.faceVideoRef?.nativeElement;
+      if (!video) { this.faceError = 'No se encontró el elemento de video.'; this.cdr.detectChanges(); return; }
+
+      video.srcObject = this.faceStream;
+      await video.play();
+
+      this.faceScanning = true;
+      this.iniciarScanLineFacial();
+      this.cdr.detectChanges();
+
+      // Auto-captura después de 1.8 s (da tiempo para centrarse)
+      const t = setTimeout(() => this.capturarDescriptor(), 1800);
+      this.timers.push(t);
+
+    } catch (err: any) {
+      const msg = err?.name === 'NotAllowedError'
+        ? 'Permiso de cámara denegado. Actívalo en los ajustes del navegador.'
+        : 'No se pudo acceder a la cámara.';
+      this.faceError    = msg;
+      this.faceScanning = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  private iniciarScanLineFacial(): void {
+    let dir = 1, posY = 50;
+    this.scanLineInterval = setInterval(() => {
+      posY += dir * 4;
+      if (posY > 220) dir = -1;
+      if (posY < 50)  dir = 1;
+      this.faceScanLineY = posY;
+      this.cdr.detectChanges();
+    }, 35);
+  }
+
+  // ── Paso 3: capturar descriptor ───────────────────────────────────────────
+
+  private async capturarDescriptor(): Promise<void> {
+    if (!this.faceScanning) return;
+
+    const faceapi = (window as any).faceapi;
+    const video   = this.faceVideoRef?.nativeElement;
+    if (!faceapi || !video) { this.faceError = 'Error interno.'; this.cdr.detectChanges(); return; }
+
+    this.faceProcessing = true;
     this.cdr.detectChanges();
 
-    this.bioService.verificar().subscribe({
+    try {
+      const det = await faceapi
+        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }))
+        .withFaceLandmarks(true)
+        .withFaceDescriptor();
+
+      if (!det) {
+        this.faceProcessing = false;
+        this.faceError      = 'No se detectó ningún rostro. Centra tu cara y vuelve a intentarlo.';
+        this.limpiarCamaraFacial();
+        this.cdr.detectChanges();
+        return;
+      }
+
+      const descriptor = Array.from(det.descriptor as Float32Array) as number[];
+      this.limpiarCamaraFacial();
+      this.enviarVerificacion(descriptor);
+
+    } catch {
+      this.faceProcessing = false;
+      this.faceError      = 'Error al procesar el rostro. Inténtalo de nuevo.';
+      this.limpiarCamaraFacial();
+      this.cdr.detectChanges();
+    }
+  }
+
+  // ── Paso 4: verificar en backend ──────────────────────────────────────────
+
+  private enviarVerificacion(descriptor: number[]): void {
+    this.faceProcessing = true;
+    this.cdr.detectChanges();
+
+    this.bioService.verificar(descriptor).subscribe({
       next: () => {
         this.ngZone.run(() => {
-          this.bioVerificando = false;
+          this.faceProcessing   = false;
+          this.faceModalVisible = false;
           this.cdr.detectChanges();
-          // PASO 2: obtener geolocalización
+          // Verificación exitosa → obtener geo y generar QR
           this.solicitarGeoYGenerar();
         });
       },
       error: (err: any) => {
         this.ngZone.run(() => {
-          this.bioVerificando = false;
+          this.faceProcessing = false;
           const msg = err?.error?.message ?? err?.message ?? '';
-          // Si no tiene biometría activa
-          if (msg.toLowerCase().includes('sin_biometrica') || msg.toLowerCase().includes('no tienes biometría') || err?.error?.sin_biometrica) {
-            this.bioError = 'Debes activar la autenticación biométrica en Configuración para generar un QR.';
-          } else if (msg.toLowerCase().includes('cancelad')) {
-            this.bioError = 'Verificación cancelada. Inténtalo de nuevo.';
+          if (err?.error?.sin_biometrica || msg.toLowerCase().includes('no tienes biometría') || msg.toLowerCase().includes('sin_biometrica')) {
+            this.faceError = 'No tienes biometría registrada. Actívala en Configuración para usar esta función.';
+          } else if (msg.toLowerCase().includes('no coincide') || msg.toLowerCase().includes('no match') || err?.status === 401) {
+            this.faceError = 'El rostro no coincide con el titular de la cuenta. Acceso denegado.';
           } else {
-            this.bioError = msg || 'No se pudo verificar tu identidad.';
+            this.faceError = msg || 'No se pudo verificar tu identidad.';
           }
-          this.credencialQR = null;
           this.cdr.detectChanges();
         });
       },
     });
   }
+
+  // ── Paso 5: geolocalización → QR ─────────────────────────────────────────
 
   private solicitarGeoYGenerar(): void {
     this.geoSolicitando = true;
@@ -391,13 +560,23 @@ export class Dashboard implements OnInit, OnDestroy {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
+  private limpiarCamaraFacial(): void {
+    this.faceScanning = false;
+    if (this.faceInterval)    { clearInterval(this.faceInterval);    this.faceInterval    = null; }
+    if (this.scanLineInterval){ clearInterval(this.scanLineInterval); this.scanLineInterval = null; }
+    this.faceStream?.getTracks().forEach(t => t.stop());
+    this.faceStream = null;
+    const video = this.faceVideoRef?.nativeElement;
+    if (video) video.srcObject = null;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   getIniciales(n: string): string {
     return n.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
   }
-  // Agregar dentro de la clase Dashboard, junto a los otros helpers
-irAConfiguracion(): void {
-  this.router.navigate(['/configuracion']);
-}
 
   getNivelColor(nivel: string): string {
     return ({ abierto: '#2e7d32', restringido: '#e65100', exclusivo: '#A93845' } as any)[nivel] ?? '#fff';

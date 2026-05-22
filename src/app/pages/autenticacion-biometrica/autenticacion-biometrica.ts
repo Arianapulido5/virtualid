@@ -1,15 +1,4 @@
 // src/app/pages/autenticacion-biometrica/autenticacion-biometrica.ts
-// Reemplaza el contenido completo de este archivo
-//
-// Flujo:
-//  1. Pantalla "intro" — igual a imagen 1
-//  2. Al pulsar "Empezar" → pide cámara + carga face-api.js (CDN)
-//  3. Pantalla "camara" — igual a imagen 2
-//     • Detecta movimientos de cabeza (izquierda, derecha, arriba, abajo, centro)
-//     • Los ticks del borde se ponen verdes conforme progresa
-//     • Al llegar al 100% → llama al backend WebAuthn (bio.registrar())
-//  4. Pantalla "exito" o "error"
-
 import {
   Component, OnInit, OnDestroy,
   ChangeDetectorRef, ViewChild, ElementRef,
@@ -17,21 +6,13 @@ import {
 } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { BiometricaService } from '../../services/biometrica.service';
+import { Auth } from '../../services/auth';
 
-// Tipos de pantalla
-type Pantalla = 'intro' | 'camara' | 'exito' | 'error';
+type Pantalla = 'intro' | 'correo' | 'camara' | 'exito' | 'error';
+type Fase = 'centro' | 'derecha' | 'izquierda' | 'arriba' | 'abajo' | 'completado';
 
-// Fases de movimiento que el usuario debe completar
-type Fase =
-  | 'centro'
-  | 'derecha'
-  | 'izquierda'
-  | 'arriba'
-  | 'abajo'
-  | 'completado';
-
-// Instrucciones por fase
 const INSTRUCCIONES: Record<Fase, string> = {
   centro:     'Centra tu cara en el círculo',
   derecha:    'Mueve tu cabeza hacia la derecha ›',
@@ -41,18 +22,14 @@ const INSTRUCCIONES: Record<Fase, string> = {
   completado: '✓ Procesando...',
 };
 
-// Orden de fases
 const FASES: Fase[] = ['centro', 'derecha', 'izquierda', 'arriba', 'abajo', 'completado'];
-
-// Ticks totales en el borde del círculo de la cámara
 const TOTAL_TICKS = 48;
-// Ticks del intro
 const INTRO_TICKS = 60;
 
 @Component({
   selector: 'app-autenticacion-biometrica',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './autenticacion-biometrica.html',
   styleUrl:  './autenticacion-biometrica.scss',
 })
@@ -69,50 +46,42 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
   instrCambiando    = false;
   escaneando        = false;
 
-  // ── Arrays para template ────────────────────────────────────────────────────
-  readonly ticksArray    = Array(INTRO_TICKS).fill(0);   // intro
-  readonly ticksArray48  = Array(TOTAL_TICKS).fill(0);   // cámara
+  correoLogin = '';
+  correoError = '';
+
+  readonly ticksArray    = Array(INTRO_TICKS).fill(0);
+  readonly ticksArray48  = Array(TOTAL_TICKS).fill(0);
   readonly tickAngle     = (2 * Math.PI) / INTRO_TICKS;
   readonly tick48Angle   = (2 * Math.PI) / TOTAL_TICKS;
-  readonly Math          = Math;  // para usarlo en template
+  readonly Math          = Math;
 
-  // ── Progreso del círculo ────────────────────────────────────────────────────
-  // Cuántos ticks están en verde (de 0 a 48)
   ticksVerdes = 0;
+  scanLineY   = 60;
 
-  // Fases completadas (para calcular progreso por secciones)
   private fasesCompletadas: Set<Fase> = new Set();
   private faseActual: Fase = 'centro';
   private faseIndex = 0;
+  private readonly TICKS_POR_FASE = Math.floor(TOTAL_TICKS / (FASES.length - 1));
 
-  // Ticks verdes por fase completada: 48 ticks / 5 fases = ~9.6 → usamos distribución exacta
-  private readonly TICKS_POR_FASE = Math.floor(TOTAL_TICKS / (FASES.length - 1)); // 9
-
-  // ── Línea de escaneo ────────────────────────────────────────────────────────
-  scanLineY = 60;
-
-  // ── Stream / timers ─────────────────────────────────────────────────────────
   private stream: MediaStream | null = null;
   private faceApiLoaded = false;
   private detectionInterval: any = null;
   private scanLineInterval: any  = null;
   private timers: any[] = [];
 
-  // ── WebAuthn ─────────────────────────────────────────────────────────────────
-  private modo: 'registro' | 'login' = 'registro';
-  private correo = '';
-  private userId: number | null = null;
-  private optsAutenticacion: any = null;
+  // ← CAMBIADO: private → protected para que el template pueda accederlo
+  protected modo: 'registro' | 'login' = 'registro';
 
-  // ── Umbrales de detección de pose (en grados de yaw/pitch) ──────────────────
-  private readonly UMBRAL_YAW   = 12;  // grados para izquierda/derecha
-  private readonly UMBRAL_PITCH = 10;  // grados para arriba/abajo
+  private descriptoresCapturados: number[][] = [];
+  private readonly DESCRIPTORES_NECESARIOS = 5;
 
-  // ── Buffer de detecciones para estabilidad ───────────────────────────────────
   private detBuffer: Array<{ yaw: number; pitch: number }> = [];
-  private readonly BUFFER_SIZE = 8;   // muestras promediadas
-  private posicionEstable = 0;        // cuántos frames seguidos en la posición esperada
-  private readonly FRAMES_ESTABLES = 12;  // frames necesarios para confirmar una pose
+  private readonly BUFFER_SIZE = 8;
+  private posicionEstable = 0;
+  private readonly FRAMES_ESTABLES = 14;
+
+  private readonly UMBRAL_YAW   = 12;
+  private readonly UMBRAL_PITCH = 10;
 
   constructor(
     private router: Router,
@@ -123,39 +92,54 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const qModo   = this.route.snapshot.queryParamMap.get('modo');
-    const qCorreo = this.route.snapshot.queryParamMap.get('correo');
-
-    if (qModo === 'login' && qCorreo) {
-      this.modo   = 'login';
-      this.correo = qCorreo;
-      this.iniciarLoginBiometrico();
+    const qModo = this.route.snapshot.queryParamMap.get('modo');
+    if (qModo === 'login') {
+      this.modo = 'login';
+      const qCorreo = this.route.snapshot.queryParamMap.get('correo');
+      if (qCorreo) {
+        this.correoLogin = qCorreo;
+        this.pantalla = 'intro';
+      } else {
+        this.pantalla = 'correo';
+      }
     } else {
-      this.modo    = 'registro';
+      this.modo     = 'registro';
       this.pantalla = 'intro';
     }
   }
 
-  ngOnDestroy(): void {
-    this.limpiar();
-  }
+  ngOnDestroy(): void { this.limpiar(); }
 
-  // ─── Colores de ticks en la pantalla de cámara ──────────────────────────────
   tickColor(i: number): string {
-    if (i < this.ticksVerdes) return '#34C759';          // verde
-    if (i === this.ticksVerdes) return '#FFFFFF';        // blanco → frente de progreso
-    return 'rgba(255,255,255,0.25)';                     // gris inactivo
+    if (i < this.ticksVerdes) return '#34C759';
+    if (i === this.ticksVerdes) return '#FFFFFF';
+    return 'rgba(255,255,255,0.25)';
   }
 
-  // ─── INTRO ──────────────────────────────────────────────────────────────────
+  validarCorreoLogin(): boolean {
+    const re = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    if (!this.correoLogin.trim()) {
+      this.correoError = 'El correo es obligatorio.';
+      return false;
+    }
+    if (!re.test(this.correoLogin.trim())) {
+      this.correoError = 'Ingresa un correo válido.';
+      return false;
+    }
+    this.correoError = '';
+    return true;
+  }
+
+  continuarConCorreo(): void {
+    if (!this.validarCorreoLogin()) return;
+    this.pantalla = 'intro';
+    this.cdr.detectChanges();
+  }
 
   async empezar(): Promise<void> {
     this.pantalla = 'camara';
     this.cdr.detectChanges();
-
-    // Pequeño delay para que el DOM pinte el <video>
     await this.delay(120);
-
     await this.cargarFaceApi();
     await this.iniciarCamara();
   }
@@ -174,11 +158,11 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
     this.fasesCompletadas.clear();
     this.posicionEstable = 0;
     this.detBuffer = [];
+    this.descriptoresCapturados = [];
     this.pantalla = 'intro';
     this.cdr.detectChanges();
   }
 
-  // ─── Carga dinámica de face-api.js desde CDN ─────────────────────────────────
   private cargarFaceApi(): Promise<void> {
     if (this.faceApiLoaded || (window as any).faceapi) {
       this.faceApiLoaded = true;
@@ -187,7 +171,6 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
 
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      // face-api.js minificado desde CDN
       script.src = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
       script.onload = async () => {
         this.faceApiLoaded = true;
@@ -199,35 +182,29 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
     });
   }
 
-  // Carga los modelos de face-api.js (tiny_face_detector + face_landmark_68)
   private async cargarModelos(): Promise<void> {
     const faceapi = (window as any).faceapi;
-    // Modelo tiny — rápido, funciona en móvil
     const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model';
     try {
       await Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
         faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
       ]);
     } catch {
-      // Si el CDN anterior falla, intentar con otro espejo
       const MODEL_URL_2 = 'https://justadudewhohacks.github.io/face-api.js/models';
       await Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL_2),
         faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL_2),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL_2),
       ]);
     }
   }
 
-  // ─── Cámara ──────────────────────────────────────────────────────────────────
   private async iniciarCamara(): Promise<void> {
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'user',
-          width:  { ideal: 640 },
-          height: { ideal: 800 },
-        },
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 800 } },
         audio: false,
       });
 
@@ -245,8 +222,8 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
 
     } catch (err: any) {
       const msg = err?.name === 'NotAllowedError'
-        ? 'Permiso de cámara denegado. Actívalo en los ajustes del dispositivo.'
-        : 'No se pudo acceder a la cámara. Asegúrate de que no esté en uso.';
+        ? 'Permiso de cámara denegado. Actívalo en los ajustes.'
+        : 'No se pudo acceder a la cámara.';
       this.mostrarErrorCamara(msg);
     }
   }
@@ -257,10 +234,8 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  // ─── Animación de la línea de escaneo ────────────────────────────────────────
   private iniciarScanLine(): void {
-    let dir   = 1;
-    let posY  = 50;
+    let dir = 1, posY = 50;
     this.scanLineInterval = setInterval(() => {
       posY += dir * 3;
       if (posY > 300) dir = -1;
@@ -270,15 +245,13 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
     }, 35);
   }
 
-  // ─── Detección de cara + pose ─────────────────────────────────────────────────
   private iniciarDeteccion(): void {
     const faceapi = (window as any).faceapi;
     const video   = this.videoRef?.nativeElement;
-    const canvas  = this.canvasRef?.nativeElement;
-    if (!video || !canvas || !faceapi) return;
+    if (!video || !faceapi) return;
 
     const opciones = new faceapi.TinyFaceDetectorOptions({
-      inputSize:   320,
+      inputSize: 320,
       scoreThreshold: 0.5,
     });
 
@@ -288,75 +261,60 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
       try {
         const deteccion = await faceapi
           .detectSingleFace(video, opciones)
-          .withFaceLandmarks(true);  // true = usa tiny model
+          .withFaceLandmarks(true)
+          .withFaceDescriptor();
 
         if (!deteccion) {
-          // No se detecta cara
           this.posicionEstable = 0;
           return;
         }
 
-        // Estimación de yaw y pitch a partir de landmarks (puntos 2D)
         const { yaw, pitch } = this.estimarPose(deteccion.landmarks);
 
-        // Guardar en buffer para suavizar
         this.detBuffer.push({ yaw, pitch });
         if (this.detBuffer.length > this.BUFFER_SIZE) this.detBuffer.shift();
 
-        const promedioYaw   = this.detBuffer.reduce((s, d) => s + d.yaw, 0)   / this.detBuffer.length;
+        const promedioYaw   = this.detBuffer.reduce((s, d) => s + d.yaw,   0) / this.detBuffer.length;
         const promedioPitch = this.detBuffer.reduce((s, d) => s + d.pitch, 0) / this.detBuffer.length;
 
-        this.zone.run(() => this.evaluarPose(promedioYaw, promedioPitch));
+        const descriptorFrame = Array.from(deteccion.descriptor as Float32Array) as number[];
 
-      } catch { /* silencioso si el modelo falla un frame */ }
+        this.zone.run(() => this.evaluarPose(promedioYaw, promedioPitch, descriptorFrame));
 
-    }, 80); // ~12 fps
+      } catch { /* ignorar frames con error */ }
+
+    }, 80);
   }
 
-  // ─── Estimación sencilla de pose desde landmarks 2D ───────────────────────────
-  // Usa la distancia relativa entre landmarks para inferir yaw y pitch.
   private estimarPose(landmarks: any): { yaw: number; pitch: number } {
     const pts = landmarks.positions as Array<{ x: number; y: number }>;
 
-    // Índices de landmark 68:
-    //  0-16  = contorno cara
-    //  36-41 = ojo izq,  42-47 = ojo der
-    //  27-30 = puente nariz
-    //  48-67 = boca
-    //  8     = barbilla
-    //  27    = inicio nariz
-
     const leftEye  = this.centroide(pts.slice(36, 42));
     const rightEye = this.centroide(pts.slice(42, 48));
-    const nose     = pts[30];  // punta nariz
+    const nose     = pts[30];
     const chin     = pts[8];
-    const top      = pts[27];  // raíz nariz (entre ojos)
+    const top      = pts[27];
 
-    // Yaw: diferencia normalizada entre distancias nariz-ojo
     const distNoseLeft  = nose.x - leftEye.x;
     const distNoseRight = rightEye.x - nose.x;
     const totalEyes     = rightEye.x - leftEye.x;
-    const yawRaw        = (distNoseLeft - distNoseRight) / (totalEyes || 1);
-    // Convertir a grados aproximados: ±0.5 de yawRaw ≈ ±30°
-    const yaw = yawRaw * 60;
+    const yaw = ((distNoseLeft - distNoseRight) / (totalEyes || 1)) * 60;
 
-    // Pitch: diferencia vertical normalizada
-    const totalHeight   = chin.y - top.y;
-    const noseFromTop   = nose.y - top.y;
-    const pitchRaw      = (noseFromTop / (totalHeight || 1)) - 0.5; // 0 = centro
-    const pitch         = pitchRaw * 80;
+    const totalHeight = chin.y - top.y;
+    const noseFromTop = nose.y - top.y;
+    const pitch = ((noseFromTop / (totalHeight || 1)) - 0.5) * 80;
 
     return { yaw, pitch };
   }
 
   private centroide(pts: Array<{ x: number; y: number }>): { x: number; y: number } {
-    const x = pts.reduce((s, p) => s + p.x, 0) / pts.length;
-    const y = pts.reduce((s, p) => s + p.y, 0) / pts.length;
-    return { x, y };
+    return {
+      x: pts.reduce((s, p) => s + p.x, 0) / pts.length,
+      y: pts.reduce((s, p) => s + p.y, 0) / pts.length,
+    };
   }
 
-  // ─── Evaluación de la pose contra la fase actual ───────────────────────────
-  private evaluarPose(yaw: number, pitch: number): void {
+  private evaluarPose(yaw: number, pitch: number, descriptor: number[]): void {
     if (this.faseActual === 'completado') return;
 
     const enPosicion = this.estaEnPosicion(this.faseActual, yaw, pitch);
@@ -364,35 +322,28 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
     if (enPosicion) {
       this.posicionEstable++;
 
-      // Progreso visual suave: aumentar ticks proporcionalmente dentro de la fase
-      const ticksBase = this.faseIndex * this.TICKS_POR_FASE;
+      const ticksBase  = this.faseIndex * this.TICKS_POR_FASE;
       const ticksExtra = Math.round((this.posicionEstable / this.FRAMES_ESTABLES) * this.TICKS_POR_FASE);
       this.ticksVerdes = Math.min(TOTAL_TICKS, ticksBase + ticksExtra);
       this.cdr.detectChanges();
 
       if (this.posicionEstable >= this.FRAMES_ESTABLES) {
+        this.descriptoresCapturados.push(descriptor);
         this.completarFase();
       }
     } else {
-      // Reducir progreso si pierde la posición (pero no retroceder la fase)
       this.posicionEstable = Math.max(0, this.posicionEstable - 2);
     }
   }
 
   private estaEnPosicion(fase: Fase, yaw: number, pitch: number): boolean {
     switch (fase) {
-      case 'centro':
-        return Math.abs(yaw) < this.UMBRAL_YAW && Math.abs(pitch) < this.UMBRAL_PITCH;
-      case 'derecha':
-        return yaw > this.UMBRAL_YAW;
-      case 'izquierda':
-        return yaw < -this.UMBRAL_YAW;
-      case 'arriba':
-        return pitch < -this.UMBRAL_PITCH;
-      case 'abajo':
-        return pitch > this.UMBRAL_PITCH;
-      default:
-        return false;
+      case 'centro':    return Math.abs(yaw) < this.UMBRAL_YAW && Math.abs(pitch) < this.UMBRAL_PITCH;
+      case 'derecha':   return yaw > this.UMBRAL_YAW;
+      case 'izquierda': return yaw < -this.UMBRAL_YAW;
+      case 'arriba':    return pitch < -this.UMBRAL_PITCH;
+      case 'abajo':     return pitch > this.UMBRAL_PITCH;
+      default:          return false;
     }
   }
 
@@ -401,7 +352,6 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
     this.posicionEstable = 0;
     this.faseIndex++;
 
-    // Fijar ticks de esta fase completos
     this.ticksVerdes = Math.min(TOTAL_TICKS, this.faseIndex * this.TICKS_POR_FASE);
     this.cdr.detectChanges();
 
@@ -419,96 +369,87 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
     }
   }
 
-  // ─── Cambio animado de instrucción ────────────────────────────────────────
-  private cambiarInstruccion(fase: Fase): void {
-    this.instrCambiando = true;
-    this.cdr.detectChanges();
-
-    const t = setTimeout(() => {
-      this.instruccionActual = INSTRUCCIONES[fase];
-      this.instrCambiando    = false;
-      this.cdr.detectChanges();
-    }, 300);
-
-    this.timers.push(t);
+  private calcularDescriptorPromedio(): number[] {
+    if (this.descriptoresCapturados.length === 0) return [];
+    const len = this.descriptoresCapturados[0].length;
+    const promedio = new Array(len).fill(0);
+    for (const desc of this.descriptoresCapturados) {
+      for (let i = 0; i < len; i++) promedio[i] += desc[i];
+    }
+    for (let i = 0; i < len; i++) {
+      promedio[i] /= this.descriptoresCapturados.length;
+    }
+    return promedio;
   }
 
-  // ─── Finalizar escaneo → llamar WebAuthn ──────────────────────────────────
   private finalizarEscaneo(): void {
-    // Detener detección
-    if (this.detectionInterval) {
-      clearInterval(this.detectionInterval);
-      this.detectionInterval = null;
-    }
-    if (this.scanLineInterval) {
-      clearInterval(this.scanLineInterval);
-      this.scanLineInterval = null;
-    }
+    if (this.detectionInterval) { clearInterval(this.detectionInterval); this.detectionInterval = null; }
+    if (this.scanLineInterval)  { clearInterval(this.scanLineInterval);  this.scanLineInterval  = null; }
 
     const t = setTimeout(() => {
       this.detenerCamara();
-      this.llamarWebAuthn();
+      this.enviarDescriptor();
     }, 800);
 
     this.timers.push(t);
   }
 
-  private llamarWebAuthn(): void {
-    this.bio.registrar().subscribe({
-      next: () => {
-        this.pantalla = 'exito';
-        this.cdr.detectChanges();
+  private enviarDescriptor(): void {
+    const descriptor = this.calcularDescriptorPromedio();
 
-        const t = setTimeout(() => {
-          this.router.navigate(['/configuracion']);
-        }, 2200);
-        this.timers.push(t);
-      },
-      error: (err) => {
-        this.pantalla     = 'error';
-        this.errorMensaje = err?.error?.message ?? err?.message
-          ?? 'No se pudo registrar la biometría. Inténtalo de nuevo.';
-        this.cdr.detectChanges();
-      },
-    });
+    if (descriptor.length !== 128) {
+      this.pantalla     = 'error';
+      this.errorMensaje = 'No se pudo extraer el descriptor facial. Inténtalo de nuevo.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (this.modo === 'registro') {
+      this.bio.registrar(descriptor).subscribe({
+        next: () => {
+          this.pantalla = 'exito';
+          this.cdr.detectChanges();
+          const t = setTimeout(() => this.router.navigate(['/configuracion']), 2200);
+          this.timers.push(t);
+        },
+        error: (err) => {
+          this.pantalla     = 'error';
+          this.errorMensaje = err?.error?.message ?? 'No se pudo registrar la biometría.';
+          this.cdr.detectChanges();
+        },
+      });
+    } else {
+      const correo = this.correoLogin.trim().toLowerCase();
+      this.bio.loginFacial(correo, descriptor).subscribe({
+        next: (res) => {
+          Auth.setToken(res.token);
+          Auth.setRol(res.rol);
+          this.pantalla = 'exito';
+          this.cdr.detectChanges();
+          const t = setTimeout(() => this.router.navigate(['/dashboard'], { replaceUrl: true }), 1500);
+          this.timers.push(t);
+        },
+        error: (err) => {
+          this.pantalla     = 'error';
+          this.errorMensaje = err?.error?.message
+            ?? 'El rostro no coincide. Inténtalo de nuevo o usa tu contraseña.';
+          this.cdr.detectChanges();
+        },
+      });
+    }
   }
 
-  // ─── LOGIN biométrico ──────────────────────────────────────────────────────
-  private iniciarLoginBiometrico(): void {
-    this.bio.autenticarInicio(this.correo).subscribe({
-      next: (opts) => {
-        this.userId            = opts.userId;
-        this.optsAutenticacion = opts;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.pantalla     = 'error';
-        this.errorMensaje = err?.error?.sin_biometrica
-          ? 'No tienes biometría registrada en este dispositivo.'
-          : (err?.error?.message ?? 'No se pudo iniciar la autenticación.');
-        this.cdr.detectChanges();
-      },
-    });
+  private cambiarInstruccion(fase: Fase): void {
+    this.instrCambiando = true;
+    this.cdr.detectChanges();
+    const t = setTimeout(() => {
+      this.instruccionActual = INSTRUCCIONES[fase];
+      this.instrCambiando    = false;
+      this.cdr.detectChanges();
+    }, 300);
+    this.timers.push(t);
   }
 
-  autenticarConBiometria(): void {
-    if (!this.userId || !this.optsAutenticacion) return;
-
-    this.bio.autenticarFin(this.userId, this.optsAutenticacion).subscribe({
-      next: (res) => {
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('rol',   res.rol);
-        this.router.navigate(['/dashboard'], { replaceUrl: true });
-      },
-      error: (err) => {
-        this.pantalla     = 'error';
-        this.errorMensaje = err?.error?.message ?? err?.message ?? 'Autenticación fallida.';
-        this.cdr.detectChanges();
-      },
-    });
-  }
-
-  // ─── Helpers ──────────────────────────────────────────────────────────────
   private detenerCamara(): void {
     this.stream?.getTracks().forEach(t => t.stop());
     this.stream = null;

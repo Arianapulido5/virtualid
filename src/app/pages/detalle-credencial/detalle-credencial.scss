@@ -663,6 +663,194 @@ $warning:      #e65100;
   }
 }
 
+
+
+// ─────────────────────────────────────────────
+//  MODAL VERIFICACIÓN FACIAL
+//  Pegar al final de dashboard.scss
+//  y al final de detalle-credencial.scss
+// ─────────────────────────────────────────────
+
+@keyframes faceSpinnerDash {
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -126; }
+}
+@keyframes faceRingPulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1; }
+}
+
+.face-modal-overlay {
+  z-index: 1000;
+}
+
+.face-modal-card {
+  padding: 32px 28px 28px !important;
+  max-width: 360px !important;
+  gap: 12px !important;
+  position: relative;
+}
+
+.face-modal-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111118;
+  margin: 0;
+  text-align: center;
+}
+
+.face-modal-desc {
+  font-size: 13px;
+  color: #4A4D56;
+  margin: 0;
+  text-align: center;
+  line-height: 1.55;
+}
+
+// ── Visor de cámara ──────────────────────────
+.face-cam-wrap {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #000;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.face-cam-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  // Espejo horizontal (selfie natural)
+  transform: scaleX(-1);
+}
+
+.face-cam-canvas {
+  display: none;
+}
+
+.face-cam-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.face-overlay-svg {
+  width: 100%;
+  height: 100%;
+}
+
+// Spinner ring SVG animado
+.face-spinner-ring {
+  transform-origin: 140px 140px;
+  animation: girar 1.2s linear infinite;
+}
+
+// ── Overlay de procesamiento ─────────────────
+.face-processing-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.18);
+  pointer-events: none;
+}
+
+.face-processing-icon {
+  width: 64px;
+  height: 64px;
+}
+
+.face-spinner-dash {
+  transform-origin: 24px 24px;
+  animation: faceSpinnerDash 1s linear infinite;
+}
+
+// ── Hints ─────────────────────────────────────
+.face-hint {
+  font-size: 11px;
+  color: #aaa;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.2px;
+
+  &--processing {
+    color: #34C759;
+    font-weight: 600;
+  }
+}
+
+// ── Estado error ──────────────────────────────
+.face-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.face-error-icon svg {
+  width: 72px;
+  height: 72px;
+}
+
+.face-modal-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+// reutiliza btn-empezar del scss de biométrica,
+// si no está disponible se define aquí
+.face-btn-reintentar,
+.face-btn-config {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #4D0F60 0%, #32488C 50%, #6B2080 100%);
+  background-size: 250% 250%;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(77,15,96,0.28);
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(77,15,96,0.4);
+  }
+}
+
+.face-btn-cancel {
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4A4D56;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #4A4D56;
+    background: rgba(0,0,0,0.04);
+  }
+}
+
 // ─────────────────────────────────────────────
 //  RESPONSIVE
 // ─────────────────────────────────────────────

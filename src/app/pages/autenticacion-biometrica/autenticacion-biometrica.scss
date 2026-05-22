@@ -377,6 +377,67 @@ $blue:      #007AFF;
   margin-top: 8px;
 }
 
+
+// ── AGREGAR AL FINAL de autenticacion-biometrica.scss ─────────────────────────
+
+// Pantalla de ingreso de correo (login sin correo en URL)
+.correo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 72px 28px 40px;
+  gap: 16px;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.correo-icono {
+  svg { width: 80px; height: 80px; }
+}
+
+.correo-field {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.correo-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: 1.5px solid #c5c9d4;
+  border-radius: 12px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+  background: #F9F9F9;
+  color: #1C1C1E;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+
+  &:focus {
+    border-color: #007AFF;
+    box-shadow: 0 0 0 4px rgba(0,122,255,0.1);
+  }
+
+  &--error {
+    border-color: #FF3B30;
+    background: #fff5f5;
+  }
+
+  &::placeholder { color: #aaa; }
+}
+
+.correo-error {
+  font-size: 12px;
+  color: #FF3B30;
+  text-align: left;
+  padding-left: 4px;
+}
+
+
 // ── Responsive ────────────────────────────────────────────────────────────────
 @media (max-width: 480px) {
   .bio-bg {

@@ -129,44 +129,19 @@ export class Login implements OnInit {
   // primero preguntamos al backend si tiene biometría activa. Si sí,
   // redirigimos a la pantalla de autenticación biométrica con el correo.
 
-  iniciarBiometria(): void {
-    this.validarCorreo();
-    if (this.errores.correo) return;
+  // ── REEMPLAZA el método iniciarBiometria() en src/app/pages/login/login.ts ────
+// El resto del archivo no cambia.
 
-    const correo = this.correo.trim().toLowerCase();
-    this.verificandoBio  = true;
-    this.errorGeneral    = '';
-    this.cdr.detectChanges();
+iniciarBiometria(): void {
+  // Si el usuario ya escribió su correo, lo usamos directamente en la URL.
+  // Si no, la pantalla de autenticación biométrica le pedirá el correo.
+  const correo = this.correo.trim().toLowerCase();
 
-    // Consultar si el correo tiene biometría activa
-    this.http
-      .post<any>(`${this.api}/biometrica/autenticar-inicio`, { correo })
-      .pipe(
-        timeout(15000),
-        catchError((err) => throwError(() => err))
-      )
-      .subscribe({
-        next: () => {
-          // Tiene biometría → ir a pantalla biométrica en modo login
-          this.verificandoBio = false;
-          this.cdr.detectChanges();
-          this.router.navigate(['/biometrica'], {
-            queryParams: { modo: 'login', correo },
-          });
-        },
-        error: (err: any) => {
-          this.verificandoBio = false;
-          const sinBio = err?.error?.sin_biometrica;
-          if (sinBio) {
-            this.errorGeneral =
-              'Este correo no tiene biometría registrada. Inicia sesión con contraseña.';
-          } else if (err?.error?.message) {
-            this.errorGeneral = err.error.message;
-          } else {
-            this.errorGeneral = 'No se pudo verificar la biometría.';
-          }
-          this.cdr.detectChanges();
-        },
-      });
+  const queryParams: any = { modo: 'login' };
+  if (correo && !this.errores.correo) {
+    queryParams.correo = correo;
   }
+
+  this.router.navigate(['/biometrica'], { queryParams });
+}
 }

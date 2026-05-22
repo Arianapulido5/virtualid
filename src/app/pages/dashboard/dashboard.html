@@ -1,3 +1,4 @@
+<!-- src/app/pages/dashboard/dashboard.html -->
 <div class="dashboard-container">
 
   <!-- ══ HEADER ══ -->
@@ -31,7 +32,6 @@
       <!-- ══ WALLET CAROUSEL ══ -->
       <div class="wallet-carousel" *ngIf="!cargandoCreds && credencialesActivas.length > 0">
 
-        <!-- Flecha izquierda -->
         <button class="carousel-arrow carousel-arrow--prev"
                 *ngIf="credencialesActivas.length > 1"
                 [disabled]="activeCardIndex === 0"
@@ -41,7 +41,6 @@
           </svg>
         </button>
 
-        <!-- Viewport con overflow hidden -->
         <div class="carousel-viewport"
              (touchstart)="onTouchStart($event)"
              (touchend)="onTouchEnd($event)"
@@ -50,7 +49,6 @@
              (mouseup)="onMouseUp($event)"
              (mouseleave)="onMouseLeave()">
 
-          <!-- Track deslizante -->
           <div class="carousel-track" [style.transform]="trackTransform">
 
             <div
@@ -92,7 +90,7 @@
                   <p class="cred-card__field-val">{{ formatFechaCorta(cred.creado_en) }}</p>
                 </div>
                 <button class="btn-qr-inline"
-                  [disabled]="geoSolicitando"
+                  [disabled]="faceScanning || qrGenerando"
                   (click)="mostrarQR(cred); $event.stopPropagation()">
                   <svg class="qr-icon" viewBox="0 0 24 24" fill="none">
                     <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/>
@@ -105,20 +103,12 @@
                   </svg>
                   <span>Generar QR</span>
                 </button>
-                <div class="btn-qr-inline btn-qr-loading"
-                     *ngIf="geoSolicitando && credencialQR?.id === cred.id">
-                  <svg class="qr-icon" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" stroke-dasharray="4 2"/>
-                  </svg>
-                  <span>Obteniendo...</span>
-                </div>
               </div>
             </div>
 
           </div>
         </div>
 
-        <!-- Flecha derecha -->
         <button class="carousel-arrow carousel-arrow--next"
                 *ngIf="credencialesActivas.length > 1"
                 [disabled]="activeCardIndex === credencialesActivas.length - 1"
@@ -128,7 +118,6 @@
           </svg>
         </button>
 
-        <!-- Dots de navegación -->
         <div class="wallet-dots" *ngIf="credencialesActivas.length > 1">
           <div class="dot"
                *ngFor="let cred of credencialesActivas; let i = index"
@@ -145,7 +134,6 @@
     <div class="dash-right">
       <div class="panel">
 
-        <!-- Acciones rápidas -->
         <div class="quick-actions">
           <button class="quick-btn" (click)="irAHistorial()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -168,7 +156,6 @@
           </button>
         </div>
 
-        <!-- Últimos 5 accesos -->
         <div class="creds-list" *ngIf="!cargandoHistorial && ultimosAccesos.length > 0">
           <div class="cred-mini"
                *ngFor="let a of ultimosAccesos"
@@ -200,12 +187,10 @@
           </div>
         </div>
 
-        <!-- Skeleton -->
         <div class="creds-list" *ngIf="cargandoHistorial">
           <div class="cred-mini cred-mini--skeleton" *ngFor="let i of [1,2,3,4,5]"></div>
         </div>
 
-        <!-- Sin historial -->
         <div class="creds-empty" *ngIf="!cargandoHistorial && ultimosAccesos.length === 0">
           <p>Sin registros de acceso aún.</p>
         </div>
@@ -216,47 +201,105 @@
   </div>
   <!-- fin dash-body -->
 
-  <!-- ══ MODAL: VERIFICANDO BIOMETRÍA ══ -->
-  <div class="modal-overlay" *ngIf="bioVerificando" (click)="$event.stopPropagation()">
-    <div class="modal-card qr-modal-card">
-      <div class="modal-icon-simple">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="56" height="56" fill="none">
-          <circle cx="24" cy="24" r="22" fill="rgba(77,15,96,0.12)"/>
-          <path d="M24 14a10 10 0 0 1 10 10c0 6-2 10-6 13" stroke="#4D0F60" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M14 24a10 10 0 0 1 10-10" stroke="#4D0F60" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M24 20a4 4 0 0 1 4 4c0 3-1 7-4 9" stroke="#6B2080" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M20 24a4 4 0 0 1 4-4" stroke="#6B2080" stroke-width="2.5" stroke-linecap="round"/>
-          <circle cx="24" cy="24" r="1.5" fill="#4D0F60"/>
-        </svg>
-      </div>
-      <h3>Verificando identidad</h3>
-      <p>Toca el sensor de huella o usa Face ID para continuar.</p>
-      <div class="qr-spinner" style="margin-top: 4px;"></div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       MODAL: VERIFICACIÓN FACIAL (cámara activa)
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay face-modal-overlay" *ngIf="faceModalVisible" (click)="$event.stopPropagation()">
+    <div class="modal-card face-modal-card" (click)="$event.stopPropagation()">
+      <button class="modal-close-btn" (click)="cerrarModalFacial()">✕</button>
+
+      <!-- Estado: error -->
+      <ng-container *ngIf="faceError && !faceScanning && !faceProcessing">
+        <div class="face-error-state">
+          <div class="face-error-icon">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="40" r="36" fill="rgba(255,59,48,0.1)" stroke="rgba(255,59,48,0.35)" stroke-width="1.5"/>
+              <line x1="26" y1="26" x2="54" y2="54" stroke="#FF3B30" stroke-width="5" stroke-linecap="round"/>
+              <line x1="54" y1="26" x2="26" y2="54" stroke="#FF3B30" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 class="face-modal-title">Verificación fallida</h3>
+          <p class="face-modal-desc">{{ faceError }}</p>
+          <div class="face-modal-btns">
+            <button class="btn-empezar face-btn-reintentar" (click)="reintentarFacial()"
+                    *ngIf="!faceError.includes('no tienes biometría') && !faceError.includes('No tienes biometría')">
+              Intentar de nuevo
+            </button>
+            <button class="btn-empezar face-btn-config"
+                    *ngIf="faceError.includes('No tienes biometría') || faceError.includes('no tienes biometría')"
+                    (click)="cerrarModalFacial(); irAConfiguracion()">
+              Ir a Configuración
+            </button>
+            <button class="face-btn-cancel" (click)="cerrarModalFacial()">Cancelar</button>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Estado: cámara activa / procesando -->
+      <ng-container *ngIf="faceScanning || faceProcessing || (!faceError && faceModalVisible)">
+        <h3 class="face-modal-title">Verificación facial</h3>
+        <p class="face-modal-desc">
+          {{ faceProcessing ? 'Verificando identidad...' : 'Centra tu rostro en el círculo' }}
+        </p>
+
+        <!-- Visor de cámara -->
+        <div class="face-cam-wrap">
+          <video #faceVideoRef autoplay playsinline muted class="face-cam-video"></video>
+          <canvas #faceCanvasRef class="face-cam-canvas"></canvas>
+
+          <!-- Overlay con elipse y línea de escaneo -->
+          <div class="face-cam-overlay">
+            <svg viewBox="0 0 280 280" class="face-overlay-svg" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <mask id="face-mask-dash">
+                  <rect width="280" height="280" fill="white"/>
+                  <ellipse cx="140" cy="140" rx="105" ry="120" fill="black"/>
+                </mask>
+              </defs>
+              <rect width="280" height="280" fill="rgba(0,0,0,0.55)" mask="url(#face-mask-dash)"/>
+              <!-- Elipse guía punteada -->
+              <ellipse cx="140" cy="140" rx="105" ry="120"
+                       fill="none"
+                       [attr.stroke]="faceProcessing ? '#34C759' : '#FFFFFF'"
+                       stroke-width="2.5"
+                       stroke-dasharray="10 6"
+                       style="transition: stroke 0.4s"/>
+              <!-- Línea de escaneo -->
+              <line *ngIf="faceScanning && !faceProcessing"
+                    [attr.y1]="faceScanLineY" [attr.y2]="faceScanLineY"
+                    x1="40" x2="240"
+                    stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+              <!-- Spinner procesando -->
+              <circle *ngIf="faceProcessing" cx="140" cy="140" r="116"
+                      fill="none" stroke="rgba(52,199,89,0.3)" stroke-width="3"
+                      stroke-dasharray="200 530" class="face-spinner-ring"/>
+            </svg>
+          </div>
+
+          <!-- Overlay de procesamiento -->
+          <div class="face-processing-overlay" *ngIf="faceProcessing">
+            <div class="face-processing-icon">
+              <svg viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="20" stroke="rgba(52,199,89,0.3)" stroke-width="3"/>
+                <circle cx="24" cy="24" r="20" stroke="#34C759" stroke-width="3"
+                        stroke-dasharray="30 96" stroke-linecap="round" class="face-spinner-dash"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <p class="face-hint" *ngIf="!faceProcessing">
+          La verificación es automática · mantente quieto
+        </p>
+        <p class="face-hint face-hint--processing" *ngIf="faceProcessing">
+          Comparando con el registro...
+        </p>
+      </ng-container>
+
     </div>
   </div>
 
-  <!-- ══ MODAL: ERROR BIOMÉTRICO ══ -->
-  <div class="modal-overlay" *ngIf="bioError && !bioVerificando" (click)="cerrarBioError()">
-    <div class="modal-card qr-modal-card" (click)="$event.stopPropagation()">
-      <button class="modal-close-btn" (click)="cerrarBioError()">✕</button>
-      <div class="modal-icon-warn">🔒</div>
-      <h3>No se pudo verificar</h3>
-      <p>{{ bioError }}</p>
-      <button
-        class="btn-aceptar-modal btn-aceptar-solo"
-        *ngIf="bioError.includes('Configuración')"
-        (click)="cerrarBioError(); irAConfiguracion()">
-        Ir a Configuración
-      </button>
-      <button
-        class="btn-cancelar-modal"
-        style="width:100%; margin-top: 8px;"
-        *ngIf="!bioError.includes('Configuración')"
-        (click)="cerrarBioError()">
-        Cerrar
-      </button>
-    </div>
-  </div>
 
   <!-- ══ MODAL SOLICITANDO UBICACIÓN ══ -->
   <div class="modal-overlay" *ngIf="geoSolicitando && !qrVisible" (click)="cancelarGeo()">
