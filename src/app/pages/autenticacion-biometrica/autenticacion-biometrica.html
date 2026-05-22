@@ -1,307 +1,164 @@
 <!-- src/app/pages/autenticacion-biometrica/autenticacion-biometrica.html -->
-<!-- REEMPLAZA el contenido completo de este archivo -->
 
 <div class="bio-bg">
-  <div class="bio-card" [class.face-mode]="pantalla === 'face'" [class.huella-mode]="pantalla === 'huella'">
+  <div class="bio-card" [class.camara-mode]="pantalla === 'camara'">
 
     <!-- ══════════════════════════════════════════════
-         PANTALLA 0: SELECCIÓN DE MÉTODO
+         PANTALLA: INTRO  (imagen 1)
     ══════════════════════════════════════════════ -->
-    <ng-container *ngIf="pantalla === 'selector'">
-      <div class="bio-icon-wrap">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="bio-svg">
-          <rect x="14" y="28" width="36" height="26" rx="5" fill="rgba(255,255,255,0.18)"/>
-          <path d="M22 28v-9a10 10 0 0 1 20 0v9"
-                fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-linecap="round"/>
-          <circle cx="32" cy="42" r="5" fill="white"/>
-          <rect x="30" y="42" width="4" height="6" rx="2" fill="rgba(255,255,255,0.7)"/>
+    <ng-container *ngIf="pantalla === 'intro'">
+
+      <!-- Botón volver -->
+      <button class="btn-back" (click)="cancelar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+
+      <!-- Ícono animado: círculo de ticks + cara -->
+      <div class="face-intro-wrap">
+        <svg class="face-intro-svg" viewBox="0 0 240 240"
+             fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Ticks del círculo exterior -->
+          <g class="ticks-group">
+            <ng-container *ngFor="let tick of ticksArray; let i = index">
+              <line
+                [attr.x1]="110 * Math.cos(i * tickAngle) + 120"
+                [attr.y1]="110 * Math.sin(i * tickAngle) + 120"
+                [attr.x2]="120 * Math.cos(i * tickAngle) + 120"
+                [attr.y2]="120 * Math.sin(i * tickAngle) + 120"
+                stroke="#D0D0D5" stroke-width="2.5" stroke-linecap="round"/>
+            </ng-container>
+          </g>
+          <!-- Cara estilo Face ID -->
+          <circle cx="120" cy="120" r="56" stroke="#C8C8CC" stroke-width="1.5" fill="none"/>
+          <!-- Ojos -->
+          <rect x="100" y="100" width="8" height="12" rx="4" fill="#888"/>
+          <rect x="132" y="100" width="8" height="12" rx="4" fill="#888"/>
+          <!-- Nariz -->
+          <path d="M115 118 Q120 126 125 118" stroke="#888" stroke-width="2"
+                fill="none" stroke-linecap="round"/>
+          <!-- Boca -->
+          <path d="M108 132 Q120 143 132 132" stroke="#888" stroke-width="2.5"
+                fill="none" stroke-linecap="round"/>
+          <!-- Arcos de esquina (tipo Face ID) -->
+          <path d="M78 100 Q78 88 90 88" stroke="#888" stroke-width="2.5"
+                fill="none" stroke-linecap="round"/>
+          <path d="M150 100 Q150 88 162 88" stroke="#888" stroke-width="2.5"
+                fill="none" stroke-linecap="round"/>
+          <path d="M78 140 Q78 152 90 152" stroke="#888" stroke-width="2.5"
+                fill="none" stroke-linecap="round"/>
+          <path d="M162 140 Q162 152 150 152" stroke="#888" stroke-width="2.5"
+                fill="none" stroke-linecap="round"/>
         </svg>
       </div>
 
-      <ng-container *ngIf="modo === 'registro'">
-        <h2>Activar biometría</h2>
-        <p>Registra tu huella dactilar o Face ID para acceder sin contraseña.</p>
-        <div class="bio-btns">
-          <button class="btn-bio btn-filled btn-huella" (click)="iniciarRegistroFaceId()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"
-                 fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-              <path d="M9 3H5a2 2 0 0 0-2 2v4"/>
-              <path d="M15 3h4a2 2 0 0 1 2 2v4"/>
-              <path d="M9 21H5a2 2 0 0 1-2-2v-4"/>
-              <path d="M15 21h4a2 2 0 0 0 2-2v-4"/>
-              <circle cx="9" cy="10" r="1" fill="currentColor"/>
-              <circle cx="15" cy="10" r="1" fill="currentColor"/>
-              <path d="M9 15a3 3 0 0 0 6 0"/>
-            </svg>
-            Registrar Face ID
-          </button>
-          <button class="btn-bio btn-outline btn-face" (click)="iniciarRegistroHuella()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"
-                 fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-              <path d="M12 2a10 10 0 0 1 10 10"/>
-              <path d="M12 6a6 6 0 0 1 6 6c0 4-1.5 7-4 9"/>
-              <path d="M12 10a2 2 0 0 1 2 2c0 2-.5 5-2 6"/>
-              <path d="M6 12a6 6 0 0 1 6-6"/>
-              <path d="M2 12a10 10 0 0 1 10-10"/>
-            </svg>
-            Registrar huella dactilar
-          </button>
-          <button class="btn-bio btn-ghost" (click)="cancelar()">Cancelar</button>
-        </div>
-      </ng-container>
+      <h2 class="intro-title">Cómo configurar Face ID</h2>
+      <p class="intro-desc">
+        Primero, sitúa tu cara dentro del marco de la cámara.
+        Después, mueve tu cabeza circularmente de forma que se
+        muestren todos los ángulos de tu cara.
+      </p>
 
-      <ng-container *ngIf="modo === 'login'">
-        <h2>Verificación biométrica</h2>
-        <p>Usa tu huella o Face ID para entrar.</p>
-        <div class="bio-btns">
-          <button class="btn-bio btn-filled" (click)="autenticarConBiometria()">
-            Usar huella / Face ID
-          </button>
-          <button class="btn-bio btn-outline" (click)="usarContrasena()">Usar contraseña</button>
-        </div>
-      </ng-container>
-    </ng-container>
-
-
-    <!-- ══════════════════════════════════════════════
-         PANTALLA 1: FACE ID — INTRO
-    ══════════════════════════════════════════════ -->
-    <ng-container *ngIf="pantalla === 'face'">
-
-      <ng-container *ngIf="faceEtapa === 'intro'">
-        <div class="face-intro-icon">
-          <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Marco animado -->
-            <circle cx="60" cy="60" r="52" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-            <path d="M60 8 A52 52 0 0 1 112 60" stroke="white" stroke-width="2.5"
-                  stroke-linecap="round" class="arc-anim"/>
-            <path d="M60 112 A52 52 0 0 1 8 60" stroke="white" stroke-width="2.5"
-                  stroke-linecap="round" class="arc-anim arc-anim-2"/>
-            <!-- Cara smiley tipo Face ID -->
-            <circle cx="60" cy="60" r="28" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
-            <circle cx="52" cy="54" r="3" fill="white"/>
-            <circle cx="68" cy="54" r="3" fill="white"/>
-            <path d="M50 67 Q60 76 70 67" stroke="white" stroke-width="2.5"
-                  fill="none" stroke-linecap="round"/>
-            <!-- Línea de escaneo -->
-            <line x1="32" y1="60" x2="88" y2="60" stroke="rgba(255,255,255,0.4)"
-                  stroke-width="1" class="scan-line"/>
-          </svg>
-        </div>
-        <h2>Cómo configurar Face ID</h2>
-        <p>Primero, sitúa tu cara dentro del marco de la cámara. Después, mueve tu cabeza circularmente de forma que se muestren todos los ángulos de tu cara.</p>
-        <div class="bio-btns">
-          <button class="btn-bio btn-filled" (click)="empezarFaceId()">Empezar</button>
-          <button class="btn-bio btn-ghost" (click)="volverSelector()">Cancelar</button>
-        </div>
-      </ng-container>
-
-      <!-- CÁMARA ACTIVA -->
-      <ng-container *ngIf="faceEtapa === 'camara'">
-        <div class="face-camera-container">
-          <!-- Video de cámara -->
-          <video #videoRef autoplay playsinline muted class="face-video"></video>
-
-          <!-- Overlay SVG encima del video -->
-          <div class="face-overlay">
-            <svg viewBox="0 0 300 300" class="face-overlay-svg">
-              <!-- Oscurecimiento exterior con hueco oval -->
-              <defs>
-                <mask id="oval-mask">
-                  <rect width="300" height="300" fill="white"/>
-                  <ellipse cx="150" cy="150" rx="110" ry="130" fill="black"/>
-                </mask>
-                <filter id="blur-f">
-                  <feGaussianBlur stdDeviation="2"/>
-                </filter>
-              </defs>
-              <rect width="300" height="300" fill="rgba(0,0,0,0.55)" mask="url(#oval-mask)"/>
-
-              <!-- Borde oval que rota / progresa -->
-              <ellipse cx="150" cy="150" rx="110" ry="130"
-                       fill="none"
-                       stroke="rgba(255,255,255,0.2)"
-                       stroke-width="2"/>
-
-              <!-- Arco de progreso -->
-              <ellipse cx="150" cy="150" rx="110" ry="130"
-                       fill="none"
-                       stroke="white"
-                       stroke-width="3"
-                       stroke-linecap="round"
-                       [attr.stroke-dasharray]="faceProgresoDash"
-                       stroke-dashoffset="0"
-                       transform="rotate(-90 150 150)"
-                       class="face-progress-arc"/>
-
-              <!-- Línea de escaneo animada -->
-              <line [attr.y1]="faceLineaY" [attr.y2]="faceLineaY"
-                    x1="40" x2="260"
-                    stroke="rgba(255,255,255,0.6)"
-                    stroke-width="1.5"
-                    class="face-scan-line"/>
-            </svg>
-          </div>
-
-          <!-- Instrucción actual -->
-          <div class="face-instruccion">
-            <span class="face-instruccion-text">{{ instruccionActual }}</span>
-          </div>
-        </div>
-
-        <!-- Estado de error -->
-        <div class="face-error" *ngIf="faceError">
-          <p>{{ faceError }}</p>
-          <div class="bio-btns">
-            <button class="btn-bio btn-filled" (click)="reiniciarFaceId()">Reintentar</button>
-            <button class="btn-bio btn-ghost" (click)="volverSelector()">Cancelar</button>
-          </div>
-        </div>
-      </ng-container>
-
-      <!-- ÉXITO -->
-      <ng-container *ngIf="faceEtapa === 'exito'">
-        <div class="bio-icon-wrap">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="bio-svg success-svg">
-            <circle cx="32" cy="32" r="28" fill="rgba(46,125,50,0.3)"/>
-            <polyline points="20,34 28,42 44,22"
-                      fill="none" stroke="white" stroke-width="5"
-                      stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <h2 class="txt-exito">¡Face ID registrado!</h2>
-        <p>Tu rostro fue escaneado correctamente.</p>
-      </ng-container>
+      <div class="intro-btns">
+        <button class="btn-empezar" (click)="empezar()">Empezar</button>
+      </div>
 
     </ng-container>
 
 
     <!-- ══════════════════════════════════════════════
-         PANTALLA 2: HUELLA DACTILAR
+         PANTALLA: CÁMARA ACTIVA  (imagen 2)
     ══════════════════════════════════════════════ -->
-    <ng-container *ngIf="pantalla === 'huella'">
+    <ng-container *ngIf="pantalla === 'camara'">
 
-      <ng-container *ngIf="huellaEtapa === 'intro'">
-        <div class="huella-icon-wrap">
-          <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg"
-               class="huella-svg-intro">
-            <!-- Anillos de huella decorativos -->
-            <circle cx="60" cy="60" r="48" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
-            <circle cx="60" cy="60" r="38" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-            <!-- Huella dactilar estilizada -->
-            <path d="M60 30 C44 30 32 42 32 58 C32 72 40 84 52 90"
-                  stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
-            <path d="M60 36 C47 36 38 46 38 58 C38 69 44 79 54 85"
-                  stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-            <path d="M60 42 C50 42 44 50 44 58 C44 66 48 74 56 80"
-                  stroke="rgba(255,255,255,0.55)" stroke-width="2" stroke-linecap="round" fill="none"/>
-            <path d="M60 48 C53 48 50 54 50 58 C50 63 52 69 58 74"
-                  stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-            <!-- Espejo derecho -->
-            <path d="M60 30 C76 30 88 42 88 58 C88 72 80 84 68 90"
-                  stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
-            <path d="M60 36 C73 36 82 46 82 58 C82 69 76 79 66 85"
-                  stroke="rgba(255,255,255,0.7)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-            <path d="M60 42 C70 42 76 50 76 58 C76 66 72 74 64 80"
-                  stroke="rgba(255,255,255,0.55)" stroke-width="2" stroke-linecap="round" fill="none"/>
-            <!-- Centro -->
-            <circle cx="60" cy="58" r="4" fill="white" opacity="0.9"/>
-          </svg>
-        </div>
-        <h2>Registrar huella dactilar</h2>
-        <p>Coloca tu dedo en el sensor de huellas del dispositivo cuando te lo indique el sistema.</p>
-        <div class="bio-btns">
-          <button class="btn-bio btn-filled" (click)="empezarHuella()">Continuar</button>
-          <button class="btn-bio btn-ghost" (click)="volverSelector()">Cancelar</button>
-        </div>
-      </ng-container>
+      <div class="camara-wrap">
 
-      <!-- SENSOR ACTIVO -->
-      <ng-container *ngIf="huellaEtapa === 'sensor'">
-        <div class="huella-sensor-wrap">
-          <svg viewBox="0 0 200 200" class="huella-sensor-svg">
+        <!-- Video -->
+        <video #videoRef autoplay playsinline muted class="camara-video"></video>
+        <!-- Canvas face-api (oculto para procesar) -->
+        <canvas #canvasRef class="camara-canvas"></canvas>
+
+        <!-- Overlay SVG con círculo de progreso -->
+        <div class="camara-overlay">
+          <svg viewBox="0 0 320 400" class="overlay-svg"
+               xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <radialGradient id="huellaGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="rgba(255,255,255,0.25)"/>
-                <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-              </radialGradient>
+              <!-- Máscara oval para oscurecer el exterior -->
+              <mask id="face-mask">
+                <rect width="320" height="400" fill="white"/>
+                <ellipse cx="160" cy="185" rx="115" ry="140" fill="black"/>
+              </mask>
             </defs>
-            <!-- Fondo circular con glow -->
-            <circle cx="100" cy="100" r="85"
-                    [class.huella-pulse]="huellaEstado === 'esperando' || huellaEstado === 'leyendo'"
-                    fill="url(#huellaGlow)"
-                    stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
 
-            <!-- Anillos de progreso -->
-            <circle cx="100" cy="100" r="72"
-                    fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
-            <circle cx="100" cy="100" r="72"
-                    fill="none" stroke="white" stroke-width="3"
-                    stroke-linecap="round"
-                    [attr.stroke-dasharray]="huellaDash"
-                    transform="rotate(-90 100 100)"
-                    class="huella-progress-circle"/>
+            <!-- Oscurecimiento exterior -->
+            <rect width="320" height="400"
+                  fill="rgba(0,0,0,0.62)" mask="url(#face-mask)"/>
 
-            <!-- Icono de huella en el centro -->
-            <g transform="translate(60, 60)">
-              <svg viewBox="0 0 80 80" width="80" height="80" fill="none">
-                <!-- Líneas de huella que van "llenándose" -->
-                <path d="M40 8 C25 8 14 19 14 34 C14 47 21 59 32 66"
-                      stroke="white" stroke-width="3" stroke-linecap="round"
-                      [style.opacity]="huellaLinea1Opac"/>
-                <path d="M40 14 C28 14 20 23 20 34 C20 44 25 54 34 60"
-                      stroke="white" stroke-width="2.5" stroke-linecap="round"
-                      [style.opacity]="huellaLinea2Opac"/>
-                <path d="M40 20 C31 20 26 27 26 34 C26 41 29 49 36 55"
-                      stroke="white" stroke-width="2" stroke-linecap="round"
-                      [style.opacity]="huellaLinea3Opac"/>
-                <path d="M40 26 C34 26 32 30 32 34 C32 38 33 43 38 48"
-                      stroke="white" stroke-width="1.5" stroke-linecap="round"
-                      [style.opacity]="huellaLinea4Opac"/>
-                <!-- Espejo derecho -->
-                <path d="M40 8 C55 8 66 19 66 34 C66 47 59 59 48 66"
-                      stroke="white" stroke-width="3" stroke-linecap="round"
-                      [style.opacity]="huellaLinea1Opac"/>
-                <path d="M40 14 C52 14 60 23 60 34 C60 44 55 54 46 60"
-                      stroke="white" stroke-width="2.5" stroke-linecap="round"
-                      [style.opacity]="huellaLinea2Opac"/>
-                <path d="M40 20 C49 20 54 27 54 34 C54 41 51 49 44 55"
-                      stroke="white" stroke-width="2" stroke-linecap="round"
-                      [style.opacity]="huellaLinea3Opac"/>
-                <circle cx="40" cy="34" r="4" fill="white" [style.opacity]="huellaLinea4Opac"/>
-              </svg>
+            <!-- Ticks del borde (tipo imagen 2) -->
+            <g class="overlay-ticks">
+              <ng-container *ngFor="let t of ticksArray48; let i = index">
+                <line
+                  [attr.x1]="(115 + 14) * Math.cos(i * tick48Angle) + 160"
+                  [attr.y1]="(140 + 16) * Math.sin(i * tick48Angle) + 185"
+                  [attr.x2]="(115 + 22) * Math.cos(i * tick48Angle) + 160"
+                  [attr.y2]="(140 + 22) * Math.sin(i * tick48Angle) + 185"
+                  [attr.stroke]="tickColor(i)"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  class="tick-line"/>
+              </ng-container>
             </g>
 
-            <!-- Check de éxito -->
-            <g *ngIf="huellaEstado === 'exito'">
-              <circle cx="100" cy="100" r="30" fill="rgba(46,125,50,0.4)"/>
-              <polyline points="86,102 96,112 116,88"
-                        fill="none" stroke="white" stroke-width="5"
-                        stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-          </svg>
-
-          <!-- Texto de instrucción -->
-          <div class="huella-instruccion">
-            <p>{{ instruccionHuella }}</p>
-          </div>
-        </div>
-      </ng-container>
-
-      <!-- ÉXITO HUELLA -->
-      <ng-container *ngIf="huellaEtapa === 'exito'">
-        <div class="bio-icon-wrap">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="bio-svg success-svg">
-            <circle cx="32" cy="32" r="28" fill="rgba(46,125,50,0.3)"/>
-            <polyline points="20,34 28,42 44,22"
-                      fill="none" stroke="white" stroke-width="5"
-                      stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Línea de escaneo animada -->
+            <line *ngIf="escaneando"
+                  [attr.y1]="scanLineY" [attr.y2]="scanLineY"
+                  x1="50" x2="270"
+                  stroke="rgba(255,255,255,0.45)"
+                  stroke-width="1.5"
+                  class="scan-line-anim"/>
           </svg>
         </div>
-        <h2 class="txt-exito">¡Huella registrada!</h2>
-        <p>Tu huella dactilar fue registrada correctamente.</p>
-      </ng-container>
 
+        <!-- Instrucción abajo -->
+        <div class="instruccion-wrap">
+          <p class="instruccion-txt" [class.cambiando]="instrCambiando">
+            {{ instruccionActual }}
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Error de cámara -->
+      <div class="camara-error" *ngIf="errorCamara">
+        <p>{{ errorCamara }}</p>
+        <button class="btn-reintentar" (click)="reintentar()">Reintentar</button>
+        <button class="btn-cancelar-link" (click)="cancelar()">Cancelar</button>
+      </div>
+
+    </ng-container>
+
+
+    <!-- ══════════════════════════════════════════════
+         PANTALLA: ÉXITO
+    ══════════════════════════════════════════════ -->
+    <ng-container *ngIf="pantalla === 'exito'">
+      <div class="exito-wrap">
+        <div class="exito-icono">
+          <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="55" fill="rgba(52,199,89,0.15)"
+                    stroke="rgba(52,199,89,0.4)" stroke-width="1.5"/>
+            <circle cx="60" cy="60" r="40" fill="rgba(52,199,89,0.2)"/>
+            <polyline points="38,62 52,76 82,46"
+                      fill="none" stroke="#34C759" stroke-width="6"
+                      stroke-linecap="round" stroke-linejoin="round"
+                      class="check-stroke"/>
+          </svg>
+        </div>
+        <h2 class="exito-titulo">¡Face ID configurado!</h2>
+        <p class="exito-desc">Tu rostro fue registrado correctamente.</p>
+      </div>
     </ng-container>
 
 
@@ -309,21 +166,23 @@
          PANTALLA: ERROR GLOBAL
     ══════════════════════════════════════════════ -->
     <ng-container *ngIf="pantalla === 'error'">
-      <div class="bio-icon-wrap">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="bio-svg">
-          <circle cx="32" cy="32" r="28" fill="rgba(169,56,69,0.3)"/>
-          <line x1="22" y1="22" x2="42" y2="42" stroke="white" stroke-width="5" stroke-linecap="round"/>
-          <line x1="42" y1="22" x2="22" y2="42" stroke="white" stroke-width="5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <h2 class="txt-error">Error</h2>
-      <p class="txt-error-sub">{{ errorMensaje }}</p>
-      <div class="bio-btns">
-        <button class="btn-bio btn-filled" (click)="reintentar()">Reintentar</button>
-        <button class="btn-bio btn-outline" *ngIf="modo === 'login'" (click)="usarContrasena()">
-          Usar contraseña
-        </button>
-        <button class="btn-bio btn-ghost" (click)="volverSelector()">Cancelar</button>
+      <div class="error-global-wrap">
+        <div class="error-icono">
+          <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="55" fill="rgba(255,59,48,0.12)"
+                    stroke="rgba(255,59,48,0.35)" stroke-width="1.5"/>
+            <line x1="40" y1="40" x2="80" y2="80" stroke="#FF3B30"
+                  stroke-width="6" stroke-linecap="round"/>
+            <line x1="80" y1="40" x2="40" y2="80" stroke="#FF3B30"
+                  stroke-width="6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h2 class="error-titulo">No se pudo registrar</h2>
+        <p class="error-desc">{{ errorMensaje }}</p>
+        <div class="error-btns">
+          <button class="btn-empezar" (click)="reintentar()">Intentar de nuevo</button>
+          <button class="btn-cancelar-link" (click)="cancelar()">Cancelar</button>
+        </div>
       </div>
     </ng-container>
 

@@ -27,23 +27,31 @@
       }
     }
   ],
-"dataGroups": [
-  {
-    "name": "api-auth",
-    "urls": [
-      "https://virtualid-api-production.up.railway.app/api/auth/**",
-      "https://virtualid-api-production.up.railway.app/api/informacion/**"
-    ],
-    "cacheConfig": { "strategy": "freshness", "maxSize": 100, "maxAge": "3d", "timeout": "10s" }
-  },
-  {
-    "name": "api-data",
-    "urls": [
-      "https://virtualid-api-production.up.railway.app/api/credenciales/**",
-      "https://virtualid-api-production.up.railway.app/api/historial/**"
-    ],
-    "cacheConfig": { "strategy": "performance", "maxSize": 100, "maxAge": "1h" }
-  }
-],
+  "dataGroups": [
+    {
+      "name": "api-auth",
+      "urls": [
+        "https://virtualid-api-production.up.railway.app/api/auth/**",
+        "https://virtualid-api-production.up.railway.app/api/informacion/**"
+      ],
+      "cacheConfig": { "strategy": "freshness", "maxSize": 100, "maxAge": "3d", "timeout": "10s" }
+    },
+    {
+      "name": "api-data",
+      "urls": [
+        "https://virtualid-api-production.up.railway.app/api/credenciales/**",
+        "https://virtualid-api-production.up.railway.app/api/historial/**"
+      ],
+      "cacheConfig": { "strategy": "performance", "maxSize": 100, "maxAge": "1h" }
+    },
+    {
+      "name": "face-api-models",
+      "urls": [
+        "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model/**",
+        "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/**"
+      ],
+      "cacheConfig": { "strategy": "performance", "maxSize": 30, "maxAge": "30d" }
+    }
+  ],
   "navigationUrls": []
 }

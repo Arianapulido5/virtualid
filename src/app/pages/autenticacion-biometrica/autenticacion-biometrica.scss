@@ -1,414 +1,409 @@
 // src/app/pages/autenticacion-biometrica/autenticacion-biometrica.scss
-// REEMPLAZA el contenido completo de este archivo
+// Reemplaza el contenido completo de este archivo
 
+@use 'sass:color';
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500&display=swap');
 
-$purple-dark: #4D0F60;
-$purple-mid:  #6B2080;
-$blue-dark:   #32488C;
-$bg:          #EDF2F4;
-$white:       #ffffff;
-$text-main:   #111118;
-$text-soft:   #4A4D56;
-$success:     #2e7d32;
-$danger:      #A93845;
+// ── Variables ─────────────────────────────────────────────────────────────────
+$bg:        #F2F2F7;   // fondo iOS típico
+$white:     #FFFFFF;
+$text-main: #1C1C1E;
+$text-soft: #6E6E73;
+$green:     #34C759;
+$danger:    #FF3B30;
+$blue:      #007AFF;
 
-// ── KEYFRAMES ─────────────────────────────────────────────────────────────────
-@keyframes gradientShift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+// ── Keyframes ─────────────────────────────────────────────────────────────────
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(40px) scale(0.93); }
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-@keyframes orbFloat1 {
-  0%, 100% { transform: translate(0, 0); }
-  33%       { transform: translate(30px, -50px); }
-  66%       { transform: translate(-20px, 25px); }
-}
-@keyframes orbFloat2 {
-  0%, 100% { transform: translate(0, 0); }
-  50%       { transform: translate(-40px, 35px); }
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes successPop {
-  0%   { transform: scale(0.5) rotate(-10deg); opacity: 0; }
-  60%  { transform: scale(1.15) rotate(3deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
-}
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes arcRotate {
-  from { stroke-dashoffset: 0; }
-  to   { stroke-dashoffset: -250; }
+@keyframes successPop {
+  0%   { transform: scale(0.5) rotate(-8deg); opacity: 0; }
+  65%  { transform: scale(1.12) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); }
 }
-@keyframes arcRotate2 {
-  from { stroke-dashoffset: -125; }
-  to   { stroke-dashoffset: 125; }
+@keyframes checkDraw {
+  from { stroke-dashoffset: 80; }
+  to   { stroke-dashoffset: 0; }
 }
-@keyframes scanLineMove {
-  0%   { transform: translateY(0); opacity: 1; }
-  45%  { opacity: 1; }
-  50%  { transform: translateY(160px); opacity: 0; }
-  51%  { transform: translateY(0); opacity: 0; }
-  55%  { opacity: 1; }
-  100% { transform: translateY(160px); opacity: 1; }
+@keyframes instrFade {
+  0%   { opacity: 0; transform: translateY(6px); }
+  20%  { opacity: 1; transform: translateY(0); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
 }
-@keyframes huellaOndula {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.06); }
+@keyframes scanMove {
+  0%   { transform: translateY(0); opacity: 0.7; }
+  50%  { transform: translateY(140px); opacity: 0.3; }
+  100% { transform: translateY(0); opacity: 0.7; }
 }
-@keyframes instruccionSlide {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes iconPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
-  50%       { transform: scale(1.06); box-shadow: 0 0 0 20px rgba(255,255,255,0); }
+@keyframes tickPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
 }
 
-// ── FONDO ─────────────────────────────────────────────────────────────────────
+// ── Fondo ─────────────────────────────────────────────────────────────────────
 .bio-bg {
   position: fixed;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  padding-top: calc(env(safe-area-inset-top, 0px) + 24px);
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
-  background: linear-gradient(145deg, $purple-dark 0%, #3a0b48 30%, $blue-dark 70%, #1e2d5c 100%);
-  background-size: 300% 300%;
-  animation: gradientShift 10s ease infinite;
-  box-sizing: border-box;
-  overflow: hidden;
-  font-family: 'Open Sans', sans-serif;
-
-  &::before {
-    content: '';
-    position: absolute;
-    width: 480px; height: 480px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(107,32,128,0.3) 0%, transparent 70%);
-    top: -180px; left: -120px; pointer-events: none;
-    animation: orbFloat1 14s ease-in-out infinite;
-  }
-  &::after {
-    content: '';
-    position: absolute;
-    width: 360px; height: 360px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(63,91,169,0.25) 0%, transparent 70%);
-    bottom: -120px; right: -90px; pointer-events: none;
-    animation: orbFloat2 11s ease-in-out infinite;
-  }
-}
-
-// ── CARD ──────────────────────────────────────────────────────────────────────
-.bio-card {
   background: $bg;
-  border-radius: 28px;
-  padding: 52px 36px 40px;
-  width: 100%;
-  max-width: 400px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-  text-align: center;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.12) inset;
-  animation: cardIn 0.6s cubic-bezier(.34,1.2,.64,1) both;
-
-  // Modo cámara: fondo oscuro, sin padding extra
-  &.face-mode {
-    background: #0a0a0f;
-    padding: 0;
-    overflow: hidden;
-  }
-}
-
-// ── ÍCONO BASE ────────────────────────────────────────────────────────────────
-.bio-icon-wrap {
-  width: 110px; height: 110px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, $purple-dark, $blue-dark);
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 10px 34px rgba(77,15,96,0.45);
-  transition: box-shadow 0.3s;
-  margin-bottom: 4px;
-  &.pulsing { animation: iconPulse 1.4s ease-in-out infinite; }
-}
-
-.bio-svg {
-  width: 56px; height: 56px;
-  animation: fadeInUp 0.4s ease both;
-  &.success-svg { animation: successPop 0.5s cubic-bezier(.34,1.56,.64,1) both; }
-}
-
-// ── TEXTOS ────────────────────────────────────────────────────────────────────
-h2 {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 22px; font-weight: 800;
-  color: $text-main; margin: 0;
-  animation: fadeInUp 0.45s ease 0.1s both;
-}
-p {
-  font-size: 14px; color: $text-soft;
-  line-height: 1.6; margin: 0;
-  animation: fadeInUp 0.45s ease 0.18s both;
-}
-.txt-exito     { color: $success; }
-.txt-error     { color: $danger; }
-.txt-error-sub { color: darken($danger, 5%); font-size: 13px; }
-
-// ── BOTONES ───────────────────────────────────────────────────────────────────
-.bio-btns {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  margin-top: 6px;
-  animation: fadeInUp 0.5s ease 0.28s both;
-}
-
-.btn-bio {
-  width: 100%;
-  padding: 14px 18px;
-  border-radius: 12px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px; font-weight: 700;
-  cursor: pointer;
-  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s, background 0.2s;
+  font-family: 'Open Sans', sans-serif;
+  overflow: hidden;
+}
 
-  svg { flex-shrink: 0; transition: transform 0.25s cubic-bezier(.34,1.56,.64,1); }
-  &:disabled { opacity: 0.45; cursor: not-allowed; }
+// ── Card ──────────────────────────────────────────────────────────────────────
+.bio-card {
+  background: $white;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 390px;
+  min-height: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+  overflow: hidden;
+  animation: cardIn 0.5s cubic-bezier(.34,1.1,.64,1) both;
 
-  &.btn-filled {
-    background: linear-gradient(135deg, $purple-dark, $blue-dark);
-    color: $white;
-    box-shadow: 0 6px 20px rgba(77,15,96,0.35);
-    &:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 28px rgba(77,15,96,0.45);
-      svg { transform: scale(1.15) rotate(-5deg); }
-    }
-    &:active:not(:disabled) { transform: translateY(0); }
-  }
-
-  &.btn-outline {
-    background: $white;
-    color: $purple-dark;
-    border: 2px solid $purple-dark;
-    &:hover:not(:disabled) {
-      background: $purple-dark;
-      color: $white;
-      transform: translateY(-2px);
-      svg { stroke: $white; }
-    }
-    &:active:not(:disabled) { transform: translateY(0); }
-  }
-
-  &.btn-ghost {
-    background: transparent;
-    color: $text-soft;
-    border: 1.5px solid #ccc;
-    &:hover:not(:disabled) {
-      border-color: $text-soft;
-      background: rgba(0,0,0,0.04);
-      transform: translateY(-1px);
-    }
+  // Modo cámara: sin borde, full negro
+  &.camara-mode {
+    background: #000;
+    border-radius: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    min-height: 0;
+    height: auto;
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  FACE ID — INTRO
-// ─────────────────────────────────────────────────────────────────────────────
-.face-intro-icon {
-  width: 160px; height: 160px;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 8px;
+// ── Botón volver ──────────────────────────────────────────────────────────────
+.btn-back {
+  position: absolute;
+  top: 18px;
+  left: 16px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(0,0,0,0.06);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s;
 
-  svg { width: 100%; height: 100%; }
+  svg {
+    width: 18px;
+    height: 18px;
+    color: $text-main;
+  }
+
+  &:hover { background: rgba(0,0,0,0.12); }
+  &:active { background: rgba(0,0,0,0.18); }
 }
 
-.arc-anim {
-  stroke-dasharray: 80 170;
-  animation: arcRotate 3s linear infinite;
-}
-.arc-anim-2 {
-  stroke-dasharray: 80 170;
-  animation: arcRotate2 3s linear infinite;
-}
-
-.scan-line {
-  stroke-dasharray: 4 4;
-  opacity: 0.4;
-  animation: scanLineMove 2.5s ease-in-out infinite;
+// ── Pantalla INTRO ────────────────────────────────────────────────────────────
+.face-intro-wrap {
+  margin-top: 64px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  FACE ID — CÁMARA
-// ─────────────────────────────────────────────────────────────────────────────
-.face-camera-container {
+.face-intro-svg {
+  width: 200px;
+  height: 200px;
+  animation: fadeInUp 0.5s ease 0.1s both;
+}
+
+.intro-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: $text-main;
+  margin: 0 0 14px;
+  text-align: center;
+  padding: 0 28px;
+  animation: fadeInUp 0.5s ease 0.18s both;
+}
+
+.intro-desc {
+  font-size: 15px;
+  color: $text-soft;
+  line-height: 1.65;
+  text-align: center;
+  padding: 0 32px;
+  margin: 0;
+  animation: fadeInUp 0.5s ease 0.24s both;
+}
+
+.intro-btns {
+  width: 100%;
+  padding: 32px 24px 40px;
+  box-sizing: border-box;
+  margin-top: auto;
+  animation: fadeInUp 0.5s ease 0.32s both;
+}
+
+.btn-empezar {
+  width: 100%;
+  padding: 16px;
+  background: $blue;
+  color: $white;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s cubic-bezier(.34,1.56,.64,1);
+  letter-spacing: -0.2px;
+
+  &:hover  { background: color.adjust($blue, $lightness: -8%); transform: translateY(-2px); }
+  &:active { background: color.adjust($blue, $lightness: -12%); transform: translateY(0); }
+}
+
+// ── Pantalla CÁMARA ───────────────────────────────────────────────────────────
+.camara-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
-  background: #000;
-  overflow: hidden;
-  border-radius: 28px;
 }
 
-.face-video {
+.camara-video {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scaleX(-1);     // espejo para cámara frontal
   display: block;
+  object-fit: cover;
+  transform: scaleX(-1);  // espejo — cámara frontal
+  border-radius: 0;
+  background: #000;
+  aspect-ratio: 4 / 5;
 }
 
-.face-overlay {
+// Canvas invisible — solo para face-api
+.camara-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.camara-overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.face-overlay-svg {
+.overlay-svg {
   width: 100%;
   height: 100%;
 }
 
-// Arco de progreso animado suavemente
-.face-progress-arc {
-  transition: stroke-dasharray 0.2s linear;
-}
-
 // Línea de escaneo
-.face-scan-line {
-  transition: y1 0.08s linear, y2 0.08s linear;
-  filter: drop-shadow(0 0 3px rgba(255,255,255,0.6));
+.scan-line-anim {
+  animation: scanMove 1.8s ease-in-out infinite;
+  transform-origin: center;
 }
 
-// Instrucción flotante sobre la cámara
-.face-instruccion {
+// Ticks del borde del círculo
+.tick-line {
+  transition: stroke 0.4s ease;
+}
+
+// Instrucción flotante bajo el círculo
+.instruccion-wrap {
   position: absolute;
   bottom: 0;
-  left: 0; right: 0;
-  padding: 20px 24px 28px;
-  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+  left: 0;
+  right: 0;
+  padding: 22px 28px 32px;
+  background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  min-height: 80px;
+  min-height: 90px;
 }
 
-.face-instruccion-text {
+.instruccion-txt {
   font-family: 'Montserrat', sans-serif;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   color: $white;
   text-align: center;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.8);
-  animation: instruccionSlide 0.4s ease both;
-}
+  margin: 0;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.8);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 
-// Error superpuesto a la cámara
-.face-error {
-  padding: 24px 36px;
-  width: 100%;
-  box-sizing: border-box;
-  text-align: center;
-
-  p {
-    font-size: 14px;
-    color: $danger;
-    margin-bottom: 16px;
+  &.cambiando {
+    opacity: 0;
+    transform: translateY(4px);
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  HUELLA DACTILAR — INTRO
-// ─────────────────────────────────────────────────────────────────────────────
-.huella-icon-wrap {
-  width: 160px; height: 160px;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 8px;
-}
-
-.huella-svg-intro {
-  width: 100%; height: 100%;
-  animation: huellaOndula 3s ease-in-out infinite;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  HUELLA DACTILAR — SENSOR
-// ─────────────────────────────────────────────────────────────────────────────
-.huella-sensor-wrap {
+// Error de cámara
+.camara-error {
+  padding: 24px 28px 32px;
+  text-align: center;
+  background: $white;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  width: 100%;
-  padding: 20px 36px 32px;
-  box-sizing: border-box;
-}
-
-.huella-sensor-svg {
-  width: 220px; height: 220px;
-}
-
-// Pulso del fondo circular cuando espera
-.huella-pulse {
-  animation: huellaOndula 1.5s ease-in-out infinite;
-}
-
-// Anillo de progreso
-.huella-progress-circle {
-  transition: stroke-dasharray 0.5s ease;
-  filter: drop-shadow(0 0 4px rgba(255,255,255,0.5));
-}
-
-// Líneas de huella (opacidad cambia con JS)
-svg path, svg line {
-  transition: opacity 0.5s ease;
-}
-
-.huella-instruccion {
-  text-align: center;
+  gap: 14px;
 
   p {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: $text-main;
+    color: $danger;
+    font-size: 14px;
     margin: 0;
-    animation: instruccionSlide 0.4s ease both;
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  RESPONSIVE
-// ─────────────────────────────────────────────────────────────────────────────
-@media (max-width: 480px) {
-  .bio-card {
-    padding: 36px 22px 28px;
-    border-radius: 20px;
-    &.face-mode { padding: 0; border-radius: 24px; }
+.btn-reintentar {
+  width: 100%;
+  padding: 14px;
+  background: $blue;
+  color: $white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover { background: color.adjust($blue, $lightness: -8%); }
+}
+
+.btn-cancelar-link {
+  background: none;
+  border: none;
+  color: $text-soft;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px;
+  &:hover { color: $text-main; }
+}
+
+// ── Pantalla ÉXITO ────────────────────────────────────────────────────────────
+.exito-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 48px 32px;
+  gap: 18px;
+  text-align: center;
+}
+
+.exito-icono {
+  svg {
+    width: 120px;
+    height: 120px;
+    animation: successPop 0.55s cubic-bezier(.34,1.56,.64,1) both;
   }
-  .bio-icon-wrap { width: 90px; height: 90px; }
-  .bio-svg       { width: 46px; height: 46px; }
-  h2             { font-size: 20px; }
-  .btn-bio       { font-size: 13px; padding: 13px 16px; }
-  .face-intro-icon { width: 130px; height: 130px; }
-  .huella-icon-wrap { width: 130px; height: 130px; }
-  .huella-sensor-svg { width: 180px; height: 180px; }
+}
+
+.check-stroke {
+  stroke-dasharray: 80;
+  stroke-dashoffset: 80;
+  animation: checkDraw 0.5s ease 0.35s forwards;
+}
+
+.exito-titulo {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: $text-main;
+  margin: 0;
+  animation: fadeInUp 0.4s ease 0.6s both;
+}
+
+.exito-desc {
+  font-size: 15px;
+  color: $text-soft;
+  margin: 0;
+  animation: fadeInUp 0.4s ease 0.7s both;
+}
+
+// ── Pantalla ERROR GLOBAL ─────────────────────────────────────────────────────
+.error-global-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 48px 28px;
+  gap: 16px;
+  text-align: center;
+}
+
+.error-icono svg {
+  width: 110px;
+  height: 110px;
+  animation: successPop 0.5s ease both;
+}
+
+.error-titulo {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  color: $text-main;
+  margin: 0;
+}
+
+.error-desc {
+  font-size: 14px;
+  color: $text-soft;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.error-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 480px) {
+  .bio-bg {
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  .bio-card {
+    border-radius: 0;
+    min-height: 100dvh;
+    max-width: 100%;
+    box-shadow: none;
+
+    &.camara-mode {
+      border-radius: 0;
+      min-height: 100dvh;
+    }
+  }
+
+  .camara-video {
+    aspect-ratio: unset;
+    height: 100dvh;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .face-intro-svg { width: 175px; height: 175px; }
+  .intro-title    { font-size: 19px; }
+  .intro-desc     { font-size: 14px; }
 }
