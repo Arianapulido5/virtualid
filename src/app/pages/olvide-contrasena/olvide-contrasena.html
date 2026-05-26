@@ -16,7 +16,7 @@
     <!-- Logo -->
     <div class="logo-circle"><span>VID</span></div>
 
-    <!-- ══ PASO 2: Formulario nueva contraseña (token en URL) ══════ -->
+    <!-- ══ PASO 2: Formulario nueva contraseña ══════════════════ -->
     @if (token && !resetExitoso) {
 
       <h1 class="card-title">Nueva contraseña</h1>
@@ -91,7 +91,6 @@
         </span>
       </div>
 
-      <!-- Error reset -->
       <p class="error-msg" *ngIf="errorReset">{{ errorReset }}</p>
 
       <button class="btn-primary" (click)="restablecerContrasena()" [disabled]="cargandoReset">
@@ -110,31 +109,12 @@
 
     }
 
-    <!-- ══ PASO 1B: Correo enviado ══════════════════════════════════ -->
-    @else if (!token && enviado) {
-
-      <div class="success-icon">✉️</div>
-      <h1 class="card-title">Revisa tu correo</h1>
-      <p class="card-subtitle">
-        Hemos enviado un enlace de recuperación a<br>
-        <strong>{{ correo }}</strong>
-      </p>
-      <p class="card-nota">
-        Si no ves el correo, revisa tu carpeta de spam.<br>
-        El enlace expira en 1 hora.
-      </p>
-      <button class="btn-primary" routerLink="/login">
-        Volver al inicio de sesión
-      </button>
-
-    }
-
-    <!-- ══ PASO 1: Ingresar correo ══════════════════════════════════ -->
-    @else if (!token && !enviado) {
+    <!-- ══ PASO 1: Ingresar correo ══════════════════════════════ -->
+    @else if (!token && !resetExitoso) {
 
       <h1 class="card-title">¿Olvidaste tu contraseña?</h1>
       <p class="card-subtitle">
-        Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.
+        Ingresa tu correo y podrás crear una nueva contraseña de inmediato.
       </p>
 
       <div class="form-group">
@@ -152,7 +132,7 @@
       <p class="error-msg" *ngIf="error">{{ error }}</p>
 
       <button class="btn-primary" (click)="enviar()" [disabled]="cargando">
-        <span *ngIf="!cargando">Enviar enlace</span>
+        <span *ngIf="!cargando">Continuar</span>
         <span *ngIf="cargando" class="spinner-btn"></span>
       </button>
 

@@ -27,6 +27,8 @@ export class Auth {
 
   constructor(private http: HttpClient) {}
 
+  // ── Sesión ──────────────────────────────────────────────────────────────────
+
   static setToken(token: string): void {
     try { localStorage.setItem('token', token); }
     catch { sessionStorage.setItem('token', token); }
@@ -52,10 +54,14 @@ export class Auth {
     sessionStorage.removeItem('rol');
   }
 
+  // ── HTTP helpers ────────────────────────────────────────────────────────────
+
   private headers(): HttpHeaders {
     const token = Auth.getToken();
     return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
+
+  // ── Auth ────────────────────────────────────────────────────────────────────
 
   login(correo: string, contrasena: string) {
     return this.http.post<any>(`${this.url}/auth/login`, { correo, contrasena });
@@ -85,13 +91,26 @@ export class Auth {
     Auth.clearSession();
   }
 
-  solicitarRecuperacion(correo: string) {
-    return this.http.post<any>(`${this.url}/recuperacion/solicitar`, { correo });
+  // ── Recuperación sin email ──────────────────────────────────────────────────
+
+  /** Paso 1: verifica si el correo existe en la BD.
+   *  Si existe devuelve { token } (JWT 15 min) para usarlo en el paso 2. */
+  verificarCorreoRecuperacion(correo: string): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(
+      `${this.url}/recuperacion/verificar-correo`,
+      { correo }
+    );
   }
 
-  restablecerContrasena(token: string, contrasena: string) {
-    return this.http.post<any>(`${this.url}/recuperacion/restablecer`, { token, contrasena });
+  /** Paso 2: guarda la nueva contraseña en la BD usando el token temporal. */
+  restablecerContrasena(token: string, contrasena: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.url}/recuperacion/restablecer`,
+      { token, contrasena }
+    );
   }
+
+  // ── Información personal ────────────────────────────────────────────────────
 
   obtenerInformacion(): Observable<InfoPersonalData> {
     return this.http.get<InfoPersonalData>(`${this.url}/informacion`, { headers: this.headers() });
@@ -111,5 +130,10 @@ export class Auth {
       { contrasena_actual, nueva_contrasena, confirmar_contrasena },
       { headers: this.headers() }
     );
+  }
+
+  // Mantener por si se usa en otro lugar
+  solicitarRecuperacion(correo: string) {
+    return this.http.post<any>(`${this.url}/recuperacion/solicitar`, { correo });
   }
 }
