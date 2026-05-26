@@ -720,10 +720,11 @@ $warning:      #e65100;
   text-align: center;
   line-height: 1.55;
 }
-
 .face-cam-wrap {
   position: relative;
-  width: 100%;
+  width: calc(100% + 56px); // compensa padding 28px de cada lado
+  margin-left: -28px;
+  margin-right: -28px;
   height: 280px;
   border-radius: 0;
   overflow: hidden;
@@ -854,6 +855,16 @@ $warning:      #e65100;
     border-color: rgba(255,255,255,0.6) !important;
     background: rgba(255,255,255,0.08) !important;
   }
+
+  .face-cam-overlay ellipse {
+  transition: stroke 0.3s ease;
+}
+
+.face-cam-overlay.processing ellipse {
+  stroke: #34C759;
+  animation: girar 2s linear infinite;
+  transform-origin: 140px 140px;
+}
 }
 
 // ─────────────────────────────────────────────

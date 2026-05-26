@@ -279,13 +279,14 @@ export class Login implements OnInit, OnDestroy {
         .withFaceLandmarks(true)
         .withFaceDescriptor();
 
-      if (!det) {
-        this.faceProcessing = false;
-        this.faceError      = 'No se detectó ningún rostro. Centra tu cara y vuelve a intentarlo.';
-        this.limpiarCamara();
-        this.cdr.detectChanges();
-        return;
-      }
+    if (!det) {
+  this.faceProcessing = false;
+  this.faceScanning   = false;
+  this.limpiarCamara();
+  this.faceError = 'No se detectó ningún rostro. Centra tu cara y vuelve a intentarlo.';
+  this.cdr.detectChanges();
+  return;
+}
 
       const descriptor = Array.from(det.descriptor as Float32Array) as number[];
       this.limpiarCamara();

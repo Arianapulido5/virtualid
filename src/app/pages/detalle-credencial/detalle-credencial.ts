@@ -215,16 +215,25 @@ export class DetalleCredencial implements OnInit, OnDestroy {
 
   // ── Paso 1: abrir modal con cámara ────────────────────────────────────────
 
-  private async abrirModalFacial(): Promise<void> {
-    this.faceModalVisible = true;
-    this.faceScanning     = false;
-    this.faceProcessing   = false;
-    this.faceError        = '';
-    this.cdr.detectChanges();
-    await this.delay(120);
+private async abrirModalFacial(): Promise<void> {
+  this.faceModalVisible = true;
+  this.faceScanning     = false;
+  this.faceProcessing   = false;
+  this.faceError        = '';
+  this.cdr.detectChanges();
+
+  await this.delay(200);
+
+  try {
     await this.cargarFaceApi();
     await this.iniciarCamaraFacial();
+  } catch (err: any) {
+    this.faceError      = 'No se pudo iniciar la verificación. Inténtalo de nuevo.';
+    this.faceScanning   = false;
+    this.faceProcessing = false;
+    this.cdr.detectChanges();
   }
+}
 
   cerrarModalFacial(): void {
     this.limpiarCamaraFacial();

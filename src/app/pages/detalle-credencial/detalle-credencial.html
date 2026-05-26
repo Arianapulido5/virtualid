@@ -8,8 +8,8 @@
       <h3>{{ confirmTitulo }}</h3>
       <p>{{ confirmMensaje }}</p>
       <div class="modal-btns">
-        <button class="btn-cancelar-modal" (click)="cancelarConfirmacion()">Cancelar</button>
         <button class="btn-aceptar-modal" (click)="confirmarAccion()">Sí, eliminar</button>
+        <button class="btn-cancelar-modal" (click)="cancelarConfirmacion()">Cancelar</button>
       </div>
     </div>
   </div>
@@ -27,79 +27,86 @@
   </div>
 
   <!-- ══════════════════════════════════════════════════════════════════════
-       MODAL: VERIFICACIÓN FACIAL
-  ══════════════════════════════════════════════════════════════════════ -->
-  <div class="modal-overlay face-modal-overlay" *ngIf="faceModalVisible" (click)="$event.stopPropagation()">
-    <div class="modal-card face-modal-card" (click)="$event.stopPropagation()">
-      <button class="modal-close-btn" (click)="cerrarModalFacial()">✕</button>
+     MODAL: VERIFICACIÓN FACIAL
+══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay face-modal-overlay" *ngIf="faceModalVisible" (click)="$event.stopPropagation()">
+  <div class="modal-card face-modal-card" style="background:#000000; border:none; box-shadow:none;" (click)="$event.stopPropagation()">
+    <button class="modal-close-btn" style="color:#ffffff; background:transparent; border:none;" (click)="cerrarModalFacial()">✕</button>
 
-      <!-- Estado: error -->
-      <ng-container *ngIf="faceError && !faceScanning && !faceProcessing">
-        <div class="face-error-state">
-          <div class="face-error-icon">
-            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="40" cy="40" r="36" fill="rgba(255,59,48,0.1)" stroke="rgba(255,59,48,0.35)" stroke-width="1.5"/>
-              <line x1="26" y1="26" x2="54" y2="54" stroke="#FF3B30" stroke-width="5" stroke-linecap="round"/>
-              <line x1="54" y1="26" x2="26" y2="54" stroke="#FF3B30" stroke-width="5" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <h3 class="face-modal-title">Verificación fallida</h3>
-          <p class="face-modal-desc">{{ faceError }}</p>
-          <div class="face-modal-btns">
-            <button class="btn-empezar face-btn-reintentar" (click)="reintentarFacial()"
-                    *ngIf="!faceError.includes('No tienes biometría')">
-              Intentar de nuevo
-            </button>
-            <button class="btn-empezar face-btn-config"
-                    *ngIf="faceError.includes('No tienes biometría')"
-                    (click)="cerrarModalFacial(); irAConfiguracion()">
-              Ir a Configuración
-            </button>
-            <button class="face-btn-cancel" (click)="cerrarModalFacial()">Cancelar</button>
-          </div>
+    <!-- Estado: error -->
+    <ng-container *ngIf="faceError && !faceScanning && !faceProcessing">
+      <div class="face-error-state">
+        <div class="face-error-icon">
+          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="36" fill="rgba(255,59,48,0.1)" stroke="rgba(255,59,48,0.35)" stroke-width="1.5"/>
+            <line x1="26" y1="26" x2="54" y2="54" stroke="#FF3B30" stroke-width="5" stroke-linecap="round"/>
+            <line x1="54" y1="26" x2="26" y2="54" stroke="#FF3B30" stroke-width="5" stroke-linecap="round"/>
+          </svg>
         </div>
-      </ng-container>
+        <h3 class="face-modal-title">Verificación fallida</h3>
+        <p class="face-modal-desc">{{ faceError }}</p>
+        <div class="face-modal-btns">
+          <button class="btn-empezar face-btn-reintentar" (click)="reintentarFacial()"
+                  *ngIf="!faceError.includes('No tienes biometría')">
+            Intentar de nuevo
+          </button>
+          <button class="btn-empezar face-btn-config"
+                  *ngIf="faceError.includes('No tienes biometría')"
+                  (click)="cerrarModalFacial(); irAConfiguracion()">
+            Ir a Configuración
+          </button>
+          <button class="face-btn-cancel" (click)="cerrarModalFacial()">Cancelar</button>
+        </div>
+      </div>
+    </ng-container>
 
-      <!-- Estado: cámara activa / procesando -->
-      <ng-container *ngIf="faceScanning || faceProcessing || (!faceError && faceModalVisible)">
-        <h3 class="face-modal-title">Verificación facial</h3>
-        <p class="face-modal-desc">
-          {{ faceProcessing ? 'Verificando identidad...' : 'Centra tu rostro en el círculo' }}
-        </p>
+    <!-- Estado: cámara activa / procesando -->
+    <ng-container *ngIf="faceScanning || faceProcessing || (!faceError && faceModalVisible)">
+      <h3 class="face-modal-title">Verificación facial</h3>
+      <p class="face-modal-desc">
+        {{ faceProcessing ? 'Verificando identidad...' : 'Centra tu rostro en el círculo' }}
+      </p>
 
-        <div class="face-cam-wrap">
-          <video #faceVideoRef autoplay playsinline muted class="face-cam-video"></video>
-          <canvas #faceCanvasRef class="face-cam-canvas"></canvas>
+      <div class="face-cam-wrap">
+        <video #faceVideoRef class="face-cam-video" autoplay playsinline muted
+               style="clip-path: ellipse(100px 124px at 50% 50%)"></video>
+        <canvas #faceCanvasRef class="face-cam-canvas"></canvas>
 
-          <div class="face-cam-overlay">
-            <svg viewBox="0 0 280 280" class="face-overlay-svg" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <mask id="face-mask-det">
-                  <rect width="280" height="280" fill="white"/>
-                  <ellipse cx="140" cy="140" rx="105" ry="120" fill="black"/>
-                </mask>
-              </defs>
-              <rect width="280" height="280" fill="rgba(0,0,0,0.55)" mask="url(#face-mask-det)"/>
-              <ellipse cx="140" cy="140" rx="105" ry="120"
-                       fill="none"
-                       [attr.stroke]="faceProcessing ? '#34C759' : '#FFFFFF'"
-                       stroke-width="2.5"
-                       stroke-dasharray="10 6"
-                       style="transition: stroke 0.4s"/>
-              <line *ngIf="faceScanning && !faceProcessing"
-                    [attr.y1]="faceScanLineY" [attr.y2]="faceScanLineY"
-                    x1="40" x2="240"
-                    stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
-            </svg>
-          </div>
+        <div class="face-cam-overlay">
+          <svg class="face-overlay-svg" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="140" cy="140" rx="100" ry="124"
+                     fill="none"
+                     stroke="white"
+                     stroke-width="3"
+                     stroke-dasharray="14 8"
+                     stroke-linecap="round"/>
+          </svg>
         </div>
 
-        <p class="face-hint" *ngIf="!faceProcessing">La verificación es automática · mantente quieto</p>
-        <p class="face-hint face-hint--processing" *ngIf="faceProcessing">Comparando con el registro...</p>
-      </ng-container>
+        <div class="face-processing-overlay" *ngIf="faceProcessing">
+          <svg class="face-processing-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="20" stroke="rgba(255,255,255,0.15)" stroke-width="4"/>
+            <circle cx="24" cy="24" r="20"
+                    fill="none"
+                    stroke="#34C759"
+                    stroke-width="4"
+                    stroke-linecap="round"
+                    stroke-dasharray="42 84"
+                    class="face-spinner-dash"/>
+          </svg>
+        </div>
+      </div>
 
-    </div>
+      <p class="face-hint" *ngIf="!faceProcessing">
+        La verificación es automática · mantente quieto
+      </p>
+      <p class="face-hint face-hint--processing" *ngIf="faceProcessing">
+        Comparando con el registro...
+      </p>
+    </ng-container>
+
   </div>
+</div>
 
   <!-- ══ MODAL SOLICITANDO UBICACIÓN ══ -->
   <div class="modal-overlay" *ngIf="geoSolicitando && !qrVisible" (click)="cancelarGeo()">
