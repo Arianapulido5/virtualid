@@ -3,21 +3,25 @@
 @use 'sass:color';
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500&display=swap');
 
-$bg:        #F2F2F7;
-$white:     #FFFFFF;
-$text-main: #1C1C1E;
-$text-soft: #6E6E73;
-$green:     #34C759;
-$danger:    #FF3B30;
-$blue:      #007AFF;
+// ─── Tokens ───────────────────────────────────────────────────────────────────
+$bg-dark:    #000000;
+$bg-card:    #000000;
+$white:      #FFFFFF;
+$text-main:  #FFFFFF;
+$text-soft:  rgba(255,255,255,0.55);
+$green:      #34C759;
+$danger:     #FF3B30;
+$blue:       #007AFF;
+$tick-off:   rgba(255,255,255,0.22);
+$tick-on:    #FFFFFF;
 
-// ── Keyframes ─────────────────────────────────────────────────────────────────
+// ─── Keyframes ────────────────────────────────────────────────────────────────
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(30px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes successPop {
@@ -34,12 +38,20 @@ $blue:      #007AFF;
   50%  { transform: translateY(140px); opacity: 0.3; }
   100% { transform: translateY(0);     opacity: 0.7; }
 }
+@keyframes tickGlow {
+  0%, 100% { opacity: 0.18; }
+  50%       { opacity: 0.45; }
+}
+@keyframes rotateDots {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
 
-// ── Fondo ─────────────────────────────────────────────────────────────────────
+// ─── Fondo ────────────────────────────────────────────────────────────────────
 .bio-bg {
   position: fixed;
   inset: 0;
-  background: $bg;
+  background: $bg-dark;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,39 +59,36 @@ $blue:      #007AFF;
   overflow: hidden;
 }
 
-// ── Card ──────────────────────────────────────────────────────────────────────
+// ─── Card ─────────────────────────────────────────────────────────────────────
 .bio-card {
-  background: $white;
-  border-radius: 24px;
+  background: $bg-card;
+  border-radius: 0;
   width: 100%;
   max-width: 390px;
-  min-height: 580px;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.10);
   overflow: hidden;
   animation: cardIn 0.5s cubic-bezier(.34,1.1,.64,1) both;
 
   &.camara-mode {
     background: #000;
-    border-radius: 24px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-    min-height: 0;
-    height: auto;
+    min-height: 100dvh;
   }
 }
 
-// ── Botón volver ──────────────────────────────────────────────────────────────
+// ─── Botón volver ─────────────────────────────────────────────────────────────
 .btn-back {
   position: absolute;
-  top: 18px;
+  top: env(safe-area-inset-top, 18px);
+  top: calc(env(safe-area-inset-top, 0px) + 18px);
   left: 16px;
   width: 36px;
   height: 36px;
   border: none;
-  background: rgba(0,0,0,0.06);
+  background: rgba(255,255,255,0.10);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -88,35 +97,37 @@ $blue:      #007AFF;
   z-index: 10;
   transition: background 0.2s;
 
-  svg { width: 18px; height: 18px; color: $text-main; }
-  &:hover  { background: rgba(0,0,0,0.12); }
-  &:active { background: rgba(0,0,0,0.18); }
+  svg { width: 18px; height: 18px; color: $white; }
+  &:hover  { background: rgba(255,255,255,0.18); }
+  &:active { background: rgba(255,255,255,0.25); }
 }
 
-// ── Intro ─────────────────────────────────────────────────────────────────────
+// ─── INTRO (pantalla principal estilo iPhone Face ID) ─────────────────────────
 .face-intro-wrap {
-  margin-top: 64px;
-  margin-bottom: 32px;
+  margin-top: auto;
+  padding-top: 48px;
+  margin-bottom: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .face-intro-svg {
-  width: 200px;
-  height: 200px;
-  animation: fadeInUp 0.5s ease 0.1s both;
+  width: 260px;
+  height: 260px;
+  animation: fadeInUp 0.55s ease 0.1s both;
 }
 
 .intro-title {
   font-family: 'Montserrat', sans-serif;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
-  color: $text-main;
+  color: $white;
   margin: 0 0 14px;
   text-align: center;
   padding: 0 28px;
-  animation: fadeInUp 0.5s ease 0.18s both;
+  animation: fadeInUp 0.5s ease 0.2s both;
+  letter-spacing: -0.3px;
 }
 
 .intro-desc {
@@ -124,22 +135,23 @@ $blue:      #007AFF;
   color: $text-soft;
   line-height: 1.65;
   text-align: center;
-  padding: 0 32px;
+  padding: 0 36px;
   margin: 0;
-  animation: fadeInUp 0.5s ease 0.24s both;
+  animation: fadeInUp 0.5s ease 0.28s both;
 }
 
 .intro-btns {
   width: 100%;
-  padding: 32px 24px 40px;
+  padding: 28px 24px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
   box-sizing: border-box;
-  margin-top: auto;
-  animation: fadeInUp 0.5s ease 0.32s both;
+  margin-top: auto;          // pega el botón al fondo
+  animation: fadeInUp 0.5s ease 0.36s both;
 }
 
 .btn-empezar {
   width: 100%;
-  padding: 16px;
+  padding: 17px;
   background: $blue;
   color: $white;
   border: none;
@@ -155,23 +167,27 @@ $blue:      #007AFF;
   &:active { background: color.adjust($blue, $lightness: -12%); transform: translateY(0); }
 }
 
-// ── Cámara ────────────────────────────────────────────────────────────────────
+
+// ─── Cámara ───────────────────────────────────────────────────────────────────
 .camara-wrap {
   position: relative;
   width: 100%;
+  height: 100dvh;
+  background: #000;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .camara-video {
   width: 100%;
+  height: 100%;
   display: block;
   object-fit: cover;
-  // SIN espejo — imagen natural tal como la captura la cámara
   background: #000;
-  aspect-ratio: 3 / 4;   // menos alargado, más compacto
-  border-radius: 0;
+  position: absolute;
+  inset: 0;
 }
 
-// Canvas invisible — solo para face-api
 .camara-canvas {
   position: absolute;
   top: 0; left: 0;
@@ -184,6 +200,7 @@ $blue:      #007AFF;
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 2;
 }
 
 .overlay-svg {
@@ -197,44 +214,39 @@ $blue:      #007AFF;
 }
 
 .tick-line {
-  transition: stroke 0.4s ease;
+  transition: stroke 0.35s ease, stroke-width 0.35s ease;
 }
 
-// Instrucción flotante
 .instruccion-wrap {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 18px 28px 28px;
-  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+  bottom: 0; left: 0; right: 0;
+  padding: 18px 28px 40px;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  min-height: 80px;
+  min-height: 90px;
+  pointer-events: none;
 }
 
 .instruccion-txt {
   font-family: 'Montserrat', sans-serif;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: $white;
   text-align: center;
   margin: 0;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.8);
+  text-shadow: 0 1px 8px rgba(0,0,0,0.9);
   transition: opacity 0.3s ease, transform 0.3s ease;
 
-  &.cambiando {
-    opacity: 0;
-    transform: translateY(4px);
-  }
+  &.cambiando { opacity: 0; transform: translateY(4px); }
 }
 
 // Error de cámara
 .camara-error {
   padding: 24px 28px 32px;
   text-align: center;
-  background: $white;
+  background: #111;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -267,50 +279,64 @@ $blue:      #007AFF;
   font-weight: 600;
   cursor: pointer;
   padding: 6px;
-  &:hover { color: $text-main; }
+  &:hover { color: $white; }
 }
 
-// ── Éxito ─────────────────────────────────────────────────────────────────────
+
+// ─── Éxito ────────────────────────────────────────────────────────────────────
+// ─── Éxito ────────────────────────────────────────────────────────────────────
 .exito-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   flex: 1;
+  width: 100%;
   padding: 48px 32px;
-  gap: 18px;
+  gap: 24px;
   text-align: center;
+  background: #FFFFFF;
 }
 
-.exito-icono svg {
-  width: 120px;
-  height: 120px;
-  animation: successPop 0.55s cubic-bezier(.34,1.56,.64,1) both;
-}
-
-.check-stroke {
-  stroke-dasharray: 80;
-  stroke-dashoffset: 80;
-  animation: checkDraw 0.5s ease 0.35s forwards;
+.exito-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .exito-titulo {
   font-family: 'Montserrat', sans-serif;
-  font-size: 22px;
-  font-weight: 800;
-  color: $text-main;
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
   margin: 0;
-  animation: fadeInUp 0.4s ease 0.6s both;
+  line-height: 1.4;
+  padding: 0 16px;
 }
 
-.exito-desc {
-  font-size: 15px;
-  color: $text-soft;
-  margin: 0;
-  animation: fadeInUp 0.4s ease 0.7s both;
+.exito-btns {
+  width: 100%;
+  margin-top: auto;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
 }
 
-// ── Error global ──────────────────────────────────────────────────────────────
+.btn-exito-ok {
+  width: 100%;
+  padding: 17px;
+  background: #007AFF;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:active { background: #005FCC; }
+}
+
+// ─── Error global ─────────────────────────────────────────────────────────────
 .error-global-wrap {
   display: flex;
   flex-direction: column;
@@ -332,7 +358,7 @@ $blue:      #007AFF;
   font-family: 'Montserrat', sans-serif;
   font-size: 21px;
   font-weight: 800;
-  color: $text-main;
+  color: $white;
   margin: 0;
 }
 
@@ -351,7 +377,7 @@ $blue:      #007AFF;
   margin-top: 8px;
 }
 
-// ── Pantalla correo ───────────────────────────────────────────────────────────
+// ─── Pantalla correo ──────────────────────────────────────────────────────────
 .correo-wrap {
   display: flex;
   flex-direction: column;
@@ -377,36 +403,36 @@ $blue:      #007AFF;
   width: 100%;
   box-sizing: border-box;
   padding: 14px 16px;
-  border: 1.5px solid #c5c9d4;
+  border: 1.5px solid rgba(255,255,255,0.15);
   border-radius: 12px;
   font-family: 'Open Sans', sans-serif;
   font-size: 16px;
-  background: #F9F9F9;
-  color: #1C1C1E;
+  background: rgba(255,255,255,0.08);
+  color: $white;
   outline: none;
   transition: border-color 0.25s, box-shadow 0.25s;
 
   &:focus {
-    border-color: #007AFF;
-    box-shadow: 0 0 0 4px rgba(0,122,255,0.1);
+    border-color: $blue;
+    box-shadow: 0 0 0 4px rgba(0,122,255,0.15);
   }
 
   &--error {
-    border-color: #FF3B30;
-    background: #fff5f5;
+    border-color: $danger;
+    background: rgba(255,59,48,0.08);
   }
 
-  &::placeholder { color: #aaa; }
+  &::placeholder { color: rgba(255,255,255,0.3); }
 }
 
 .correo-error {
   font-size: 12px;
-  color: #FF3B30;
+  color: $danger;
   text-align: left;
   padding-left: 4px;
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────────
+// ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 480px) {
   .bio-bg {
     align-items: flex-start;
@@ -425,15 +451,27 @@ $blue:      #007AFF;
     }
   }
 
-  // En móvil la cámara ocupa el ancho completo con aspect-ratio fijo
-  .camara-video {
-    aspect-ratio: 3 / 4;
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-  }
+.camara-video {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: unset;
+  object-fit: cover;
+  transform: none;
+}
 
-  .face-intro-svg { width: 175px; height: 175px; }
-  .intro-title    { font-size: 19px; }
+  .face-intro-svg { width: 240px; height: 240px; }
+  .intro-title    { font-size: 21px; }
   .intro-desc     { font-size: 14px; }
+
+  .face-intro-wrap {
+    padding-top: 60px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.1ms !important;
+  }
 }

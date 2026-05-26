@@ -15,16 +15,24 @@ type Fase = 'centro' | 'derecha' | 'izquierda' | 'arriba' | 'abajo' | 'completad
 
 const INSTRUCCIONES: Record<Fase, string> = {
   centro:     'Centra tu cara en el círculo',
-  derecha:    'Mueve tu cabeza hacia la derecha ›',
-  izquierda:  '‹ Ahora hacia la izquierda',
-  arriba:     '↑ Inclina la cabeza hacia arriba',
-  abajo:      '↓ Inclina la cabeza hacia abajo',
+  derecha:    'Mueve tu cabeza hacia la derecha',
+  izquierda:  'Ahora hacia la izquierda',
+  arriba:     'Inclina la cabeza hacia arriba',
+  abajo:      'Inclina la cabeza hacia abajo',
   completado: '✓ Procesando...',
 };
 
 const FASES: Fase[] = ['centro', 'derecha', 'izquierda', 'arriba', 'abajo', 'completado'];
-const TOTAL_TICKS   = 48;
+const TOTAL_TICKS   = 60;
 const INTRO_TICKS   = 60;
+
+// Constantes del círculo de cámara
+const TICK_CX      = 195;
+const TICK_CY      = 380;
+const TICK_R       = 130;
+const TICK_GAP     = 10;
+const TICK_LEN_OFF = 8;
+const TICK_LEN_ON  = 13;
 
 @Component({
   selector: 'app-autenticacion-biometrica',
@@ -50,9 +58,7 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
   correoError = '';
 
   readonly ticksArray   = Array(INTRO_TICKS).fill(0);
-  readonly ticksArray48 = Array(TOTAL_TICKS).fill(0);
   readonly tickAngle    = (2 * Math.PI) / INTRO_TICKS;
-  readonly tick48Angle  = (2 * Math.PI) / TOTAL_TICKS;
   readonly Math         = Math;
 
   ticksVerdes = 0;
@@ -64,29 +70,17 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
   private faseIndex        = 0;
   private readonly TICKS_POR_FASE = Math.floor(TOTAL_TICKS / (FASES.length - 1));
 
-  // Buffer suavizado: últimos N frames
   private detBuffer: Array<{ yaw: number; pitch: number }> = [];
-  private readonly BUFFER_SIZE = 6;   // menos frames → más ágil
+  private readonly BUFFER_SIZE = 6;
 
-  // Cuántos frames CONSECUTIVOS en posición para dar fase por buena
-  // A 80ms × 9 frames = ~720ms — razonable sin ser tedioso
   private posicionEstable      = 0;
   private readonly FRAMES_ESTABLES = 9;
 
-  // ── Umbrales (grados)
-  // YAW: positivo = gira derecha (desde la cámara), negativo = gira izquierda
-  // PITCH: positivo = mira abajo, negativo = mira arriba
-  //
-  // Los valores se calibraron para que:
-  //   • Centro:    |yaw| < 14  y  |pitch| < 12
-  //   • Derecha/Izquierda: |yaw| > 18  (giro claro)
-  //   • Arriba:    pitch < -10  (barbilla sube, nariz baja en imagen)
-  //   • Abajo:     pitch >  10  (barbilla baja, nariz sube)
   private readonly UMBRAL_YAW_CENTRO   = 14;
   private readonly UMBRAL_PITCH_CENTRO = 12;
-  private readonly UMBRAL_YAW_LADO     = 18;  // necesita giro más pronunciado
-  private readonly UMBRAL_PITCH_ARRIBA = -10; // pitch negativo = mira arriba
-  private readonly UMBRAL_PITCH_ABAJO  =  10; // pitch positivo = mira abajo
+  private readonly UMBRAL_YAW_LADO     = 18;
+  private readonly UMBRAL_PITCH_ARRIBA = -10;
+  private readonly UMBRAL_PITCH_ABAJO  =  10;
 
   // ── Infra ──────────────────────────────────────────────────────────────────
   private stream:            MediaStream | null = null;
@@ -97,7 +91,6 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
 
   private descriptoresCapturados: number[][] = [];
 
-  // ← protected para que el template acceda
   protected modo: 'registro' | 'login' = 'registro';
 
   constructor(
@@ -129,13 +122,45 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
 
   ngOnDestroy(): void { this.limpiar(); }
 
-  // ── Ticks de color ────────────────────────────────────────────────────────
+  // ── Geometría de ticks (cámara) ───────────────────────────────────────────
+
+  private tickAngleCam(i: number): number {
+    return i * (2 * Math.PI / TOTAL_TICKS) - Math.PI / 2;
+  }
+
+  getTickX1(i: number): number {
+    return TICK_CX + (TICK_R + TICK_GAP) * Math.cos(this.tickAngleCam(i));
+  }
+
+  getTickY1(i: number): number {
+    return TICK_CY + (TICK_R + TICK_GAP) * Math.sin(this.tickAngleCam(i));
+  }
+
+  getTickX2(i: number): number {
+    const len = i < this.ticksVerdes ? TICK_LEN_ON : TICK_LEN_OFF;
+    return TICK_CX + (TICK_R + TICK_GAP + len) * Math.cos(this.tickAngleCam(i));
+  }
+
+  getTickY2(i: number): number {
+    const len = i < this.ticksVerdes ? TICK_LEN_ON : TICK_LEN_OFF;
+    return TICK_CY + (TICK_R + TICK_GAP + len) * Math.sin(this.tickAngleCam(i));
+  }
 
   tickColor(i: number): string {
-    if (i < this.ticksVerdes)      return '#34C759';
-    if (i === this.ticksVerdes)    return '#FFFFFF';
-    return 'rgba(255,255,255,0.25)';
+    if (i < this.ticksVerdes)   return '#34C759';
+    if (i === this.ticksVerdes) return '#FFFFFF';
+    return 'rgba(255,255,255,0.28)';
   }
+
+  tickWidth(i: number): number {
+    if (i < this.ticksVerdes)   return 3.5;
+    if (i === this.ticksVerdes) return 3;
+    return 2.5;
+  }
+
+  tickOpacity(i: number): number {
+  return 1;
+}
 
   // ── Pantalla correo ───────────────────────────────────────────────────────
 
@@ -231,10 +256,24 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
 
   private async iniciarCamara(): Promise<void> {
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
-        audio: false,
-      });
+this.stream = await navigator.mediaDevices.getUserMedia({
+  video: {
+    facingMode: 'user',
+    width: { ideal: 1280 },
+    height: { ideal: 720 },
+    aspectRatio: { ideal: 16/9 }
+  },
+  audio: false,
+});
+
+// Aplicar zoom a la cámara después de obtener el stream
+const videoTrack = this.stream.getVideoTracks()[0];
+const capabilities = videoTrack.getCapabilities() as any;
+if (capabilities.zoom) {
+  await videoTrack.applyConstraints({
+    advanced: [{ zoom: capabilities.zoom.min } as any]
+  });
+}
 
       const video = this.videoRef?.nativeElement;
       if (!video) { this.mostrarErrorCamara('No se encontró el elemento de video.'); return; }
@@ -282,7 +321,7 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
 
     const opciones = new faceapi.TinyFaceDetectorOptions({
       inputSize:       320,
-      scoreThreshold:  0.45,   // un poco más permisivo para mejorar detección
+      scoreThreshold:  0.45,
     });
 
     this.detectionInterval = setInterval(async () => {
@@ -295,14 +334,12 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
           .withFaceDescriptor();
 
         if (!deteccion) {
-          // Cara no detectada — resetear estabilidad suavemente
           this.posicionEstable = Math.max(0, this.posicionEstable - 1);
           return;
         }
 
         const { yaw, pitch } = this.estimarPose(deteccion.landmarks);
 
-        // Buffer deslizante para suavizar ruido
         this.detBuffer.push({ yaw, pitch });
         if (this.detBuffer.length > this.BUFFER_SIZE) this.detBuffer.shift();
 
@@ -319,50 +356,25 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
   }
 
   // ── Estimación de pose ────────────────────────────────────────────────────
-  //
-  // YAW  (giro horizontal):
-  //   Usamos la distancia nariz→ojo izquierdo vs nariz→ojo derecho.
-  //   Cuando giras a la derecha, el ojo derecho queda más cerca de la nariz
-  //   → (distNoseLeft - distNoseRight) > 0  → yaw positivo
-  //
-  // PITCH (inclinación vertical):
-  //   Usamos la relación entre la distancia ojos→nariz y ojos→barbilla.
-  //   Cuando inclinas hacia abajo la barbilla baja → más espacio ojos→nariz
-  //   que ojos→barbilla → pitch positivo.
-  //   Cuando inclinas hacia arriba ocurre lo opuesto → pitch negativo.
-  //
+
   private estimarPose(landmarks: any): { yaw: number; pitch: number } {
     const pts = landmarks.positions as Array<{ x: number; y: number }>;
 
-    // Puntos clave
-    const leftEye  = this.centroide(pts.slice(36, 42));  // ojo izquierdo
-    const rightEye = this.centroide(pts.slice(42, 48));  // ojo derecho
-    const nose     = pts[30];                             // punta de nariz
-    const chin     = pts[8];                              // barbilla
+    const leftEye  = this.centroide(pts.slice(36, 42));
+    const rightEye = this.centroide(pts.slice(42, 48));
+    const nose     = pts[30];
+    const chin     = pts[8];
 
-    // ── YAW ──────────────────────────────────────────────────────────────────
     const totalEyes     = Math.abs(rightEye.x - leftEye.x) || 1;
     const distNoseLeft  = nose.x - leftEye.x;
     const distNoseRight = rightEye.x - nose.x;
-    // Normalizado por la distancia entre ojos y escalado a grados aproximados
     const yaw = ((distNoseLeft - distNoseRight) / totalEyes) * 55;
 
-    // ── PITCH ─────────────────────────────────────────────────────────────────
-    // Centro ocular: promedio vertical de ambos ojos
     const eyeCenterY = (leftEye.y + rightEye.y) / 2;
-
-    // Distancias verticales
-    const eyeToNose = nose.y  - eyeCenterY;  // siempre positivo (nariz más baja)
-    const eyeToChin = chin.y  - eyeCenterY;  // siempre positivo (barbilla aún más baja)
-
-    // Ratio: cuánto de la cara (ojos→barbilla) ocupa el tramo ojos→nariz
-    // Cara frontal:  ratio ≈ 0.45–0.50
-    // Mira abajo:    la nariz SE ALEJA del centro → ratio SUBE (>0.5)
-    // Mira arriba:   la nariz SE ACERCA → ratio BAJA (<0.42)
-    const ratio = eyeToNose / (eyeToChin || 1);
-
-    // Centrado en 0.46 (valor empírico frontal) y escalado a grados
-    const pitch = (ratio - 0.46) * 120;
+    const eyeToNose  = nose.y - eyeCenterY;
+    const eyeToChin  = chin.y - eyeCenterY;
+    const ratio      = eyeToNose / (eyeToChin || 1);
+    const pitch      = (ratio - 0.46) * 120;
 
     return { yaw, pitch };
   }
@@ -395,7 +407,6 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
         this.completarFase();
       }
     } else {
-      // Suavizar caída: no resetear de golpe
       this.posicionEstable = Math.max(0, this.posicionEstable - 2);
     }
   }
@@ -405,23 +416,14 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
       case 'centro':
         return Math.abs(yaw) < this.UMBRAL_YAW_CENTRO &&
                Math.abs(pitch) < this.UMBRAL_PITCH_CENTRO;
-
       case 'derecha':
-        // Desde la perspectiva del usuario: girar a su derecha
-        // Sin espejo → landmarks van en la misma dirección que el giro real
         return yaw > this.UMBRAL_YAW_LADO;
-
       case 'izquierda':
         return yaw < -this.UMBRAL_YAW_LADO;
-
       case 'arriba':
-        // Barbilla sube → nariz se acerca a los ojos → pitch negativo
         return pitch < this.UMBRAL_PITCH_ARRIBA;
-
       case 'abajo':
-        // Barbilla baja → nariz se aleja de los ojos → pitch positivo
         return pitch > this.UMBRAL_PITCH_ABAJO;
-
       default:
         return false;
     }
@@ -455,7 +457,7 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
 
   private calcularDescriptorPromedio(): number[] {
     if (this.descriptoresCapturados.length === 0) return [];
-    const len      = this.descriptoresCapturados[0].length; // 128
+    const len      = this.descriptoresCapturados[0].length;
     const promedio = new Array(len).fill(0);
     for (const desc of this.descriptoresCapturados) {
       for (let i = 0; i < len; i++) promedio[i] += desc[i];
@@ -489,20 +491,20 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.modo === 'registro') {
-      this.bio.registrar(descriptor).subscribe({
-        next: () => {
-          this.pantalla = 'exito';
-          this.cdr.detectChanges();
-          const t = setTimeout(() => this.router.navigate(['/configuracion']), 2200);
-          this.timers.push(t);
-        },
-        error: (err) => {
-          this.pantalla     = 'error';
-          this.errorMensaje = err?.error?.message ?? 'No se pudo registrar la biometría.';
-          this.cdr.detectChanges();
-        },
-      });
+   if (this.modo === 'registro') {
+  this.bio.registrar(descriptor).subscribe({
+    next: () => {
+      this.pantalla = 'exito';
+      this.cdr.detectChanges();
+      // ya no navega automáticamente, el usuario presiona OK
+    },
+    error: (err) => {
+      this.pantalla     = 'error';
+      this.errorMensaje = err?.error?.message ?? 'No se pudo registrar la biometría.';
+      this.cdr.detectChanges();
+    },
+  });
+
     } else {
       const correo = this.correoLogin.trim().toLowerCase();
       this.bio.loginFacial(correo, descriptor).subscribe({
@@ -552,7 +554,12 @@ export class AutenticacionBiometrica implements OnInit, OnDestroy {
     this.timers = [];
   }
 
+ irAConfiguracion(): void {
+    this.router.navigate([this.modo === 'registro' ? '/configuracion' : '/dashboard'], { replaceUrl: true });
+  }
+
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
+  
