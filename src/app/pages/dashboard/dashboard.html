@@ -205,10 +205,8 @@
   <!-- ══════════════════════════════════════════════════════════════════════
        MODAL: VERIFICACIÓN FACIAL (cámara activa)
   ══════════════════════════════════════════════════════════════════════ -->
-  <div class="modal-overlay face-modal-overlay" *ngIf="faceModalVisible" (click)="$event.stopPropagation()">
-    <div class="modal-card face-modal-card" (click)="$event.stopPropagation()">
-      <button class="modal-close-btn" (click)="cerrarModalFacial()">✕</button>
-
+ <div class="modal-overlay face-modal-overlay" *ngIf="faceModalVisible" (click)="$event.stopPropagation()">
+<div class="modal-card face-modal-card" style="background:#000000; border:none; box-shadow:none;" (click)="$event.stopPropagation()">    <button class="modal-close-btn" style="color:#ffffff; background:transparent; border:none;" (click)="cerrarModalFacial()">✕</button>
       <!-- Estado: error -->
       <ng-container *ngIf="faceError && !faceScanning && !faceProcessing">
         <div class="face-error-state">
@@ -243,51 +241,46 @@
           {{ faceProcessing ? 'Verificando identidad...' : 'Centra tu rostro en el círculo' }}
         </p>
 
-        <!-- Visor de cámara -->
-        <div class="face-cam-wrap">
-          <video #faceVideoRef autoplay playsinline muted class="face-cam-video"></video>
-          <canvas #faceCanvasRef class="face-cam-canvas"></canvas>
+       <!-- Visor de cámara -->
+<div class="face-cam-wrap" >
+  <video #faceVideoRef autoplay playsinline muted class="face-cam-video"></video>
+  <canvas #faceCanvasRef class="face-cam-canvas"></canvas>
 
-          <!-- Overlay con elipse y línea de escaneo -->
-          <div class="face-cam-overlay">
-            <svg viewBox="0 0 280 280" class="face-overlay-svg" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <mask id="face-mask-dash">
-                  <rect width="280" height="280" fill="white"/>
-                  <ellipse cx="140" cy="140" rx="105" ry="120" fill="black"/>
-                </mask>
-              </defs>
-              <rect width="280" height="280" fill="rgba(0,0,0,0.55)" mask="url(#face-mask-dash)"/>
-              <!-- Elipse guía punteada -->
-              <ellipse cx="140" cy="140" rx="105" ry="120"
-                       fill="none"
-                       [attr.stroke]="faceProcessing ? '#34C759' : '#FFFFFF'"
-                       stroke-width="2.5"
-                       stroke-dasharray="10 6"
-                       style="transition: stroke 0.4s"/>
-              <!-- Línea de escaneo -->
-              <line *ngIf="faceScanning && !faceProcessing"
-                    [attr.y1]="faceScanLineY" [attr.y2]="faceScanLineY"
-                    x1="40" x2="240"
-                    stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
-              <!-- Spinner procesando -->
-              <circle *ngIf="faceProcessing" cx="140" cy="140" r="116"
-                      fill="none" stroke="rgba(52,199,89,0.3)" stroke-width="3"
-                      stroke-dasharray="200 530" class="face-spinner-ring"/>
-            </svg>
-          </div>
+  <div class="face-cam-overlay">
+    <svg viewBox="0 0 280 280" class="face-overlay-svg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+  <mask id="face-mask-dash">
+    <rect width="280" height="280" fill="white"/>
+    <ellipse cx="140" cy="140" rx="105" ry="120" fill="black"/>
+  </mask>
+</defs>
+<rect width="280" height="280" fill="#000000" mask="url(#face-mask-dash)"/>
+      <ellipse cx="140" cy="140" rx="105" ry="120"
+               fill="none"
+               [attr.stroke]="faceProcessing ? '#34C759' : '#FFFFFF'"
+               stroke-width="2.5"
+               stroke-dasharray="10 6"
+               style="transition: stroke 0.4s"/>
+      <line *ngIf="faceScanning && !faceProcessing"
+            [attr.y1]="faceScanLineY" [attr.y2]="faceScanLineY"
+            x1="40" x2="240"
+            stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+      <circle *ngIf="faceProcessing" cx="140" cy="140" r="116"
+              fill="none" stroke="rgba(52,199,89,0.3)" stroke-width="3"
+              stroke-dasharray="200 530" class="face-spinner-ring"/>
+    </svg>
+  </div>
 
-          <!-- Overlay de procesamiento -->
-          <div class="face-processing-overlay" *ngIf="faceProcessing">
-            <div class="face-processing-icon">
-              <svg viewBox="0 0 48 48" fill="none">
-                <circle cx="24" cy="24" r="20" stroke="rgba(52,199,89,0.3)" stroke-width="3"/>
-                <circle cx="24" cy="24" r="20" stroke="#34C759" stroke-width="3"
-                        stroke-dasharray="30 96" stroke-linecap="round" class="face-spinner-dash"/>
-              </svg>
-            </div>
-          </div>
-        </div>
+  <div class="face-processing-overlay" *ngIf="faceProcessing">
+    <div class="face-processing-icon">
+      <svg viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="20" stroke="rgba(52,199,89,0.3)" stroke-width="3"/>
+        <circle cx="24" cy="24" r="20" stroke="#34C759" stroke-width="3"
+                stroke-dasharray="30 96" stroke-linecap="round" class="face-spinner-dash"/>
+      </svg>
+    </div>
+  </div>
+</div>
 
         <p class="face-hint" *ngIf="!faceProcessing">
           La verificación es automática · mantente quieto
