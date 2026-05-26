@@ -15,11 +15,11 @@ type Fase = 'centro' | 'derecha' | 'izquierda' | 'arriba' | 'abajo' | 'completad
 
 const INSTRUCCIONES: Record<Fase, string> = {
   centro:     'Centra tu cara en el círculo',
-  derecha:    'Mueve tu cabeza hacia la derecha',
-  izquierda:  'Ahora hacia la izquierda',
+  derecha:     'Ahora hacia la izquierda',
+  izquierda:  'Mueve tu cabeza hacia la derecha',
   arriba:     'Inclina la cabeza hacia arriba',
   abajo:      'Inclina la cabeza hacia abajo',
-  completado: '✓ Procesando...',
+  completado: 'Procesando...',
 };
 
 const FASES: Fase[] = ['centro', 'derecha', 'izquierda', 'arriba', 'abajo', 'completado'];

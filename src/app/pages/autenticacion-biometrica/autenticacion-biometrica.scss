@@ -289,13 +289,16 @@ $tick-on:    #FFFFFF;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex: 1;
   width: 100%;
-  padding: 48px 32px;
-  gap: 24px;
+  padding: 80px 32px 40px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
+  gap: 20px;
   text-align: center;
   background: #FFFFFF;
+  box-sizing: border-box;
+  min-height: 100dvh;
 }
 
 .exito-icono {
@@ -324,7 +327,7 @@ $tick-on:    #FFFFFF;
   width: 100%;
   padding: 17px;
   background: #007AFF;
-  color: #FFFFFF;
+  color: #000000;
   border: none;
   border-radius: 14px;
   font-family: 'Montserrat', sans-serif;
