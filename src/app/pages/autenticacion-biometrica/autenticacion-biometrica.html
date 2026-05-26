@@ -172,25 +172,26 @@
 ══════════════════════════════════════════════ -->
 <ng-container *ngIf="pantalla === 'exito'">
   <div class="exito-wrap">
-    <div class="exito-icono">
-      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
-        <circle cx="40" cy="40" r="38" stroke="#34C759" stroke-width="2" fill="none"/>
-        <!-- Ojos -->
-        <rect x="27" y="28" width="5" height="10" rx="2.5" fill="#34C759"/>
-        <rect x="48" y="28" width="5" height="10" rx="2.5" fill="#34C759"/>
-        <!-- Nariz -->
-        <path d="M34 44 Q40 52 46 44" stroke="#34C759" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <!-- Sonrisa -->
-        <path d="M28 54 Q40 64 52 54" stroke="#34C759" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      </svg>
+
+    <div class="exito-content">          <!-- ← envuelve los dos -->
+      <div class="exito-icono">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+          <circle cx="40" cy="40" r="38" stroke="#34C759" stroke-width="2" fill="none"/>
+          <rect x="27" y="28" width="5" height="10" rx="2.5" fill="#34C759"/>
+          <rect x="48" y="28" width="5" height="10" rx="2.5" fill="#34C759"/>
+          <path d="M34 44 Q40 52 46 44" stroke="#34C759" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M28 54 Q40 64 52 54" stroke="#34C759" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2 class="exito-titulo">
+        {{ modo === 'registro' ? 'Face ID se ha configurado.' : '¡Bienvenido!' }}
+      </h2>
     </div>
-    <h2 class="exito-titulo">
-      {{ modo === 'registro' ? 'Face ID se ha configurado.' : '¡Bienvenido!' }}
-    </h2>
+
     <div class="exito-btns">
       <button class="btn-exito-ok" (click)="irAConfiguracion()">OK</button>
     </div>
-    
+
   </div>
 </ng-container>
 

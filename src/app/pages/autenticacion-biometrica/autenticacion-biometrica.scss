@@ -284,29 +284,28 @@ $tick-on:    #FFFFFF;
 
 
 // ─── Éxito ────────────────────────────────────────────────────────────────────
-// ─── Éxito ────────────────────────────────────────────────────────────────────
 .exito-wrap {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  flex: 1;
   width: 100%;
-  padding: 0 24px 40px;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
-  box-sizing: border-box;
   min-height: 100dvh;
   background: #000000;
+  padding: 0 24px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
+  box-sizing: border-box;
 }
 
 .exito-content {
+  position: absolute;
+  top: -15%;              // ← mueve ícono+título juntos
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  flex: 1;
-  justify-content: center;   // centra el bloque ícono+título verticalmente
-  padding-bottom: 60px;      // lo sube un poco del centro exacto, más natural visualmente
+  gap: 16px;
 }
 
 .exito-icono {
@@ -326,14 +325,14 @@ $tick-on:    #FFFFFF;
   text-align: center;
 }
 
-.exito-btns{
+.exito-btns {
   width: 100%;
-  padding: 28px 24px;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
+  margin-top: auto;      // ← botón siempre abajo
+  padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 28px);
   box-sizing: border-box;
-  margin-top: auto;          // pega el botón al fondo
   animation: fadeInUp 0.5s ease 0.36s both;
 }
+
 
 .btn-exito-ok {
   width: 100%;
@@ -460,8 +459,8 @@ $tick-on:    #FFFFFF;
 
   .exito-content {
     padding-bottom: 60px;
-    padding-top: 80px;    // ← esto lo baja del tope
-    justify-content: flex-start;  // ← deja de centrar y respeta el padding-top
+    padding-top: 35dvh;    // ← 35% de la altura de pantalla hacia abajo
+    justify-content: flex-start;
   }
 
   .exito-btns {
