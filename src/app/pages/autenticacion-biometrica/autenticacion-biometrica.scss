@@ -289,16 +289,24 @@ $tick-on:    #FFFFFF;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   flex: 1;
   width: 100%;
-  padding: 180px 10px 40px;
+  padding: 0 24px 40px;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
-  gap: 200px;
-  text-align: center;
-  background: #000000;
   box-sizing: border-box;
   min-height: 100dvh;
+  background: #000000;
+}
+
+.exito-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+  justify-content: center;   // centra el bloque ícono+título verticalmente
+  padding-bottom: 60px;      // lo sube un poco del centro exacto, más natural visualmente
 }
 
 .exito-icono {
@@ -315,12 +323,16 @@ $tick-on:    #FFFFFF;
   margin: 0;
   line-height: 1.4;
   padding: 0 16px;
+  text-align: center;
 }
 
-.exito-btns {
+.exito-btns{
   width: 100%;
-  margin-top: auto;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
+  padding: 28px 24px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
+  box-sizing: border-box;
+  margin-top: auto;          // pega el botón al fondo
+  animation: fadeInUp 0.5s ease 0.36s both;
 }
 
 .btn-exito-ok {
@@ -444,6 +456,16 @@ $tick-on:    #FFFFFF;
   .bio-bg {
     align-items: flex-start;
     padding: 0;
+  }
+
+  .exito-content {
+    padding-bottom: 60px;
+    padding-top: 80px;    // ← esto lo baja del tope
+    justify-content: flex-start;  // ← deja de centrar y respeta el padding-top
+  }
+
+  .exito-btns {
+    padding-bottom: 0;
   }
 
   .bio-card {
