@@ -1,11 +1,9 @@
 // src/app/pages/autenticacion-biometrica/autenticacion-biometrica.scss
-// Reemplaza el contenido completo de este archivo
 
 @use 'sass:color';
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;500&display=swap');
 
-// ── Variables ─────────────────────────────────────────────────────────────────
-$bg:        #F2F2F7;   // fondo iOS típico
+$bg:        #F2F2F7;
 $white:     #FFFFFF;
 $text-main: #1C1C1E;
 $text-soft: #6E6E73;
@@ -31,20 +29,10 @@ $blue:      #007AFF;
   from { stroke-dashoffset: 80; }
   to   { stroke-dashoffset: 0; }
 }
-@keyframes instrFade {
-  0%   { opacity: 0; transform: translateY(6px); }
-  20%  { opacity: 1; transform: translateY(0); }
-  80%  { opacity: 1; }
-  100% { opacity: 0; }
-}
 @keyframes scanMove {
-  0%   { transform: translateY(0); opacity: 0.7; }
+  0%   { transform: translateY(0);     opacity: 0.7; }
   50%  { transform: translateY(140px); opacity: 0.3; }
-  100% { transform: translateY(0); opacity: 0.7; }
-}
-@keyframes tickPulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.5; }
+  100% { transform: translateY(0);     opacity: 0.7; }
 }
 
 // ── Fondo ─────────────────────────────────────────────────────────────────────
@@ -74,7 +62,6 @@ $blue:      #007AFF;
   overflow: hidden;
   animation: cardIn 0.5s cubic-bezier(.34,1.1,.64,1) both;
 
-  // Modo cámara: sin borde, full negro
   &.camara-mode {
     background: #000;
     border-radius: 24px;
@@ -101,17 +88,12 @@ $blue:      #007AFF;
   z-index: 10;
   transition: background 0.2s;
 
-  svg {
-    width: 18px;
-    height: 18px;
-    color: $text-main;
-  }
-
-  &:hover { background: rgba(0,0,0,0.12); }
+  svg { width: 18px; height: 18px; color: $text-main; }
+  &:hover  { background: rgba(0,0,0,0.12); }
   &:active { background: rgba(0,0,0,0.18); }
 }
 
-// ── Pantalla INTRO ────────────────────────────────────────────────────────────
+// ── Intro ─────────────────────────────────────────────────────────────────────
 .face-intro-wrap {
   margin-top: 64px;
   margin-bottom: 32px;
@@ -173,7 +155,7 @@ $blue:      #007AFF;
   &:active { background: color.adjust($blue, $lightness: -12%); transform: translateY(0); }
 }
 
-// ── Pantalla CÁMARA ───────────────────────────────────────────────────────────
+// ── Cámara ────────────────────────────────────────────────────────────────────
 .camara-wrap {
   position: relative;
   width: 100%;
@@ -183,10 +165,10 @@ $blue:      #007AFF;
   width: 100%;
   display: block;
   object-fit: cover;
-  transform: scaleX(-1);  // espejo — cámara frontal
-  border-radius: 0;
+  // SIN espejo — imagen natural tal como la captura la cámara
   background: #000;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 4;   // menos alargado, más compacto
+  border-radius: 0;
 }
 
 // Canvas invisible — solo para face-api
@@ -209,34 +191,32 @@ $blue:      #007AFF;
   height: 100%;
 }
 
-// Línea de escaneo
 .scan-line-anim {
   animation: scanMove 1.8s ease-in-out infinite;
   transform-origin: center;
 }
 
-// Ticks del borde del círculo
 .tick-line {
   transition: stroke 0.4s ease;
 }
 
-// Instrucción flotante bajo el círculo
+// Instrucción flotante
 .instruccion-wrap {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 22px 28px 32px;
-  background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%);
+  padding: 18px 28px 28px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  min-height: 90px;
+  min-height: 80px;
 }
 
 .instruccion-txt {
   font-family: 'Montserrat', sans-serif;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   color: $white;
   text-align: center;
@@ -260,11 +240,7 @@ $blue:      #007AFF;
   align-items: center;
   gap: 14px;
 
-  p {
-    color: $danger;
-    font-size: 14px;
-    margin: 0;
-  }
+  p { color: $danger; font-size: 14px; margin: 0; }
 }
 
 .btn-reintentar {
@@ -294,7 +270,7 @@ $blue:      #007AFF;
   &:hover { color: $text-main; }
 }
 
-// ── Pantalla ÉXITO ────────────────────────────────────────────────────────────
+// ── Éxito ─────────────────────────────────────────────────────────────────────
 .exito-wrap {
   display: flex;
   flex-direction: column;
@@ -306,12 +282,10 @@ $blue:      #007AFF;
   text-align: center;
 }
 
-.exito-icono {
-  svg {
-    width: 120px;
-    height: 120px;
-    animation: successPop 0.55s cubic-bezier(.34,1.56,.64,1) both;
-  }
+.exito-icono svg {
+  width: 120px;
+  height: 120px;
+  animation: successPop 0.55s cubic-bezier(.34,1.56,.64,1) both;
 }
 
 .check-stroke {
@@ -336,7 +310,7 @@ $blue:      #007AFF;
   animation: fadeInUp 0.4s ease 0.7s both;
 }
 
-// ── Pantalla ERROR GLOBAL ─────────────────────────────────────────────────────
+// ── Error global ──────────────────────────────────────────────────────────────
 .error-global-wrap {
   display: flex;
   flex-direction: column;
@@ -377,10 +351,7 @@ $blue:      #007AFF;
   margin-top: 8px;
 }
 
-
-// ── AGREGAR AL FINAL de autenticacion-biometrica.scss ─────────────────────────
-
-// Pantalla de ingreso de correo (login sin correo en URL)
+// ── Pantalla correo ───────────────────────────────────────────────────────────
 .correo-wrap {
   display: flex;
   flex-direction: column;
@@ -392,9 +363,7 @@ $blue:      #007AFF;
   box-sizing: border-box;
 }
 
-.correo-icono {
-  svg { width: 80px; height: 80px; }
-}
+.correo-icono svg { width: 80px; height: 80px; }
 
 .correo-field {
   width: 100%;
@@ -437,7 +406,6 @@ $blue:      #007AFF;
   padding-left: 4px;
 }
 
-
 // ── Responsive ────────────────────────────────────────────────────────────────
 @media (max-width: 480px) {
   .bio-bg {
@@ -457,10 +425,11 @@ $blue:      #007AFF;
     }
   }
 
+  // En móvil la cámara ocupa el ancho completo con aspect-ratio fijo
   .camara-video {
-    aspect-ratio: unset;
-    height: 100dvh;
+    aspect-ratio: 3 / 4;
     width: 100%;
+    height: auto;
     object-fit: cover;
   }
 

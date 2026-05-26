@@ -1,10 +1,13 @@
+
+raw
+Login · HTML
 <!-- src/app/pages/login/login.html -->
 <div class="login-bg">
   <div class="login-bg-orb3"></div>
   <div class="card">
     <div class="logo-circle">VID</div>
     <h2>Iniciar Sesión</h2>
-
+ 
     <!-- CORREO -->
     <div class="field">
       <label>Correo electrónico</label>
@@ -17,7 +20,6 @@
       />
       <span class="field-error" *ngIf="errores.correo">{{ errores.correo }}</span>
     </div>
-
     <!-- CONTRASEÑA -->
     <div class="field">
       <label>Contraseña</label>
@@ -47,47 +49,100 @@
     <div class="row-options">
       <a routerLink="/olvide-contrasena" class="forgot-link">¿Olvidaste tu contraseña?</a>
     </div>
-
+ 
     <!-- ERROR GENERAL -->
     <p *ngIf="errorGeneral" class="error-general">{{ errorGeneral }}</p>
-
+ 
     <!-- BOTÓN INICIO DE SESIÓN MANUAL -->
-    <button class="btn-login" (click)="iniciarSesion()" [disabled]="cargando || verificandoBio">
+    <button class="btn-login" (click)="iniciarSesion()" [disabled]="cargando || faceProcessing">
       <span *ngIf="!cargando">Iniciar Sesión</span>
       <span *ngIf="cargando" class="spinner"></span>
     </button>
 
-    <!-- SEPARADOR -->
-    <div class="divider-row" *ngIf="biometricaDisponible">
-      <div class="divider"></div>
-      <span class="divider-txt">o</span>
-      <div class="divider"></div>
-    </div>
 
-    <!-- BOTÓN BIOMÉTRICO -->
+    <!-- BOTÓN FACE ID — sin pedir correo, directo a cámara -->
     <button
       class="btn-bio-login"
       *ngIf="biometricaDisponible"
       (click)="iniciarBiometria()"
-      [disabled]="cargando || verificandoBio">
-      <span *ngIf="!verificandoBio">
-        <!-- Huella / Face ID icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20">
-          <path d="M12 2a5 5 0 0 1 5 5"/>
-          <path d="M7 7a5 5 0 0 1 10 0"/>
-          <path d="M12 12a2 2 0 0 1 2 2v4"/>
-          <path d="M10 14a2 2 0 0 1 4 0"/>
-          <path d="M4 10a8 8 0 0 1 16 0"/>
-          <path d="M2 14s2 6 10 6 10-6 10-6"/>
-        </svg>
-        Acceder con huella / Face ID
-      </span>
-      <span *ngIf="verificandoBio" class="spinner spinner-dark"></span>
+      [disabled]="cargando || faceScanning || faceProcessing">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.8" width="20" height="20"
+           stroke-linecap="round" stroke-linejoin="round">
+      </svg>
+      <span>Acceder con Face ID</span>
     </button>
 
     <!-- LINK DE REGISTRO -->
     <a routerLink="/registro" class="register-link">
       ¿No tienes cuenta? Regístrate aquí
     </a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     MODAL VERIFICACIÓN FACIAL — se monta fuera de .card para z-index
+══════════════════════════════════════════════════════════════════════ -->
+<div class="face-login-overlay" *ngIf="faceModalVisible" (click)="$event.stopPropagation()">
+  <div class="face-login-card" (click)="$event.stopPropagation()">
+    <button class="face-close-btn" (click)="cerrarModalFace()">✕</button>
+ 
+    <!-- ── Estado: error ── -->
+    <ng-container *ngIf="faceError && !faceScanning && !faceProcessing">
+      <div class="face-error-ico">
+        <svg viewBox="0 0 80 80" fill="none">
+          <circle cx="40" cy="40" r="36" fill="rgba(255,59,48,0.1)" stroke="rgba(255,59,48,0.4)" stroke-width="1.5"/>
+          <line x1="26" y1="26" x2="54" y2="54" stroke="#FF3B30" stroke-width="5" stroke-linecap="round"/>
+          <line x1="54" y1="26" x2="26" y2="54" stroke="#FF3B30" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3 class="face-title">No se pudo verificar</h3>
+      <p class="face-desc">{{ faceError }}</p>
+      <button class="face-btn-primary" (click)="reintentarFace()">Intentar de nuevo</button>
+      <button class="face-btn-secondary" (click)="cerrarModalFace()">Usar contraseña</button>
+    </ng-container>
+ 
+    <!-- ── Estado: cámara activa / procesando ── -->
+    <ng-container *ngIf="!faceError || faceScanning || faceProcessing">
+      <h3 class="face-title">Verificación facial</h3>
+      <p class="face-desc">
+        {{ faceProcessing ? 'Buscando tu cuenta...' : 'Centra tu rostro en el círculo' }}
+      </p>
+ 
+      <!-- Visor -->
+      <div class="face-cam-wrap">
+        <video #faceVideoRef autoplay playsinline muted class="face-cam-video"></video>
+ 
+        <!-- Overlay SVG -->
+        <div class="face-cam-overlay">
+          <svg viewBox="0 0 280 280" class="face-overlay-svg" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <mask id="login-face-mask">
+                <rect width="280" height="280" fill="white"/>
+                <ellipse cx="140" cy="140" rx="105" ry="120" fill="black"/>
+              </mask>
+            </defs>
+            <!-- Oscurecimiento fuera de la elipse -->
+            <rect width="280" height="280" fill="rgba(0,0,0,0.55)" mask="url(#login-face-mask)"/>
+            <!-- Elipse guía — verde al procesar -->
+            <ellipse cx="140" cy="140" rx="105" ry="120"
+                     fill="none"
+                     [attr.stroke]="faceProcessing ? '#34C759' : 'rgba(255,255,255,0.9)'"
+                     stroke-width="2.5"
+                     stroke-dasharray="10 6"
+                     style="transition: stroke 0.4s"/>
+            <!-- Línea de escaneo -->
+            <line *ngIf="faceScanning && !faceProcessing"
+                  [attr.y1]="faceScanLineY" [attr.y2]="faceScanLineY"
+                  x1="38" x2="242"
+                  stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>
+ 
+      <p class="face-hint" *ngIf="!faceProcessing">Detección automática · mantente quieto</p>
+      <p class="face-hint face-hint--ok" *ngIf="faceProcessing">Comparando con cuentas registradas...</p>
+    </ng-container>
+ 
   </div>
 </div>
