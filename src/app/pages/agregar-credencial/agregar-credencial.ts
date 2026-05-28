@@ -82,14 +82,26 @@ export class AgregarCredencial implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.cargarInstitucion();
+ ngOnInit(): void {
+  // Leer tipo directo del token JWT — siempre está disponible
+  const token = localStorage.getItem('token') ?? '';
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.tipo) {
+        this.tipoUsuario = payload.tipo;
+        this.tipoElegido = true;
+      }
+    } catch {}
   }
+  this.cargarInstitucion();
+}
 
   cargarInstitucion(): void {
     this.cargandoInstituciones = true;
     this.errorMsg = '';
 
+    // ── Llamada 1: institución y puntos ──────────────────────────────
     this.http
       .get<{ institucion: Institucion; puntos: PuntoAcceso[] }>(
         `${this.apiBase}/usuario/mi-institucion`,
@@ -102,6 +114,10 @@ export class AgregarCredencial implements OnInit {
             this.todosPuntos           = data.puntos ?? [];
             this.institucionId         = String(data.institucion.id);
             this.cargandoInstituciones = false;
+            // Si /informacion ya llegó antes y seteó el tipo, filtrar ahora
+            if (this.tipoElegido) {
+              this.filtrarPuntos();
+            }
             this.cdr.detectChanges();
           });
         },
@@ -123,6 +139,7 @@ export class AgregarCredencial implements OnInit {
         }
       });
 
+    // ── Llamada 2: datos personales del usuario ───────────────────────
     this.http
       .get<any>(`${this.apiBase}/informacion`, { headers: this.headers })
       .subscribe({
@@ -132,18 +149,22 @@ export class AgregarCredencial implements OnInit {
             this.numeroRegistrado = p.numero_empleado ?? '';
             if (!this.numeroId) this.numeroId = this.numeroRegistrado;
             if (!this.correo)   this.correo   = this.correoRegistrado;
+
+            // Tipo fijado automáticamente desde el perfil
+            if (p.tipo) {
+              this.tipoUsuario = p.tipo;  // 'estudiante' | 'empleado'
+              this.tipoElegido = true;
+              // Si los puntos ya llegaron, filtrar ahora
+              if (this.todosPuntos.length > 0) {
+                this.filtrarPuntos();
+              }
+            }
+
             this.cdr.detectChanges();
           });
         },
         error: () => {}
       });
-  }
-
-  onTipoChange(valor: string): void {
-    this.tipoUsuario   = valor;
-    this.tipoElegido   = true;
-    this.puntoAccesoId = null;
-    this.filtrarPuntos();
   }
 
   filtrarPuntos(): void {
@@ -167,14 +188,13 @@ export class AgregarCredencial implements OnInit {
   }
 
   seleccionarPunto(id: number): void {
-  // Si toca el mismo, lo deselecciona para poder ver todos de nuevo
-  if (this.puntoAccesoId === id) {
-    this.puntoAccesoId = null;
-  } else {
-    this.puntoAccesoId = id;
+    if (this.puntoAccesoId === id) {
+      this.puntoAccesoId = null;
+    } else {
+      this.puntoAccesoId = id;
+    }
+    this.cdr.detectChanges();
   }
-  this.cdr.detectChanges();
-}
 
   validarNumeroId(): void {
     this.errNumeroId = '';

@@ -1,7 +1,6 @@
 <div class="page-layout">
   <div class="page-body">
 
-    <!-- BACK (fuera del scroll) -->
     <a class="back-link" (click)="volver()" style="cursor:pointer">
       <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2.5"
@@ -11,10 +10,8 @@
       </svg>
     </a>
 
-    <!-- SCROLL WRAPPER -->
     <div class="detalle-acceso-scroll-wrapper">
 
-      <!-- CARGANDO -->
       <div class="loading-state" *ngIf="cargando">
         <div class="loading-spinner"></div>
         <span>Cargando registro…</span>
@@ -22,7 +19,6 @@
 
       <ng-container *ngIf="!cargando && acceso">
 
-        <!-- HERO -->
         <div class="resultado-hero" [ngClass]="acceso.exitoso ? 'exitoso' : 'denegado'">
           <div class="hero-orb"></div>
           <div class="hero-orb hero-orb--2"></div>
@@ -43,7 +39,6 @@
           </div>
         </div>
 
-        <!-- CARDS GRID -->
         <div class="detalle-grid">
 
           <!-- CARD LUGAR -->
@@ -81,6 +76,7 @@
             <h3 class="card-title"><span>🕐</span> Detalles del Evento</h3>
 
             <div class="timeline">
+
               <div class="tl-item">
                 <div class="tl-dot tl-dot--date"></div>
                 <div class="tl-body">
@@ -88,6 +84,7 @@
                   <span class="tl-val">{{ formatFechaLarga(acceso.creado_en) }}</span>
                 </div>
               </div>
+
               <div class="tl-item">
                 <div class="tl-dot tl-dot--time"></div>
                 <div class="tl-body">
@@ -95,22 +92,44 @@
                   <span class="tl-val mono">{{ formatHoraExacta(acceso.creado_en) }}</span>
                 </div>
               </div>
+
+              <!-- Tipo de movimiento -->
               <div class="tl-item">
-                <div class="tl-dot" [ngClass]="acceso.exitoso ? 'tl-dot--ok' : 'tl-dot--err'"></div>
+                <div class="tl-dot"
+                     [style.background]="acceso.tipo_movimiento === 'entrada'
+                       ? 'var(--success)' : 'var(--red)'">
+                </div>
                 <div class="tl-body">
-                  <span class="tl-lbl">Resultado</span>
-                  <span class="resultado-inline" [ngClass]="acceso.exitoso ? 'ok' : 'err'">
-                    {{ acceso.exitoso ? 'Acceso permitido' : ' Acceso denegado' }}
+                  <span class="tl-lbl">Movimiento</span>
+                  <span class="resultado-inline"
+                        [ngClass]="acceso.tipo_movimiento === 'entrada' ? 'ok' : 'err'">
+                    {{ acceso.tipo_movimiento === 'entrada' ? '➡️ Entrada' : '⬅️ Salida' }}
                   </span>
                 </div>
               </div>
-              <div class="tl-item" *ngIf="!acceso.exitoso && acceso.motivo_denegacion">
+
+              <div class="tl-item">
+                <div class="tl-dot"
+                     [ngClass]="acceso.exitoso ? 'tl-dot--ok' : 'tl-dot--err'">
+                </div>
+                <div class="tl-body">
+                  <span class="tl-lbl">Resultado</span>
+                  <span class="resultado-inline"
+                        [ngClass]="acceso.exitoso ? 'ok' : 'err'">
+                    {{ acceso.exitoso ? 'Acceso permitido' : 'Acceso denegado' }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="tl-item"
+                   *ngIf="!acceso.exitoso && acceso.motivo_denegacion">
                 <div class="tl-dot tl-dot--warn"></div>
                 <div class="tl-body">
                   <span class="tl-lbl">Motivo</span>
                   <span class="tl-val motivo">{{ acceso.motivo_denegacion }}</span>
                 </div>
               </div>
+
             </div>
           </div>
 
@@ -118,7 +137,6 @@
 
       </ng-container>
 
-      <!-- NOT FOUND -->
       <div class="empty-state" *ngIf="!cargando && !acceso">
         <div class="empty-icon">🔍</div>
         <p>No se encontró el registro de acceso.</p>
@@ -126,7 +144,6 @@
       </div>
 
     </div>
-    <!-- fin detalle-acceso-scroll-wrapper -->
 
   </div>
 </div>

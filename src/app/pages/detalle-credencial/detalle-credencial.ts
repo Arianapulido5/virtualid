@@ -63,6 +63,10 @@ export class DetalleCredencial implements OnInit, OnDestroy {
   timerPercent   = 100;
   private countdownInterval: any;
 
+  // ── Movimiento (Entrada / Salida) ─────────────────────────────────────────
+  movimientoModalVisible          = false;
+  tipoMovimiento: 'entrada' | 'salida' = 'entrada';
+
   // ── Verificación facial ───────────────────────────────────────────────────
   faceModalVisible  = false;
   faceScanning      = false;
@@ -75,7 +79,7 @@ export class DetalleCredencial implements OnInit, OnDestroy {
   private faceApiLoaded     = false;
   private timers:           any[] = [];
 
-  // Ubicación de la institución
+  // Ubicación
   direccionGeo   = '';
   cargandoGeo    = false;
   tieneUbicacion = false;
@@ -100,7 +104,7 @@ export class DetalleCredencial implements OnInit, OnDestroy {
     private http:       HttpClient,
     private router:     Router,
     private ngZone:     NgZone,
-    private cdr:        ChangeDetectorRef,
+    public  cdr:        ChangeDetectorRef,   // public para usarlo en template
     private qrService:  QrService,
     private geocoding:  GeocodingService,
     private bioService: BiometricaService,
@@ -133,7 +137,11 @@ export class DetalleCredencial implements OnInit, OnDestroy {
               this.cargandoGeo = true;
               this.cdr.detectChanges();
               this.geocoding.obtenerDireccion(data.inst_lat, data.inst_lng).subscribe((dir) => {
-                this.ngZone.run(() => { this.direccionGeo = dir; this.cargandoGeo = false; this.cdr.detectChanges(); });
+                this.ngZone.run(() => {
+                  this.direccionGeo = dir;
+                  this.cargandoGeo  = false;
+                  this.cdr.detectChanges();
+                });
               });
             }
           });
@@ -141,7 +149,9 @@ export class DetalleCredencial implements OnInit, OnDestroy {
         error: (err) => {
           this.ngZone.run(() => {
             if (err.status === 401 || err.status === 403) { this.router.navigate(['/login']); return; }
-            this.error    = err.status === 404 ? 'Credencial no encontrada.' : `Error ${err.status}: ${err.error?.message ?? 'No se pudo cargar.'}`;
+            this.error    = err.status === 404
+              ? 'Credencial no encontrada.'
+              : `Error ${err.status}: ${err.error?.message ?? 'No se pudo cargar.'}`;
             this.cargando = false;
             this.cdr.detectChanges();
           });
@@ -191,19 +201,48 @@ export class DetalleCredencial implements OnInit, OnDestroy {
   // ── Modales genéricos ────────────────────────────────────────────────────────
 
   private pedirConfirmacion(titulo: string, mensaje: string, accion: () => void): void {
-    this.confirmTitulo = titulo; this.confirmMensaje = mensaje; this.confirmCallback = accion; this.confirmVisible = true; this.cdr.detectChanges();
+    this.confirmTitulo   = titulo;
+    this.confirmMensaje  = mensaje;
+    this.confirmCallback = accion;
+    this.confirmVisible  = true;
+    this.cdr.detectChanges();
   }
-  confirmarAccion(): void { this.confirmVisible = false; if (this.confirmCallback) { this.confirmCallback(); this.confirmCallback = null; } this.cdr.detectChanges(); }
-  cancelarConfirmacion(): void { this.confirmVisible = false; this.confirmCallback = null; this.cdr.detectChanges(); }
-  private mostrarResultado(titulo: string, mensaje: string, tipo: 'exito' | 'error'): void { this.modalTitulo = titulo; this.modalMensaje = mensaje; this.modalTipo = tipo; this.modalVisible = true; this.cdr.detectChanges(); }
-  cerrarModal(): void { this.modalVisible = false; if (this._redirigirAlCerrar) { this._redirigirAlCerrar = false; this.router.navigate(['/tarjetas']); } this.cdr.detectChanges(); }
 
-  cancelarGeo(): void { this.geoSolicitando = false; this.cdr.detectChanges(); }
-  cerrarGeoError(): void { this.geoError = ''; this.cdr.detectChanges(); }
+  confirmarAccion(): void {
+    this.confirmVisible = false;
+    if (this.confirmCallback) { this.confirmCallback(); this.confirmCallback = null; }
+    this.cdr.detectChanges();
+  }
+
+  cancelarConfirmacion(): void {
+    this.confirmVisible  = false;
+    this.confirmCallback = null;
+    this.cdr.detectChanges();
+  }
+
+  private mostrarResultado(titulo: string, mensaje: string, tipo: 'exito' | 'error'): void {
+    this.modalTitulo  = titulo;
+    this.modalMensaje = mensaje;
+    this.modalTipo    = tipo;
+    this.modalVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  cerrarModal(): void {
+    this.modalVisible = false;
+    if (this._redirigirAlCerrar) {
+      this._redirigirAlCerrar = false;
+      this.router.navigate(['/tarjetas']);
+    }
+    this.cdr.detectChanges();
+  }
+
+  cancelarGeo(): void    { this.geoSolicitando = false; this.cdr.detectChanges(); }
+  cerrarGeoError(): void { this.geoError = '';           this.cdr.detectChanges(); }
   irAConfiguracion(): void { this.router.navigate(['/configuracion']); }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  //  FLUJO: bio facial → geo → QR
+  //  FLUJO: bio facial → modal movimiento → geo → QR
   // ═══════════════════════════════════════════════════════════════════════════
 
   mostrarQR(): void {
@@ -213,27 +252,27 @@ export class DetalleCredencial implements OnInit, OnDestroy {
     this.abrirModalFacial();
   }
 
-  // ── Paso 1: abrir modal con cámara ────────────────────────────────────────
+  // ── Paso 1: biometría facial ──────────────────────────────────────────────
 
-private async abrirModalFacial(): Promise<void> {
-  this.faceModalVisible = true;
-  this.faceScanning     = false;
-  this.faceProcessing   = false;
-  this.faceError        = '';
-  this.cdr.detectChanges();
-
-  await this.delay(200);
-
-  try {
-    await this.cargarFaceApi();
-    await this.iniciarCamaraFacial();
-  } catch (err: any) {
-    this.faceError      = 'No se pudo iniciar la verificación. Inténtalo de nuevo.';
-    this.faceScanning   = false;
-    this.faceProcessing = false;
+  private async abrirModalFacial(): Promise<void> {
+    this.faceModalVisible = true;
+    this.faceScanning     = false;
+    this.faceProcessing   = false;
+    this.faceError        = '';
     this.cdr.detectChanges();
+
+    await this.delay(200);
+
+    try {
+      await this.cargarFaceApi();
+      await this.iniciarCamaraFacial();
+    } catch (err: any) {
+      this.faceError      = 'No se pudo iniciar la verificación. Inténtalo de nuevo.';
+      this.faceScanning   = false;
+      this.faceProcessing = false;
+      this.cdr.detectChanges();
+    }
   }
-}
 
   cerrarModalFacial(): void {
     this.limpiarCamaraFacial();
@@ -254,14 +293,10 @@ private async abrirModalFacial(): Promise<void> {
       return Promise.resolve();
     }
     return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
-      script.onload = async () => {
-        this.faceApiLoaded = true;
-        await this.cargarModelos();
-        resolve();
-      };
-      script.onerror = () => reject(new Error('No se pudo cargar face-api.js'));
+      const script    = document.createElement('script');
+      script.src      = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
+      script.onload   = async () => { this.faceApiLoaded = true; await this.cargarModelos(); resolve(); };
+      script.onerror  = () => reject(new Error('No se pudo cargar face-api.js'));
       document.head.appendChild(script);
     });
   }
@@ -285,7 +320,7 @@ private async abrirModalFacial(): Promise<void> {
     }
   }
 
-  // ── Paso 2: iniciar cámara ────────────────────────────────────────────────
+  // ── Paso 2: cámara ────────────────────────────────────────────────────────
 
   private async iniciarCamaraFacial(): Promise<void> {
     try {
@@ -378,16 +413,21 @@ private async abrirModalFacial(): Promise<void> {
           this.faceProcessing   = false;
           this.faceModalVisible = false;
           this.cdr.detectChanges();
-          this.solicitarGeoYGenerar();
+          // ← NUEVO: abrir modal de movimiento antes de geo
+          this.mostrarModalMovimiento();
         });
       },
       error: (err: any) => {
         this.ngZone.run(() => {
           this.faceProcessing = false;
           const msg = err?.error?.message ?? err?.message ?? '';
-          if (err?.error?.sin_biometrica || msg.toLowerCase().includes('no tienes biometría') || msg.toLowerCase().includes('sin_biometrica')) {
+          if (err?.error?.sin_biometrica
+              || msg.toLowerCase().includes('no tienes biometría')
+              || msg.toLowerCase().includes('sin_biometrica')) {
             this.faceError = 'No tienes biometría registrada. Actívala en Configuración para usar esta función.';
-          } else if (msg.toLowerCase().includes('no coincide') || msg.toLowerCase().includes('no match') || err?.status === 401) {
+          } else if (msg.toLowerCase().includes('no coincide')
+                     || msg.toLowerCase().includes('no match')
+                     || err?.status === 401) {
             this.faceError = 'El rostro no coincide con el titular de la cuenta. Acceso denegado.';
           } else {
             this.faceError = msg || 'No se pudo verificar tu identidad.';
@@ -398,7 +438,26 @@ private async abrirModalFacial(): Promise<void> {
     });
   }
 
-  // ── Paso 5: geolocalización → QR ─────────────────────────────────────────
+  // ── Paso 5: modal movimiento ──────────────────────────────────────────────
+
+  mostrarModalMovimiento(): void {
+    this.movimientoModalVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  seleccionarMovimiento(tipo: 'entrada' | 'salida'): void {
+    this.tipoMovimiento         = tipo;
+    this.movimientoModalVisible = false;
+    this.cdr.detectChanges();
+    this.solicitarGeoYGenerar();
+  }
+
+  cancelarMovimiento(): void {
+    this.movimientoModalVisible = false;
+    this.cdr.detectChanges();
+  }
+
+  // ── Paso 6: geolocalización → QR ─────────────────────────────────────────
 
   private solicitarGeoYGenerar(): void {
     this.geoSolicitando = true;
@@ -411,39 +470,67 @@ private async abrirModalFacial(): Promise<void> {
     }
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => { this.ngZone.run(() => { this.geoSolicitando = false; this.iniciarQR(pos.coords.latitude, pos.coords.longitude); }); },
-      (err) => { this.ngZone.run(() => { this.geoSolicitando = false; console.warn('Geo no disponible:', err.message); this.iniciarQR(undefined, undefined); }); },
+      (pos) => {
+        this.ngZone.run(() => {
+          this.geoSolicitando = false;
+          this.iniciarQR(pos.coords.latitude, pos.coords.longitude);
+        });
+      },
+      (err) => {
+        this.ngZone.run(() => {
+          this.geoSolicitando = false;
+          console.warn('Geo no disponible:', err.message);
+          this.iniciarQR(undefined, undefined);
+        });
+      },
       { timeout: 10000, maximumAge: 30000, enableHighAccuracy: true }
     );
   }
 
   private iniciarQR(latitud?: number, longitud?: number): void {
-    this.qrVisible = true; this.qrDataUrl = ''; this.qrGenerando = true; this.geoError = ''; this.cdr.detectChanges();
+    this.qrVisible   = true;
+    this.qrDataUrl   = '';
+    this.qrGenerando = true;
+    this.geoError    = '';
+    this.cdr.detectChanges();
     this.generarQR(latitud, longitud);
     this.iniciarCountdown();
   }
 
   ocultarQR(): void {
-    this.qrVisible = false; this.qrDataUrl = ''; this.qrGenerando = false; this.geoError = ''; this.geoSolicitando = false;
-    clearInterval(this.countdownInterval); this.countdown = 45; this.timerPercent = 100; this.cdr.detectChanges();
+    this.qrVisible   = false;
+    this.qrDataUrl   = '';
+    this.qrGenerando = false;
+    this.geoError    = '';
+    this.geoSolicitando = false;
+    clearInterval(this.countdownInterval);
+    this.countdown    = 45;
+    this.timerPercent = 100;
+    this.cdr.detectChanges();
   }
 
   private generarQR(latitud?: number, longitud?: number): void {
     if (!this.credencial) return;
-    this.qrService.generarToken(this.credencial.id, latitud, longitud).subscribe({
+    // Pasa tipoMovimiento al servicio
+    this.qrService.generarToken(
+      this.credencial.id, latitud, longitud, this.tipoMovimiento
+    ).subscribe({
       next: (data) => {
         this.ngZone.run(() => {
-          const encoded  = encodeURIComponent(data.token);
-          this.qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encoded}&bgcolor=ffffff&color=4D0F60&margin=10`;
+          const encoded    = encodeURIComponent(data.token);
+          this.qrDataUrl   = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encoded}&bgcolor=ffffff&color=4D0F60&margin=10`;
           this.qrGenerando = false;
           this.cdr.detectChanges();
         });
       },
       error: (err) => {
         this.ngZone.run(() => {
-          this.qrGenerando = false; this.qrVisible = false;
-          clearInterval(this.countdownInterval); this.countdown = 45; this.timerPercent = 100;
-          this.geoError = err.error?.message ?? 'No se pudo generar el código QR.';
+          this.qrGenerando = false;
+          this.qrVisible   = false;
+          clearInterval(this.countdownInterval);
+          this.countdown    = 45;
+          this.timerPercent = 100;
+          this.geoError     = err.error?.message ?? 'No se pudo generar el código QR.';
           this.cdr.detectChanges();
         });
       },
@@ -452,16 +539,21 @@ private async abrirModalFacial(): Promise<void> {
 
   private iniciarCountdown(): void {
     clearInterval(this.countdownInterval);
-    this.countdown = 45; this.timerPercent = 100;
+    this.countdown    = 45;
+    this.timerPercent = 100;
 
     this.countdownInterval = setInterval(() => {
       this.ngZone.run(() => {
         this.countdown--;
         this.timerPercent = (this.countdown / 45) * 100;
+
         if (this.countdown <= 0) {
           clearInterval(this.countdownInterval);
           this.qrDataUrl = '';
-          const regen = (lat?: number, lng?: number) => { this.generarQR(lat, lng); this.iniciarCountdown(); };
+          const regen = (lat?: number, lng?: number) => {
+            this.generarQR(lat, lng);
+            this.iniciarCountdown();
+          };
           if (!navigator.geolocation) { regen(); return; }
           navigator.geolocation.getCurrentPosition(
             (pos) => this.ngZone.run(() => regen(pos.coords.latitude, pos.coords.longitude)),
@@ -474,7 +566,7 @@ private async abrirModalFacial(): Promise<void> {
     }, 1000);
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────────
 
   private limpiarCamaraFacial(): void {
     this.faceScanning = false;
@@ -489,9 +581,17 @@ private async abrirModalFacial(): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  getIniciales(n: string): string { return n.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase(); }
+  getIniciales(n: string): string {
+    return n.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  }
   getIcon(tipo: string): string { return TIPO_ICON[tipo] ?? '📍'; }
-  getNivelColor(nivel: string): string { return ({ abierto: '#2e7d32', restringido: '#e65100', exclusivo: '#A93845' } as any)[nivel] ?? '#4A4D56'; }
-  formatFecha(fecha: string): string { return new Date(fecha).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }); }
-  formatFechaCorta(fecha: string): string { return new Date(fecha).toLocaleDateString('es-MX', { month: '2-digit', year: '2-digit' }); }
+  getNivelColor(nivel: string): string {
+    return ({ abierto: '#2e7d32', restringido: '#e65100', exclusivo: '#A93845' } as any)[nivel] ?? '#4A4D56';
+  }
+  formatFecha(fecha: string): string {
+    return new Date(fecha).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  formatFechaCorta(fecha: string): string {
+    return new Date(fecha).toLocaleDateString('es-MX', { month: '2-digit', year: '2-digit' });
+  }
 }

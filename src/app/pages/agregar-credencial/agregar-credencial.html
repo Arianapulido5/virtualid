@@ -85,19 +85,16 @@
           </div>
 
           <!-- Tipo de usuario -->
+          <!-- Tipo de usuario -->
           <div class="form-group">
-            <label class="form-label">Tipo de usuario</label>
-            <div class="radio-group">
-              <label class="radio-option" (click)="onTipoChange('estudiante')">
-                <span class="radio-circle" [class.checked]="tipoUsuario === 'estudiante'"></span>
-                <span>Estudiante</span>
-              </label>
-              <label class="radio-option" (click)="onTipoChange('empleado')">
-                <span class="radio-circle" [class.checked]="tipoUsuario === 'empleado'"></span>
-                <span>Empleado</span>
-              </label>
-            </div>
-          </div>
+  <label class="form-label">Tipo de usuario</label>
+  <div class="radio-group">
+    <label class="radio-option">
+      <span class="radio-circle" [class.checked]="tipoElegido"></span>
+      <span>{{ tipoElegido ? (tipoUsuario | titlecase) : '…' }}</span>
+    </label>
+  </div>
+</div>
 
           <!-- Puntos de acceso -->
           <div class="form-group">

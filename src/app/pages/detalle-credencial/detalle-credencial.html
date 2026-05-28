@@ -108,6 +108,48 @@
   </div>
 </div>
 
+<!-- ══ MODAL MOVIMIENTO (Entrada / Salida) ══ -->
+<div class="modal-overlay"
+     *ngIf="movimientoModalVisible"
+     (click)="cancelarMovimiento()">
+  <div class="modal-card movimiento-modal-card"
+       (click)="$event.stopPropagation()">
+
+    <div class="movimiento-header">
+      <div class="movimiento-icon">🚪</div>
+      <h3>¿Qué deseas registrar?</h3>
+      <p>Selecciona el tipo de movimiento para
+        <strong>{{ credencial?.punto_nombre }}</strong>.
+      </p>
+    </div>
+
+    <div class="movimiento-opciones">
+
+      <button class="btn-movimiento btn-entrada"
+              (click)="seleccionarMovimiento('entrada')">
+        <span class="mov-emoji">➡️</span>
+        <span class="mov-label">Entrada</span>
+        <span class="mov-desc">Registrar ingreso al espacio</span>
+      </button>
+
+      <button class="btn-movimiento btn-salida"
+              (click)="seleccionarMovimiento('salida')">
+        <span class="mov-emoji">⬅️</span>
+        <span class="mov-label">Salida</span>
+        <span class="mov-desc">Registrar salida del espacio</span>
+      </button>
+
+    </div>
+
+    <button class="btn-cancelar-modal"
+            style="width:100%; margin-top:4px"
+            (click)="cancelarMovimiento()">
+      Cancelar
+    </button>
+
+  </div>
+</div>
+
   <!-- ══ MODAL SOLICITANDO UBICACIÓN ══ -->
   <div class="modal-overlay" *ngIf="geoSolicitando && !qrVisible" (click)="cancelarGeo()">
     <div class="modal-card qr-modal-card" (click)="$event.stopPropagation()">

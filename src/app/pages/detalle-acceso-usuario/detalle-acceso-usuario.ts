@@ -2,7 +2,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
 interface AccesoDetalle {
@@ -16,18 +16,20 @@ interface AccesoDetalle {
   institucion_nombre: string;
   ciudad:             string;
   estado:             string;
+  tipo_movimiento:    'entrada' | 'salida';
 }
 
 @Component({
   selector: 'app-detalle-acceso-usuario',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule],
   templateUrl: './detalle-acceso-usuario.html',
   styleUrls: ['./detalle-acceso-usuario.scss']
 })
 export class DetalleAccesoUsuario implements OnInit {
   cargando = true;
   acceso: AccesoDetalle | null = null;
+  error = '';
 
   private apiBase = environment.apiUrl;
 
@@ -47,12 +49,13 @@ export class DetalleAccesoUsuario implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.cargando = false; return; }
 
-    this.http.get<AccesoDetalle[]>(
-      `${this.apiBase}/historial`,
+    // Usa la ruta directa del usuario (no el listado completo)
+    this.http.get<AccesoDetalle>(
+      `${this.apiBase}/historial/${id}`,
       { headers: this.headers }
     ).subscribe({
       next: (data) => {
-        this.acceso  = data.find(a => a.id === +id) ?? null;
+        this.acceso   = data;
         this.cargando = false;
         this.cdr.detectChanges();
       },
@@ -61,6 +64,9 @@ export class DetalleAccesoUsuario implements OnInit {
           this.router.navigate(['/login']);
           return;
         }
+        this.error    = err.status === 404
+          ? 'Registro no encontrado.'
+          : `Error ${err.status}: ${err.error?.message ?? 'No se pudo cargar.'}`;
         this.cargando = false;
         this.cdr.detectChanges();
       }
@@ -69,12 +75,8 @@ export class DetalleAccesoUsuario implements OnInit {
 
   getTipoIcon(tipo: string): string {
     const map: Record<string, string> = {
-      edificio:    '🏛',
-      biblioteca:  '📚',
-      laboratorio: '🔬',
-      cafeteria:   '☕',
-      deportiva:   '⚽',
-      otro:        '📍'
+      edificio: '🏛', biblioteca: '📚', laboratorio: '🔬',
+      cafeteria: '☕', deportiva: '⚽', otro: '📍'
     };
     return map[tipo] ?? '📍';
   }
@@ -90,9 +92,10 @@ export class DetalleAccesoUsuario implements OnInit {
   }
 
   formatDia(fecha: string): string {
-    const d   = new Date(fecha);
-    const hoy = new Date();
-    const ayer = new Date(); ayer.setDate(hoy.getDate() - 1);
+    const d    = new Date(fecha);
+    const hoy  = new Date();
+    const ayer = new Date();
+    ayer.setDate(hoy.getDate() - 1);
     if (d.toDateString() === hoy.toDateString())  return 'Hoy';
     if (d.toDateString() === ayer.toDateString()) return 'Ayer';
     return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
@@ -104,7 +107,5 @@ export class DetalleAccesoUsuario implements OnInit {
     });
   }
 
-  volver(): void {
-    this.router.navigate(['/historial']);
-  }
+  volver(): void { this.router.navigate(['/historial']); }
 }

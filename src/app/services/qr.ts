@@ -16,16 +16,16 @@ export class QrService {
     });
   }
 
-  /**
-   * Genera un token QR. Si se pasan latitud y longitud, el backend
-   * valida que el usuario esté dentro del radio permitido por la institución.
-   */
   generarToken(
     credencialId: number,
     latitud?: number,
-    longitud?: number
+    longitud?: number,
+    tipoMovimiento: 'entrada' | 'salida' = 'entrada'
   ): Observable<{ token: string; expira_en: number }> {
-    const body: any = { credencial_id: credencialId };
+    const body: any = {
+      credencial_id:   credencialId,
+      tipo_movimiento: tipoMovimiento
+    };
     if (latitud  !== undefined && latitud  !== null) body.latitud  = latitud;
     if (longitud !== undefined && longitud !== null) body.longitud = longitud;
 
