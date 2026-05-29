@@ -47,9 +47,11 @@
     </button>
   </div>
 
-  <!-- DENEGADO -->
+<!-- DENEGADO -->
   <div class="resultado-card denegado" *ngIf="estado === 'denegado'">
     <div class="resultado-icono">❌</div>
+    <p class="resultado-nombre" *ngIf="usuario">{{ usuario }}</p>
+    <p class="resultado-tipo" *ngIf="tipoUsuario">{{ tipoUsuario | titlecase }}</p>
     <p class="resultado-texto acceso-no">{{ textoResultado }}</p>
     <p class="resultado-motivo">{{ mensaje }}</p>
     <button class="btn-reintentar" (click)="escanearOtro()">
