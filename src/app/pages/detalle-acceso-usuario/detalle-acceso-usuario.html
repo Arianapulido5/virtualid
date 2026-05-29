@@ -19,11 +19,12 @@
 
       <ng-container *ngIf="!cargando && acceso">
 
-        <div class="resultado-hero" [ngClass]="acceso.exitoso ? 'exitoso' : 'denegado'">
+        <!-- HERO — clase y título según movimiento + resultado -->
+        <div class="resultado-hero" [ngClass]="getClaseHero(acceso)">
           <div class="hero-orb"></div>
           <div class="hero-orb hero-orb--2"></div>
           <div class="hero-info">
-            <h1 class="hero-titulo">{{ acceso.exitoso ? 'Acceso Exitoso' : 'Acceso Denegado' }}</h1>
+            <h1 class="hero-titulo">{{ getTituloHero(acceso) }}</h1>
             <p class="hero-subtitulo">{{ acceso.punto_nombre }} · {{ acceso.institucion_nombre }}</p>
           </div>
           <div class="hero-stats">
@@ -93,21 +94,23 @@
                 </div>
               </div>
 
-              <!-- Tipo de movimiento -->
+              <!-- Movimiento -->
               <div class="tl-item">
                 <div class="tl-dot"
-                     [style.background]="acceso.tipo_movimiento === 'entrada'
-                       ? 'var(--success)' : 'var(--red)'">
+                     [ngClass]="acceso.tipo_movimiento === 'entrada'
+                       ? 'tl-dot--entrada' : 'tl-dot--salida'">
                 </div>
                 <div class="tl-body">
                   <span class="tl-lbl">Movimiento</span>
-                  <span class="resultado-inline"
-                        [ngClass]="acceso.tipo_movimiento === 'entrada' ? 'ok' : 'err'">
-                    {{ acceso.tipo_movimiento === 'entrada' ? '➡️ Entrada' : '⬅️ Salida' }}
+                  <span class="badge-movimiento"
+                        [ngClass]="acceso.tipo_movimiento === 'entrada'
+                          ? 'entrada' : 'salida'">
+                    {{ acceso.tipo_movimiento === 'entrada' ? 'Entrada' : 'Salida' }}
                   </span>
                 </div>
               </div>
 
+              <!-- Resultado — texto correcto según movimiento -->
               <div class="tl-item">
                 <div class="tl-dot"
                      [ngClass]="acceso.exitoso ? 'tl-dot--ok' : 'tl-dot--err'">
@@ -116,11 +119,12 @@
                   <span class="tl-lbl">Resultado</span>
                   <span class="resultado-inline"
                         [ngClass]="acceso.exitoso ? 'ok' : 'err'">
-                    {{ acceso.exitoso ? 'Acceso permitido' : 'Acceso denegado' }}
+                    {{ getTextoResultado(acceso) }}
                   </span>
                 </div>
               </div>
 
+              <!-- Motivo de denegación -->
               <div class="tl-item"
                    *ngIf="!acceso.exitoso && acceso.motivo_denegacion">
                 <div class="tl-dot tl-dot--warn"></div>

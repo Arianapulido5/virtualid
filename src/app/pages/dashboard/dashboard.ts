@@ -67,15 +67,18 @@ export class Dashboard implements OnInit, OnDestroy {
   geoError       = '';
   geoSolicitando = false;
 
+  // ── Modal movimiento (Entrada / Salida) ───────────────────────────────────
+  movimientoModalVisible           = false;
+  tipoMovimiento: 'entrada' | 'salida' = 'entrada';
+
   // ── Verificación facial para QR ────────────────────────────────────────────
-  // Estados: idle → scanning → processing → done/error
-  faceModalVisible  = false;   // modal con cámara activa
-  faceScanning      = false;   // cámara en marcha
-  faceProcessing    = false;   // enviando descriptor al backend
-  faceError         = '';      // mensaje de error facial
-  faceScanLineY     = 60;      // línea de escaneo animada
-  bioError          = '';      // error visible al usuario (sin cámara)
-  bioVerificando    = false;   // legacy — ya no usado, mantenido por compatibilidad
+  faceModalVisible  = false;
+  faceScanning      = false;
+  faceProcessing    = false;
+  faceError         = '';
+  faceScanLineY     = 60;
+  bioError          = '';
+  bioVerificando    = false;
 
   private faceStream:   MediaStream | null = null;
   private faceInterval: any = null;
@@ -256,7 +259,7 @@ export class Dashboard implements OnInit, OnDestroy {
   cerrarBioError(): void { this.bioError = ''; this.cdr.detectChanges(); }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  //  FLUJO PRINCIPAL: bio facial → geo → QR
+  //  FLUJO PRINCIPAL: bio facial → modal movimiento → geo → QR
   // ═══════════════════════════════════════════════════════════════════════════
 
   mostrarQR(cred: Credencial): void {
@@ -270,25 +273,25 @@ export class Dashboard implements OnInit, OnDestroy {
 
   // ── Paso 1: abrir modal con cámara ────────────────────────────────────────
 
-private async abrirModalFacial(): Promise<void> {
-  this.faceModalVisible = true;
-  this.faceScanning     = false;
-  this.faceProcessing   = false;
-  this.faceError        = '';
-  this.cdr.detectChanges();
-
-  await this.delay(200);
-
-  try {
-    await this.cargarFaceApi();
-    await this.iniciarCamaraFacial();
-  } catch (err: any) {
-    this.faceError      = 'No se pudo iniciar la verificación. Inténtalo de nuevo.';
-    this.faceScanning   = false;
-    this.faceProcessing = false;
+  private async abrirModalFacial(): Promise<void> {
+    this.faceModalVisible = true;
+    this.faceScanning     = false;
+    this.faceProcessing   = false;
+    this.faceError        = '';
     this.cdr.detectChanges();
+
+    await this.delay(200);
+
+    try {
+      await this.cargarFaceApi();
+      await this.iniciarCamaraFacial();
+    } catch (err: any) {
+      this.faceError      = 'No se pudo iniciar la verificación. Inténtalo de nuevo.';
+      this.faceScanning   = false;
+      this.faceProcessing = false;
+      this.cdr.detectChanges();
+    }
   }
-}
 
   cerrarModalFacial(): void {
     this.limpiarCamaraFacial();
@@ -361,7 +364,6 @@ private async abrirModalFacial(): Promise<void> {
       this.iniciarScanLineFacial();
       this.cdr.detectChanges();
 
-      // Auto-captura después de 1.8 s (da tiempo para centrarse)
       const t = setTimeout(() => this.capturarDescriptor(), 1800);
       this.timers.push(t);
 
@@ -436,8 +438,8 @@ private async abrirModalFacial(): Promise<void> {
           this.faceProcessing   = false;
           this.faceModalVisible = false;
           this.cdr.detectChanges();
-          // Verificación exitosa → obtener geo y generar QR
-          this.solicitarGeoYGenerar();
+          // Verificación exitosa → seleccionar movimiento → geo → QR
+          this.mostrarModalMovimiento();
         });
       },
       error: (err: any) => {
@@ -457,7 +459,26 @@ private async abrirModalFacial(): Promise<void> {
     });
   }
 
-  // ── Paso 5: geolocalización → QR ─────────────────────────────────────────
+  // ── Paso 5: modal movimiento ──────────────────────────────────────────────
+
+  mostrarModalMovimiento(): void {
+    this.movimientoModalVisible = true;
+    this.cdr.detectChanges();
+  }
+
+  seleccionarMovimiento(tipo: 'entrada' | 'salida'): void {
+    this.tipoMovimiento         = tipo;
+    this.movimientoModalVisible = false;
+    this.cdr.detectChanges();
+    this.solicitarGeoYGenerar();
+  }
+
+  cancelarMovimiento(): void {
+    this.movimientoModalVisible = false;
+    this.cdr.detectChanges();
+  }
+
+  // ── Paso 6: geolocalización → QR ─────────────────────────────────────────
 
   private solicitarGeoYGenerar(): void {
     this.geoSolicitando = true;
@@ -513,7 +534,7 @@ private async abrirModalFacial(): Promise<void> {
   private generarQR(latitud?: number, longitud?: number): void {
     if (!this.credencialQR) return;
 
-    this.qrService.generarToken(this.credencialQR.id, latitud, longitud).subscribe({
+    this.qrService.generarToken(this.credencialQR.id, latitud, longitud, this.tipoMovimiento).subscribe({
       next: (data) => {
         this.ngZone.run(() => {
           const encoded    = encodeURIComponent(data.token);

@@ -355,6 +355,50 @@
   }
 }
 
+// ─── HERO — variante salida exitosa ──────────────────────────────────────────
+.resultado-hero {
+
+  // Entrada exitosa (ya existía como .exitoso)
+  &.exitoso {
+    background: linear-gradient(135deg, #1a4a2e, var(--success) 40%, #2e6b3e);
+  }
+
+  // Salida exitosa — azul-púrpura
+ &.salida {
+  background: linear-gradient(135deg, #1a4a2e, var(--success) 40%, #2e6b3e);
+  box-shadow: 0 10px 40px rgba(46,125,50,0.32);
+}
+
+  // Denegado (entrada o salida) — rojo (ya existe)
+  &.denegado {
+    background: linear-gradient(135deg, #4a1a1f, var(--red) 40%, #6b2e35);
+    box-shadow: 0 10px 40px rgba(169,56,69,0.32);
+  }
+}
+
+// ─── DOTS movimiento ──────────────────────────────────────────────────────────
+.tl-dot {
+  &--entrada { background: var(--success); }
+  &--salida  { background: var(--blue);    }
+}
+
+// ─── BADGE movimiento (timeline) ─────────────────────────────────────────────
+.badge-movimiento {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 20px;
+  align-self: flex-start;
+  display: inline-block;
+
+  &.exitoso {
+    background: linear-gradient(135deg, #1a4a2e, var(--success) 40%, #2e6b3e);
+  }
+ 
+
+  
+}
+
 // ─── RESPONSIVE ───────────────────────────────────────────────────────────────
 @media (max-width: 768px) {
   .page-body     { padding: 16px 14px !important; gap: 16px !important; }

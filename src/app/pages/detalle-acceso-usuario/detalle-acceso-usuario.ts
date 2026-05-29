@@ -49,7 +49,6 @@ export class DetalleAccesoUsuario implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.cargando = false; return; }
 
-    // Usa la ruta directa del usuario (no el listado completo)
     this.http.get<AccesoDetalle>(
       `${this.apiBase}/historial/${id}`,
       { headers: this.headers }
@@ -73,12 +72,36 @@ export class DetalleAccesoUsuario implements OnInit {
     });
   }
 
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
   getTipoIcon(tipo: string): string {
     const map: Record<string, string> = {
       edificio: '🏛', biblioteca: '📚', laboratorio: '🔬',
       cafeteria: '☕', deportiva: '⚽', otro: '📍'
     };
     return map[tipo] ?? '📍';
+  }
+
+  /** Título del hero según movimiento + resultado */
+  getTituloHero(acceso: AccesoDetalle): string {
+    if (acceso.tipo_movimiento === 'salida') {
+      return acceso.exitoso ? 'Salida Exitosa' : 'Salida Denegada';
+    }
+    return acceso.exitoso ? 'Entrada Exitosa' : 'Entrada Denegada';
+  }
+
+  /** Clase CSS del hero según movimiento + resultado */
+  getClaseHero(acceso: AccesoDetalle): string {
+    if (!acceso.exitoso) return 'denegado';
+    return acceso.tipo_movimiento === 'salida' ? 'salida' : 'exitoso';
+  }
+
+  /** Texto del badge de resultado en el timeline */
+  getTextoResultado(acceso: AccesoDetalle): string {
+    if (acceso.tipo_movimiento === 'salida') {
+      return acceso.exitoso ? 'Salida permitida' : 'Salida denegada';
+    }
+    return acceso.exitoso ? 'Entrada permitida' : 'Entrada denegada';
   }
 
   formatHora(fecha: string): string {
