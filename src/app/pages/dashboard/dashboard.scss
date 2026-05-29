@@ -867,6 +867,122 @@ $warning:      #e65100;
 }
 }
 
+
+// ─────────────────────────────────────────────
+//  MODAL MOVIMIENTO (Entrada / Salida)
+// ─────────────────────────────────────────────
+.movimiento-modal-card {
+  max-width: 380px !important;
+  padding: 36px 32px 28px !important;
+  gap: 20px !important;
+}
+
+.movimiento-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+
+  h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: $text-main;
+    margin: 0;
+  }
+
+  p {
+    font-size: 13px;
+    color: $text-soft;
+    margin: 0;
+    line-height: 1.55;
+    strong { color: $purple-dark; }
+  }
+}
+
+.movimiento-icon {
+  font-size: 44px;
+  line-height: 1;
+  animation: iconFloat 2.5s ease-in-out infinite;
+}
+
+.movimiento-opciones {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+}
+
+.btn-movimiento {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 22px 12px;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  background: $bg;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(.34,1.2,.64,1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    border-radius: 14px;
+    transition: opacity 0.25s;
+    pointer-events: none;
+  }
+
+  &:hover { transform: translateY(-4px); &::before { opacity: 1; } }
+  &:active { transform: translateY(-1px) scale(0.98); }
+
+  &.btn-entrada {
+    &::before { background: linear-gradient(135deg, rgba(46,125,50,0.1), rgba(46,125,50,0.04)); }
+    &:hover {
+      border-color: rgba(46,125,50,0.45);
+      box-shadow: 0 8px 24px rgba(46,125,50,0.2);
+    }
+    .mov-label { color: $success; }
+  }
+
+  &.btn-salida {
+    &::before { background: linear-gradient(135deg, rgba(169,56,69,0.1), rgba(169,56,69,0.04)); }
+    &:hover {
+      border-color: rgba(169,56,69,0.45);
+      box-shadow: 0 8px 24px rgba(169,56,69,0.2);
+    }
+    .mov-label { color: $danger; }
+  }
+}
+
+.mov-emoji {
+  font-size: 30px;
+  line-height: 1;
+  display: block;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+  .btn-movimiento:hover & { transform: scale(1.2) rotate(-5deg); }
+}
+
+.mov-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  display: block;
+}
+
+.mov-desc {
+  font-size: 11px;
+  color: $text-soft;
+  text-align: center;
+  line-height: 1.4;
+  display: block;
+}
+
 // ─────────────────────────────────────────────
 //  RESPONSIVE
 // ─────────────────────────────────────────────

@@ -58,11 +58,11 @@ export class AccesoPunto implements OnInit, OnDestroy {
   }
 
   get iconoResultado(): string {
-    if (this.estado === 'exitoso') {
-      return this.tipoMovimiento === 'salida' ? '🚪' : '✅';
-    }
-    return '❌';
+  if (this.estado === 'exitoso') {
+    return this.tipoMovimiento === 'salida' ? '✅' : '✅';
   }
+  return '❌';
+}
 
   // ── Control de cámara ─────────────────────────────────────────────────────
 

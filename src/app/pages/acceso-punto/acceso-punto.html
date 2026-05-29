@@ -41,7 +41,7 @@
     <div class="resultado-icono">{{ iconoResultado }}</div>
     <p class="resultado-nombre">{{ usuario }}</p>
     <p class="resultado-tipo">{{ tipoUsuario | titlecase }}</p>
-    <p class="resultado-texto" [ngClass]="claseTextoResultado">{{ textoResultado }}</p>
+    <p class="resultado-texto acceso-ok">{{ textoResultado }}</p>
     <button class="btn-siguiente" (click)="siguienteEscaneo()">
       Escanear siguiente
     </button>
@@ -50,7 +50,7 @@
   <!-- DENEGADO -->
   <div class="resultado-card denegado" *ngIf="estado === 'denegado'">
     <div class="resultado-icono">❌</div>
-    <p class="resultado-texto" [ngClass]="claseTextoResultado">{{ textoResultado }}</p>
+    <p class="resultado-texto acceso-no">{{ textoResultado }}</p>
     <p class="resultado-motivo">{{ mensaje }}</p>
     <button class="btn-reintentar" (click)="escanearOtro()">
       Escanear de nuevo
