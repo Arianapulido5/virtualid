@@ -22,6 +22,7 @@ export class AccesoPunto implements OnInit, OnDestroy {
   mensaje     = '';
   usuario     = '';
   tipoUsuario = '';
+  tipoMovimiento: 'entrada' | 'salida' = 'entrada';
   errorCamara = '';
 
   private stream:       MediaStream | null = null;
@@ -43,6 +44,28 @@ export class AccesoPunto implements OnInit, OnDestroy {
     clearInterval(this.scanInterval);
   }
 
+  // ── Getters de texto e ícono según movimiento y resultado ─────────────────
+
+  get textoResultado(): string {
+    if (this.estado === 'exitoso') {
+      return this.tipoMovimiento === 'salida' ? 'Salida correcta' : 'Acceso permitido';
+    }
+    return this.tipoMovimiento === 'salida' ? 'Salida denegada' : 'Acceso denegado';
+  }
+
+  get claseTextoResultado(): string {
+    return this.estado === 'exitoso' ? 'acceso-ok' : 'acceso-no';
+  }
+
+  get iconoResultado(): string {
+    if (this.estado === 'exitoso') {
+      return this.tipoMovimiento === 'salida' ? '🚪' : '✅';
+    }
+    return '❌';
+  }
+
+  // ── Control de cámara ─────────────────────────────────────────────────────
+
   async iniciarDesdeBoton(): Promise<void> {
     this.errorCamara = '';
     this.estado      = 'escaneando';
@@ -50,24 +73,24 @@ export class AccesoPunto implements OnInit, OnDestroy {
     setTimeout(() => this.iniciarCamara(), 100);
   }
 
-  escanearOtro(): void {
-    this.mensaje     = '';
-    this.usuario     = '';
-    this.tipoUsuario = '';
-    this.estado      = 'escaneando';
-    clearInterval(this.scanInterval);
-    this.cdr.detectChanges();
+  siguienteEscaneo(): void {
+    this.resetearEstado();
     setTimeout(() => this.iniciarEscaneo(), 100);
   }
 
-  siguienteEscaneo(): void {
-    this.mensaje     = '';
-    this.usuario     = '';
-    this.tipoUsuario = '';
-    this.estado      = 'escaneando';
+  escanearOtro(): void {
+    this.resetearEstado();
+    setTimeout(() => this.iniciarEscaneo(), 100);
+  }
+
+  private resetearEstado(): void {
+    this.mensaje        = '';
+    this.usuario        = '';
+    this.tipoUsuario    = '';
+    this.tipoMovimiento = 'entrada';
+    this.estado         = 'escaneando';
     clearInterval(this.scanInterval);
     this.cdr.detectChanges();
-    setTimeout(() => this.iniciarEscaneo(), 100);
   }
 
   private async iniciarCamara(): Promise<void> {
@@ -143,17 +166,19 @@ export class AccesoPunto implements OnInit, OnDestroy {
     }).subscribe({
       next: (data) => {
         this.ngZone.run(() => {
-          this.estado      = data.exitoso ? 'exitoso' : 'denegado';
-          this.usuario     = data.usuario?.nombre      ?? '';
-          this.tipoUsuario = data.usuario?.tipo_usuario ?? '';
-          this.mensaje     = data.message;
+          this.estado         = data.exitoso ? 'exitoso' : 'denegado';
+          this.usuario        = data.usuario?.nombre      ?? '';
+          this.tipoUsuario    = data.usuario?.tipo_usuario ?? '';
+          this.mensaje        = data.message;
+          this.tipoMovimiento = data.tipo_movimiento === 'salida' ? 'salida' : 'entrada';
           this.cdr.detectChanges();
         });
       },
       error: (err) => {
         this.ngZone.run(() => {
-          this.estado  = 'denegado';
-          this.mensaje = err.error?.message ?? 'Error al validar. Intenta de nuevo.';
+          this.estado         = 'denegado';
+          this.mensaje        = err.error?.message ?? 'Error al validar. Intenta de nuevo.';
+          this.tipoMovimiento = err.error?.tipo_movimiento === 'salida' ? 'salida' : 'entrada';
           this.cdr.detectChanges();
         });
       }
