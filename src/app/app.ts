@@ -95,7 +95,7 @@ export class App implements OnInit, OnDestroy {
 
     this.isPulling = pull > 10;
     // El indicador baja con el dedo, con un poco de resistencia
-    const topOffset = Math.round(pull * 0.6);
+    const topOffset = Math.round(pull * 0.6) + 60;
     this.pullIndicatorTop = `${topOffset}px`;
 
     // Rotar el spinner según cuánto se ha jalado
@@ -106,48 +106,73 @@ export class App implements OnInit, OnDestroy {
   };
 
   private onTouchEnd = (e: TouchEvent) => {
-    if (this.isRefreshing) return;
+  if (this.isRefreshing) return;
 
-    const deltaY = e.changedTouches[0].clientY - this.touchStartY;
-    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  const deltaY = e.changedTouches[0].clientY - this.touchStartY;
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 
-    if (deltaY >= this.pullThreshold && scrollTop === 0) {
-      this.triggerRefresh();
-    } else {
-      this.resetPull();
-    }
-  };
-
-  private triggerRefresh() {
+  if (deltaY >= this.pullThreshold && scrollTop === 0) {
+    // Activa el spinner girando ANTES de llamar triggerRefresh
     this.isRefreshing = true;
-    this.pullIndicatorTop = '24px';
+    this.isPulling = true;
+    this.pullIndicatorTop = '64px';
 
-    // Mostrar el splash screen y recargar
-    setTimeout(() => {
-      const splash = document.createElement('div');
-      splash.id = 'splash-screen';
-      splash.innerHTML = `
-        <div class="splash-orb splash-orb--1"></div>
-        <div class="splash-orb splash-orb--2"></div>
-        <div class="splash-orb splash-orb--3"></div>
-        <div class="splash-content">
-          <h1 class="splash-title">Virtualid</h1>
-          <div class="splash-spinner"></div>
-        </div>
-      `;
-      document.body.appendChild(splash);
+    const spinnerEl = document.querySelector('.pull-spinner') as HTMLElement;
+    if (spinnerEl) {
+      spinnerEl.style.transform = '';
+      spinnerEl.classList.add('spinning');
+    }
 
-      setTimeout(() => {
-        window.location.reload();
-      }, 400);
-    }, 300);
+    setTimeout(() => this.triggerRefresh(), 700);
+  } else {
+    this.resetPull();
   }
+};
+
+private triggerRefresh() {
+  const splash = document.createElement('div');
+  splash.id = 'pull-splash';
+  splash.innerHTML = `
+    <div class="splash-orb splash-orb--1"></div>
+    <div class="splash-orb splash-orb--2"></div>
+    <div class="splash-orb splash-orb--3"></div>
+    <div class="splash-content">
+      <h1 class="splash-title">Virtualid</h1>
+      <div class="splash-spinner"></div>
+    </div>
+  `;
+  splash.style.cssText = `
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%; height: 100%;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    background: linear-gradient(145deg, #4D0F60 0%, #3a0b48 30%, #32488C 70%, #1e2d5c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 999999;
+    margin: 0;
+    padding: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
+  `;
+  document.documentElement.style.background = '#4D0F60';
+  document.body.style.background = '#4D0F60';
+  document.body.appendChild(splash);
+
+  setTimeout(() => {
+    window.location.reload();
+  }, 600);
+}
 
   private resetPull() {
-    this.isPulling = false;
-    this.isRefreshing = false;
-    this.pullIndicatorTop = '20px';
-  }
+  this.isPulling = false;
+  this.isRefreshing = false;
+  this.pullIndicatorTop = '60px';
+}
 
   toggleMenu() { this.sidebarState.toggle(); }
 }

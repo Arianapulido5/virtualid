@@ -66,8 +66,8 @@
   transform: translateX(-50%);
   top: 20px;
   z-index: 9999;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   background: #4D0F60;
   border-radius: 50%;
   display: flex;
@@ -76,7 +76,7 @@
   opacity: 0;
   transition: opacity 0.15s ease;
   pointer-events: none;
-  box-shadow: 0 2px 12px rgba(77, 15, 96, 0.4);
+  box-shadow: 0 2px 12px rgba(77, 15, 96, 0.5);
 
   &.visible {
     opacity: 1;
@@ -84,16 +84,20 @@
 }
 
 .pull-spinner {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border: 2.5px solid rgba(255, 255, 255, 0.3);
   border-top-color: #ffffff;
   border-radius: 50%;
   transition: transform 0.05s linear;
 
   &.spinning {
-    animation: pullSpin 0.7s linear infinite;
+    animation: pullSpin 0.6s linear infinite;
   }
+}
+
+@keyframes pullSpin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes pullSpin {
