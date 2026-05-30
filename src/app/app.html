@@ -1,6 +1,11 @@
 <div class="app-layout" [class.menu-open]="menuOpen">
   <app-pwa-install></app-pwa-install>
 
+  <!-- Pull-to-refresh indicator -->
+  <div class="pull-indicator" [class.visible]="isPulling" [style.top]="pullIndicatorTop">
+    <div class="pull-spinner" [class.spinning]="isRefreshing"></div>
+  </div>
+
   @if (showSidebar && !isAdmin) {
     <app-sidebar></app-sidebar>
   }

@@ -1,6 +1,24 @@
 // public/custom-sw.js
 importScripts('./ngsw-worker.js');
 
+// Toma control inmediato al instalarse
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
+
+// Limpia cachés viejos y toma control de todas las pestañas
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+// Escucha la señal desde main.ts para activarse
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// ── Push notifications ────────────────────────────────────────────────────────
 self.addEventListener('push', (event) => {
   if (!event.data) return;
   const data  = event.data.json();
