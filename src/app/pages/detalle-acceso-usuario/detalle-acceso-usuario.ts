@@ -130,7 +130,5 @@ export class DetalleAccesoUsuario implements OnInit {
     });
   }
 
- volver(): void { 
-  this.router.navigate(['/historial'], { replaceUrl: true }); 
-}
+  volver(): void { this.router.navigate(['/historial']); }
 }

@@ -1,3 +1,4 @@
+// src/app/pages/login/login.ts
 import { Component, ChangeDetectorRef, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { NgIf } from '@angular/common';
@@ -28,11 +29,11 @@ export class Login implements OnInit, OnDestroy {
   errorGeneral = '';
   errores: { correo?: string; contrasena?: string } = {};
 
-  faceModalVisible = false;
-  faceScanning     = false;
-  faceProcessing   = false;
-  faceError        = '';
-  faceScanLineY    = 60;
+  faceModalVisible     = false;
+  faceScanning         = false;
+  faceProcessing       = false;
+  faceError            = '';
+  faceScanLineY        = 60;
   biometricaDisponible = false;
 
   private faceStream:       MediaStream | null = null;
@@ -86,6 +87,8 @@ export class Login implements OnInit, OnDestroy {
     return Object.values(this.errores).every((v) => v === undefined);
   }
 
+  // ── LOGIN MANUAL ──────────────────────────────────────────────────────────
+
   iniciarSesion() {
     this.errorGeneral = '';
     if (!this.formularioValido()) return;
@@ -113,7 +116,6 @@ export class Login implements OnInit, OnDestroy {
           Auth.setToken(res.token);
           Auth.setRol(res.rol);
           this.cdr.detectChanges();
-          // ✅ replaceUrl: true — el login no queda en el historial
           this.router.navigate(['/dashboard'], { replaceUrl: true });
         },
         error: (err: any) => {
@@ -138,6 +140,8 @@ export class Login implements OnInit, OnDestroy {
       });
   }
 
+  // ── LOGIN BIOMÉTRICO ──────────────────────────────────────────────────────
+
   async iniciarBiometria(): Promise<void> {
     this.faceError        = '';
     this.faceModalVisible = true;
@@ -161,6 +165,8 @@ export class Login implements OnInit, OnDestroy {
     this.faceError = '';
     await this.abrirCamara();
   }
+
+  // ── Carga de face-api ─────────────────────────────────────────────────────
 
   private cargarFaceApi(): Promise<void> {
     if (this.faceApiLoaded || (window as any).faceapi) {
@@ -198,6 +204,8 @@ export class Login implements OnInit, OnDestroy {
       ]);
     }
   }
+
+  // ── Cámara ────────────────────────────────────────────────────────────────
 
   private async abrirCamara(): Promise<void> {
     this.faceScanning   = false;
@@ -247,6 +255,8 @@ export class Login implements OnInit, OnDestroy {
     }, 35);
   }
 
+  // ── Captura y envío ───────────────────────────────────────────────────────
+
   private async capturarYEnviar(): Promise<void> {
     if (!this.faceScanning) return;
 
@@ -288,7 +298,6 @@ export class Login implements OnInit, OnDestroy {
               Auth.setToken(res.token);
               Auth.setRol(res.rol);
               this.cdr.detectChanges();
-              // ✅ replaceUrl: true — ya estaba correcto aquí
               this.router.navigate(['/dashboard'], { replaceUrl: true });
             });
           },
@@ -325,6 +334,8 @@ export class Login implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     }
   }
+
+  // ── Limpieza ──────────────────────────────────────────────────────────────
 
   private limpiarCamara(): void {
     this.faceScanning = false;
