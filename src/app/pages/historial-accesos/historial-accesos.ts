@@ -108,9 +108,9 @@ export class HistorialAccesos implements OnInit {
     }
   }
 
-  verDetalle(a: Acceso): void {
-    this.router.navigate(['/detalle-acceso', a.id]);
-  }
+verDetalle(a: Acceso): void {
+  this.router.navigate(['/detalle-acceso', a.id], { replaceUrl: true });
+}
 
  
 

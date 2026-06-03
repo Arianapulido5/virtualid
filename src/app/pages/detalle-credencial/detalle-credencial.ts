@@ -229,17 +229,21 @@ export class DetalleCredencial implements OnInit, OnDestroy {
   }
 
   cerrarModal(): void {
-    this.modalVisible = false;
-    if (this._redirigirAlCerrar) {
-      this._redirigirAlCerrar = false;
-      this.router.navigate(['/tarjetas']);
-    }
-    this.cdr.detectChanges();
+  this.modalVisible = false;
+  if (this._redirigirAlCerrar) {
+    this._redirigirAlCerrar = false;
+    this.router.navigate(['/tarjetas'], { replaceUrl: true }); // ← agregar replaceUrl
   }
+  this.cdr.detectChanges();
+}
+
+
+irAConfiguracion(): void { 
+  this.router.navigate(['/configuracion'], { replaceUrl: true }); // ← agregar replaceUrl
+}
 
   cancelarGeo(): void    { this.geoSolicitando = false; this.cdr.detectChanges(); }
   cerrarGeoError(): void { this.geoError = '';           this.cdr.detectChanges(); }
-  irAConfiguracion(): void { this.router.navigate(['/configuracion']); }
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  FLUJO: bio facial → modal movimiento → geo → QR

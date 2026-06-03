@@ -1,4 +1,3 @@
-// src/app/pages/login/login.ts
 import { Component, ChangeDetectorRef, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { NgIf } from '@angular/common';
@@ -29,7 +28,6 @@ export class Login implements OnInit, OnDestroy {
   errorGeneral = '';
   errores: { correo?: string; contrasena?: string } = {};
 
-  // ── Modal facial ──────────────────────────────────────────────────────────
   faceModalVisible = false;
   faceScanning     = false;
   faceProcessing   = false;
@@ -88,8 +86,6 @@ export class Login implements OnInit, OnDestroy {
     return Object.values(this.errores).every((v) => v === undefined);
   }
 
-  // ── LOGIN MANUAL ──────────────────────────────────────────────────────────
-
   iniciarSesion() {
     this.errorGeneral = '';
     if (!this.formularioValido()) return;
@@ -117,7 +113,8 @@ export class Login implements OnInit, OnDestroy {
           Auth.setToken(res.token);
           Auth.setRol(res.rol);
           this.cdr.detectChanges();
-          this.router.navigate(['/dashboard']);
+          // ✅ replaceUrl: true — el login no queda en el historial
+          this.router.navigate(['/dashboard'], { replaceUrl: true });
         },
         error: (err: any) => {
           this.cargando = false;
@@ -140,8 +137,6 @@ export class Login implements OnInit, OnDestroy {
         },
       });
   }
-
-  // ── LOGIN BIOMÉTRICO — abre cámara directo, sin pedir correo ─────────────
 
   async iniciarBiometria(): Promise<void> {
     this.faceError        = '';
@@ -166,8 +161,6 @@ export class Login implements OnInit, OnDestroy {
     this.faceError = '';
     await this.abrirCamara();
   }
-
-  // ── Carga de face-api ────────────────────────────────────────────────────
 
   private cargarFaceApi(): Promise<void> {
     if (this.faceApiLoaded || (window as any).faceapi) {
@@ -206,8 +199,6 @@ export class Login implements OnInit, OnDestroy {
     }
   }
 
-  // ── Cámara ────────────────────────────────────────────────────────────────
-
   private async abrirCamara(): Promise<void> {
     this.faceScanning   = false;
     this.faceProcessing = false;
@@ -233,7 +224,6 @@ export class Login implements OnInit, OnDestroy {
       this.iniciarScanLine();
       this.cdr.detectChanges();
 
-      // Auto-captura tras 1.8 s — tiempo para que el usuario encuadre su cara
       const t = setTimeout(() => this.capturarYEnviar(), 1800);
       this.timers.push(t);
 
@@ -257,8 +247,6 @@ export class Login implements OnInit, OnDestroy {
     }, 35);
   }
 
-  // ── Captura y envío — solo manda el descriptor, sin correo ───────────────
-
   private async capturarYEnviar(): Promise<void> {
     if (!this.faceScanning) return;
 
@@ -279,19 +267,18 @@ export class Login implements OnInit, OnDestroy {
         .withFaceLandmarks(true)
         .withFaceDescriptor();
 
-    if (!det) {
-  this.faceProcessing = false;
-  this.faceScanning   = false;
-  this.limpiarCamara();
-  this.faceError = 'No se detectó ningún rostro. Centra tu cara y vuelve a intentarlo.';
-  this.cdr.detectChanges();
-  return;
-}
+      if (!det) {
+        this.faceProcessing = false;
+        this.faceScanning   = false;
+        this.limpiarCamara();
+        this.faceError = 'No se detectó ningún rostro. Centra tu cara y vuelve a intentarlo.';
+        this.cdr.detectChanges();
+        return;
+      }
 
       const descriptor = Array.from(det.descriptor as Float32Array) as number[];
       this.limpiarCamara();
 
-      // Solo se manda el descriptor — el backend busca entre TODOS los usuarios
       this.http.post<{ token: string; rol: string }>(`${this.api}/biometrica/login`, { descriptor })
         .subscribe({
           next: (res) => {
@@ -301,6 +288,7 @@ export class Login implements OnInit, OnDestroy {
               Auth.setToken(res.token);
               Auth.setRol(res.rol);
               this.cdr.detectChanges();
+              // ✅ replaceUrl: true — ya estaba correcto aquí
               this.router.navigate(['/dashboard'], { replaceUrl: true });
             });
           },
@@ -337,8 +325,6 @@ export class Login implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     }
   }
-
-  // ── Limpieza ──────────────────────────────────────────────────────────────
 
   private limpiarCamara(): void {
     this.faceScanning = false;

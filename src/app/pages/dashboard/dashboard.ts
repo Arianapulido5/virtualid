@@ -1,7 +1,6 @@
-// src/app/pages/dashboard/dashboard.ts
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone, ViewChild, ElementRef } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Auth } from '../../services/auth';
 import { QrService } from '../../services/qr';
@@ -67,11 +66,9 @@ export class Dashboard implements OnInit, OnDestroy {
   geoError       = '';
   geoSolicitando = false;
 
-  // ── Modal movimiento (Entrada / Salida) ───────────────────────────────────
   movimientoModalVisible           = false;
   tipoMovimiento: 'entrada' | 'salida' = 'entrada';
 
-  // ── Verificación facial para QR ────────────────────────────────────────────
   faceModalVisible  = false;
   faceScanning      = false;
   faceProcessing    = false;
@@ -86,7 +83,6 @@ export class Dashboard implements OnInit, OnDestroy {
   private faceApiLoaded = false;
   private pendingCredForQR: Credencial | null = null;
 
-  // Carrusel horizontal
   activeCardIndex = 0;
   carouselOffset  = 0;
 
@@ -99,10 +95,14 @@ export class Dashboard implements OnInit, OnDestroy {
   private countdownInterval: any;
   private timers: any[] = [];
 
+  // ✅ Suscripción al botón atrás
+  private unlistenBack!: () => void;
+
   constructor(
     private auth:      Auth,
     private http:      HttpClient,
     private router:    Router,
+    private location:  Location,
     private cdr:       ChangeDetectorRef,
     private ngZone:    NgZone,
     private qrService: QrService,
@@ -120,8 +120,14 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // ✅ Bloquear botón atrás: empujar un estado para tener algo que consumir
+    history.pushState(null, '', location.href);
+    this.unlistenBack = this.location.subscribe(() => {
+      history.pushState(null, '', location.href);
+    }) as unknown as () => void;
+
     const token = localStorage.getItem('token');
-    if (!token) { this.router.navigate(['/login']); return; }
+    if (!token) { this.router.navigate(['/login'], { replaceUrl: true }); return; }
 
     this.auth.obtenerInformacion().subscribe({
       next: (info) => {
@@ -136,7 +142,7 @@ export class Dashboard implements OnInit, OnDestroy {
           this.cargandoNombre = false;
           if (err.status === 401 || err.status === 403) {
             localStorage.removeItem('token');
-            this.router.navigate(['/login']);
+            this.router.navigate(['/login'], { replaceUrl: true });
           } else {
             this.nombreUsuario = 'Usuario';
           }
@@ -162,7 +168,7 @@ export class Dashboard implements OnInit, OnDestroy {
             this.cargandoCreds = false;
             if (err.status === 401 || err.status === 403) {
               localStorage.removeItem('token');
-              this.router.navigate(['/login']);
+              this.router.navigate(['/login'], { replaceUrl: true });
             }
             this.cdr.detectChanges();
           });
@@ -192,6 +198,8 @@ export class Dashboard implements OnInit, OnDestroy {
     clearInterval(this.countdownInterval);
     this.limpiarCamaraFacial();
     this.timers.forEach(t => clearTimeout(t));
+    // ✅ Limpiar suscripción al botón atrás
+    if (this.unlistenBack) this.unlistenBack();
   }
 
   // ── Carrusel ──────────────────────────────────────────────────────────────
@@ -258,10 +266,6 @@ export class Dashboard implements OnInit, OnDestroy {
   reintentarQR(): void { if (this.credencialQR) { this.geoError = ''; this.mostrarQR(this.credencialQR); } }
   cerrarBioError(): void { this.bioError = ''; this.cdr.detectChanges(); }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  //  FLUJO PRINCIPAL: bio facial → modal movimiento → geo → QR
-  // ═══════════════════════════════════════════════════════════════════════════
-
   mostrarQR(cred: Credencial): void {
     if (this.qrGenerando || this.faceScanning) return;
     this.pendingCredForQR = cred;
@@ -270,8 +274,6 @@ export class Dashboard implements OnInit, OnDestroy {
     this.geoError         = '';
     this.abrirModalFacial();
   }
-
-  // ── Paso 1: abrir modal con cámara ────────────────────────────────────────
 
   private async abrirModalFacial(): Promise<void> {
     this.faceModalVisible = true;
@@ -305,8 +307,6 @@ export class Dashboard implements OnInit, OnDestroy {
     this.faceError = '';
     this.abrirModalFacial();
   }
-
-  // ── Carga face-api.js ─────────────────────────────────────────────────────
 
   private cargarFaceApi(): Promise<void> {
     if (this.faceApiLoaded || (window as any).faceapi) {
@@ -344,8 +344,6 @@ export class Dashboard implements OnInit, OnDestroy {
       ]);
     }
   }
-
-  // ── Paso 2: iniciar cámara ────────────────────────────────────────────────
 
   private async iniciarCamaraFacial(): Promise<void> {
     try {
@@ -388,8 +386,6 @@ export class Dashboard implements OnInit, OnDestroy {
     }, 35);
   }
 
-  // ── Paso 3: capturar descriptor ───────────────────────────────────────────
-
   private async capturarDescriptor(): Promise<void> {
     if (!this.faceScanning) return;
 
@@ -426,8 +422,6 @@ export class Dashboard implements OnInit, OnDestroy {
     }
   }
 
-  // ── Paso 4: verificar en backend ──────────────────────────────────────────
-
   private enviarVerificacion(descriptor: number[]): void {
     this.faceProcessing = true;
     this.cdr.detectChanges();
@@ -438,7 +432,6 @@ export class Dashboard implements OnInit, OnDestroy {
           this.faceProcessing   = false;
           this.faceModalVisible = false;
           this.cdr.detectChanges();
-          // Verificación exitosa → seleccionar movimiento → geo → QR
           this.mostrarModalMovimiento();
         });
       },
@@ -459,8 +452,6 @@ export class Dashboard implements OnInit, OnDestroy {
     });
   }
 
-  // ── Paso 5: modal movimiento ──────────────────────────────────────────────
-
   mostrarModalMovimiento(): void {
     this.movimientoModalVisible = true;
     this.cdr.detectChanges();
@@ -477,8 +468,6 @@ export class Dashboard implements OnInit, OnDestroy {
     this.movimientoModalVisible = false;
     this.cdr.detectChanges();
   }
-
-  // ── Paso 6: geolocalización → QR ─────────────────────────────────────────
 
   private solicitarGeoYGenerar(): void {
     this.geoSolicitando = true;
@@ -585,8 +574,6 @@ export class Dashboard implements OnInit, OnDestroy {
       });
     }, 1000);
   }
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
 
   private limpiarCamaraFacial(): void {
     this.faceScanning = false;

@@ -37,6 +37,17 @@ export class SidebarComponent implements OnInit {
 
   ngOnInit() { this.contarNoLeidos(); }
 
+  // ✅ Navega reemplazando historial — las secciones principales no se apilan
+  navegarA(route: string) {
+    this.router.navigate([route], { replaceUrl: true });
+    if (window.innerWidth <= 768) this.sidebarState.close();
+  }
+
+  // ✅ Detecta ruta activa manualmente (reemplaza routerLinkActive)
+  isActive(route: string): boolean {
+    return this.router.url === route || this.router.url.startsWith(route + '/');
+  }
+
   contarNoLeidos() {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -45,10 +56,6 @@ export class SidebarComponent implements OnInit {
       next: (msgs) => { this.noLeidos = msgs.filter(m => !m.leido).length; },
       error: () => {}
     });
-  }
-
-  closeOnMobile() {
-    if (window.innerWidth <= 768) this.sidebarState.close();
   }
 
   cerrarSesion() {

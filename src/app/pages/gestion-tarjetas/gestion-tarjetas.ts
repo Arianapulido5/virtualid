@@ -83,7 +83,7 @@ export class GestionTarjetas implements OnInit {
     return nombre.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
   }
 
-  verDetalle(id: number): void {
-    this.router.navigate(['/credencial', id]);
-  }
+verDetalle(id: number): void {
+  this.router.navigate(['/credencial', id], { replaceUrl: true });
+}
 }

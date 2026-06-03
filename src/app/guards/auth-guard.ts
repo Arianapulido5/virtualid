@@ -6,7 +6,7 @@ export const authGuard: CanActivateFn = () => {
   const token = localStorage.getItem('token');
 
   if (!token) {
-    router.navigate(['/login']);
+    router.navigate(['/login'], { replaceUrl: true });
     return false;
   }
 
@@ -15,12 +15,12 @@ export const authGuard: CanActivateFn = () => {
     const ahora = Math.floor(Date.now() / 1000);
     if (payload.exp && payload.exp < ahora) {
       localStorage.removeItem('token');
-      router.navigate(['/login']);
+      router.navigate(['/login'], { replaceUrl: true });
       return false;
     }
   } catch {
     localStorage.removeItem('token');
-    router.navigate(['/login']);
+    router.navigate(['/login'], { replaceUrl: true });
     return false;
   }
 
