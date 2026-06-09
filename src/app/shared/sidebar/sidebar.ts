@@ -47,13 +47,14 @@ export class SidebarComponent implements OnInit {
     });
   }
 
-  closeOnMobile() {
-    if (window.innerWidth <= 768) this.sidebarState.close();
-  }
-
-cerrarSesion() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('rol');
-  this.router.navigate(['/login'], { replaceUrl: true });
+navegar(route: string): void {
+  if (window.innerWidth <= 768) this.sidebarState.close();
+  this.router.navigate([route]);
 }
+
+  cerrarSesion() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('rol');
+    this.router.navigate(['/login'], { replaceUrl: true });
+  }
 }

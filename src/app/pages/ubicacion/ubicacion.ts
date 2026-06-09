@@ -96,7 +96,7 @@ export class Ubicacion implements OnInit {
     });
   }
 
-  volver(): void {
-    this.router.navigate(['/configuracion']);
-  }
+irAConfiguracion(): void {
+  this.router.navigate(['/configuracion'], { replaceUrl: true });
+}
 }

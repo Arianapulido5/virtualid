@@ -195,12 +195,10 @@ export class PullToRefresh implements OnInit, OnDestroy {
     }, 1100);
   }
 
-  private getScrollTop(): number {
-    let el = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2) as HTMLElement | null;
-    while (el) {
-      if (el.scrollTop > 0) return el.scrollTop;
-      el = el.parentElement;
-    }
-    return window.scrollY || document.documentElement.scrollTop;
-  }
+private getScrollTop(): number {
+  // Busca el primer ancestro scrollable del elemento tocado
+  const scrollable = document.querySelector('.main-content, .full-content') as HTMLElement | null;
+  if (scrollable) return scrollable.scrollTop;
+  return window.scrollY || document.documentElement.scrollTop;
+}
 }

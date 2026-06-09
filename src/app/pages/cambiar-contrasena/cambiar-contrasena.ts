@@ -84,7 +84,7 @@ export class CambiarContrasena {
     });
   }
 
-  irAConfiguracion(): void {
-    this.router.navigate(['/configuracion']);
-  }
+irAConfiguracion(): void {
+  this.router.navigate(['/configuracion'], { replaceUrl: true });
+}
 }

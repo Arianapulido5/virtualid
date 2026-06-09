@@ -1,11 +1,7 @@
-
-
-<!-- Overlay -->
 <div class="sidebar-overlay"
      [class.hidden]="!(sidebarState.isOpen$ | async)"
      (click)="sidebarState.close()"></div>
 
-<!-- Sidebar -->
 <aside class="sidebar" [class.open]="sidebarState.isOpen$ | async">
 
   <div class="sidebar-brand">
@@ -16,9 +12,9 @@
   <nav class="sidebar-nav">
     @for (item of menuItems; track item.route) {
       <a class="nav-link"
-         [routerLink]="item.route"
          routerLinkActive="active"
-         (click)="closeOnMobile()">
+         [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
+         (click)="navegar(item.route)">
         <span>{{ item.label }}</span>
         <span class="notif-badge" *ngIf="item.route === '/mensajes' && noLeidos > 0">
           {{ noLeidos }}

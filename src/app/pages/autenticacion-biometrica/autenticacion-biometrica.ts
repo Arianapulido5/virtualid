@@ -554,9 +554,9 @@ if (capabilities.zoom) {
     this.timers = [];
   }
 
- irAConfiguracion(): void {
-    this.router.navigate([this.modo === 'registro' ? '/configuracion' : '/dashboard'], { replaceUrl: true });
-  }
+irAConfiguracion(): void {
+  this.router.navigate(['/configuracion'], { replaceUrl: true });
+}
 
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));

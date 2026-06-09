@@ -489,7 +489,7 @@ export class InformacionPersonal implements OnInit {
     });
   }
 
-  irAConfiguracion(): void {
-    this.router.navigate(['/configuracion']);
-  }
+irAConfiguracion(): void {
+  this.router.navigate(['/configuracion'], { replaceUrl: true });
+}
 }
