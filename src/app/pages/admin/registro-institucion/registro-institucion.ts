@@ -142,31 +142,30 @@ export class RegistroInstitucion implements OnDestroy {
   }
 
   onLugarChange(lugar: { ciudad: string; estado: string; cp?: string } | null): void {
-  if (!lugar) return;
+    if (!lugar) return;
 
-  const esModoManual = this.mapaSelector?.modo === 'manual';
+    const esModoManual = this.mapaSelector?.modo === 'manual';
 
-  if (lugar.cp && lugar.cp.length === 5 && (lugar.cp !== this.codigo_postal || esModoManual)) {
-    this._cpVinoDeMapa = !esModoManual;
-    this.codigo_postal = lugar.cp;
+    if (lugar.cp && lugar.cp.length === 5 && (lugar.cp !== this.codigo_postal || esModoManual)) {
+      this._cpVinoDeMapa = !esModoManual;
+      this.codigo_postal = lugar.cp;
+      this._limpiarGeo();
+      this.cargandoCP = true;
+      this.cdr.detectChanges();
+      this._buscarCP(lugar.cp);
+      return;
+    }
+
+    if (!esModoManual) {
+      if (lugar.cp && lugar.cp === this.codigo_postal) return;
+      if (this.codigo_postal && this.codigo_postal.length === 5) return;
+    }
+
     this._limpiarGeo();
-    this.cargandoCP = true;
+    if (lugar.ciudad) this.ciudad = lugar.ciudad;
+    if (lugar.estado) this.estado = lugar.estado;
     this.cdr.detectChanges();
-    this._buscarCP(lugar.cp);
-    return;
   }
-
-  if (!esModoManual) {
-    if (lugar.cp && lugar.cp === this.codigo_postal) return;
-    if (this.codigo_postal && this.codigo_postal.length === 5) return;
-  }
-  
-
-  this._limpiarGeo();
-  if (lugar.ciudad) this.ciudad = lugar.ciudad;
-  if (lugar.estado) this.estado = lugar.estado;
-  this.cdr.detectChanges();
-}
 
   validarCodigoPostal(): void {
     const v = this.codigo_postal.replace(/\D/g, '').slice(0, 5);
@@ -188,11 +187,27 @@ export class RegistroInstitucion implements OnDestroy {
     }
   }
 
+  // Fetch con retry — sin headers extras para no disparar preflight CORS
+  private async _fetchConRetry(url: string, intentos = 3): Promise<any> {
+    for (let i = 0; i < intentos; i++) {
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), 10000);
+      try {
+        const res = await fetch(url, { signal: ctrl.signal, cache: 'no-store' });
+        clearTimeout(tid);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (e) {
+        clearTimeout(tid);
+        if (i === intentos - 1) throw e;
+        await new Promise(r => setTimeout(r, 600 * (i + 1)));
+      }
+    }
+  }
+
   private async _buscarCP(cp: string) {
     try {
-      const resCP = await fetch(`${SEPOMEX_BASE}/cp/${cp}.json`, { headers: { Accept: 'application/json' } });
-      if (!resCP.ok) throw new Error('CP no encontrado');
-      const jsonCP = await resCP.json();
+      const jsonCP = await this._fetchConRetry(`${SEPOMEX_BASE}/cp/${cp}.json`);
       const postcodes: any[] = jsonCP?.data?.postcodes ?? [];
       if (!postcodes.length) throw new Error('Sin registros para CP ' + cp);
 
@@ -200,71 +215,51 @@ export class RegistroInstitucion implements OnDestroy {
       const estadoRaw         = (primero.d_estado ?? '').trim();
       const estadoNorm        = this.normalizarEstado(estadoRaw);
       const estadoId          = primero.c_estado ?? this.estadoToId(estadoNorm);
-      const coloniasCP        = postcodes.map((p: any) => (p.d_asenta ?? '').trim()).filter(Boolean);
       const municipioNombreCP = (primero.d_mnpio ?? '').trim();
       const municipioIdCP     = (primero.c_mnpio  ?? '').trim();
+      const ciudadCP          = (primero.d_ciudad ?? municipioNombreCP).trim() || municipioNombreCP;
+      const coloniasCP        = [...new Set<string>(
+        postcodes.map((p: any) => (p.d_asenta ?? '').trim()).filter(Boolean)
+      )].sort();
 
-      const resEstado = await fetch(`${SEPOMEX_BASE}/estado/${estadoId}.json`, { headers: { Accept: 'application/json' } });
-      if (!resEstado.ok) throw new Error('Estado no encontrado');
-      const jsonEstado        = await resEstado.json();
-      const municipios: any[]      = jsonEstado?.data?.municipios ?? [];
-      const postcodesEstado: any[] = jsonEstado?.data?.postcodes  ?? [];
-
-      this._construirMapaCiudadMunicipios(postcodesEstado, municipios);
-
-      const ciudadesSet = new Set<string>();
-      postcodesEstado.forEach((p: any) => { const c = (p.d_ciudad ?? '').trim(); if (c) ciudadesSet.add(c); });
-      municipios.forEach((m: any) => { if (!ciudadesSet.has(m.d_mnpio)) ciudadesSet.add(m.d_mnpio); });
-      this.ciudadesDelEstado = [...ciudadesSet].sort();
-
-      this._estadoId = estadoId;
-      this.estado    = estadoNorm;
-
-      let ciudadCP = '';
-      for (const p of postcodesEstado) {
-        if ((p.c_mnpio ?? '') === municipioIdCP && (p.d_ciudad ?? '').trim()) {
-          ciudadCP = p.d_ciudad.trim();
-          break;
-        }
-      }
-      if (!ciudadCP) ciudadCP = municipioNombreCP;
-      this.ciudad = ciudadCP;
-
-      this._actualizarMunicipios(ciudadCP, municipioNombreCP);
-      this.municipio    = municipioNombreCP;
+      this._estadoId    = estadoId;
       this._municipioId = municipioIdCP;
+      this.estado       = estadoNorm;
+      this.ciudad       = ciudadCP;
+      this.municipio    = municipioNombreCP;
 
-      this._mapaColonias.set(municipioIdCP, coloniasCP.sort());
-      this.coloniasDelMunicipio = [...new Set(coloniasCP)].sort();
-      this.colonia = this.coloniasDelMunicipio[0] ?? '';
+      // Poblar selects solo con datos del CP (sin llamar estado.json)
+      this.ciudadesDelEstado   = ciudadCP ? [ciudadCP] : [];
+      this.municipiosDelCiudad = municipioNombreCP ? [municipioNombreCP] : [];
+      this._mapaCiudadMunicipios.set(ciudadCP, [{ id: municipioIdCP, nombre: municipioNombreCP }]);
+      this._mapaColonias.set(municipioIdCP, coloniasCP);
+      this.coloniasDelMunicipio = coloniasCP;
+      this.colonia = coloniasCP[0] ?? '';
 
+      this.errores['codigo_postal'] = undefined;
       this.cargandoCP = false;
       this.cdr.detectChanges();
-if (!this._cpVinoDeMapa) {
-  const MAPBOX_TOKEN = 'pk.eyJ1IjoiYXJpYW5hcHVsaWRvLTciLCJhIjoiY21td2YxdXM4MnB4cjJxcHk4aWsyc2ljcSJ9.rE19cHh6UFvEncYVjSULrg';
-  fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${cp}.json?country=MX&types=postcode&access_token=${MAPBOX_TOKEN}`)
-    .then(r => r.json())
-    .then(data => {
-      const center = data?.features?.[0]?.center;
-      if (center) {
-        const lat = parseFloat(center[1].toFixed(7));
-        const lng = parseFloat(center[0].toFixed(7));
-        this.mapaLat = lat;
-        this.mapaLng = lng;
-        this.form.latitud  = lat;
-        this.form.longitud = lng;
-        if (this.mapaSelector) {
-          this.mapaSelector.moverA(lat, lng);
-        }
-        this.cdr.detectChanges();
-      }
-      this._cpVinoDeMapa = false;
-    })
-    .catch(() => { this._cpVinoDeMapa = false; });
-}
-     
-     
-      else {
+
+      if (!this._cpVinoDeMapa) {
+        const MAPBOX_TOKEN = 'pk.eyJ1IjoiYXJpYW5hcHVsaWRvLTciLCJhIjoiY21td2YxdXM4MnB4cjJxcHk4aWsyc2ljcSJ9.rE19cHh6UFvEncYVjSULrg';
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${cp}.json?country=MX&types=postcode&access_token=${MAPBOX_TOKEN}`)
+          .then(r => r.json())
+          .then(data => {
+            const center = data?.features?.[0]?.center;
+            if (center) {
+              const lat = parseFloat(center[1].toFixed(7));
+              const lng = parseFloat(center[0].toFixed(7));
+              this.mapaLat = lat;
+              this.mapaLng = lng;
+              this.form.latitud  = lat;
+              this.form.longitud = lng;
+              if (this.mapaSelector) this.mapaSelector.moverA(lat, lng);
+              this.cdr.detectChanges();
+            }
+            this._cpVinoDeMapa = false;
+          })
+          .catch(() => { this._cpVinoDeMapa = false; });
+      } else {
         this._cpVinoDeMapa = false;
       }
 
@@ -334,10 +329,8 @@ if (!this._cpVinoDeMapa) {
     }
     try {
       this.cargandoCP = true; this.cdr.detectChanges();
-      const url = `${SEPOMEX_BASE}/estado/${this._estadoId}/municipio/${municipioId}.json`;
-      const res = await fetch(url, { headers: { Accept: 'application/json' } });
-      if (!res.ok) throw new Error();
-      const json = await res.json();
+      const url  = `${SEPOMEX_BASE}/estado/${this._estadoId}/municipio/${municipioId}.json`;
+      const json = await this._fetchConRetry(url);
       const posts: any[] = json?.data?.postcodes ?? [];
       const colonias = [...new Set<string>(posts.map((p: any) => (p.d_asenta ?? '').trim()).filter(Boolean))].sort();
       this._mapaColonias.set(municipioId, colonias);
