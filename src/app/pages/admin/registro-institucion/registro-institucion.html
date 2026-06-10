@@ -43,7 +43,6 @@
             <span class="field-error" *ngIf="errores['nombre_institucion']">{{ errores['nombre_institucion'] }}</span>
           </div>
           <div class="field">
-            <!-- ✅ CAMBIO: select con opciones predefinidas -->
             <label>Tipo</label>
             <select class="field-input"
               [(ngModel)]="form.tipo" (ngModelChange)="v.tipo()"
@@ -80,63 +79,63 @@
           </div>
         </div>
 
-        <!-- CÓDIGO POSTAL + ESTADO -->
-<div class="form-row">
-  <div class="field">
-    <label>Código Postal</label>
-    <div class="input-wrapper">
-      <input class="field-input" type="text" placeholder="5 dígitos" maxlength="5"
-        [(ngModel)]="codigo_postal" (ngModelChange)="validarCodigoPostal()"
-        [class.input-error]="errores['codigo_postal']" />
-      <span *ngIf="cargandoCP" class="spinner"
-        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;border-width:2px;border-color:rgba(77,15,96,0.2);border-top-color:#4D0F60"></span>
-    </div>
-    <span class="field-error" *ngIf="errores['codigo_postal']">{{ errores['codigo_postal'] }}</span>
-  </div>
-  <div class="field">
-    <label>Estado</label>
-    <select class="field-input" [(ngModel)]="estado">
-      <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
-      <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
-    </select>
-  </div>
-</div>
+        <!-- CÓDIGO POSTAL + ESTADO (INSTITUCIÓN) -->
+        <div class="form-row">
+          <div class="field">
+            <label>Código Postal</label>
+            <div class="input-wrapper">
+              <input class="field-input" type="text" placeholder="5 dígitos" maxlength="5"
+                [(ngModel)]="codigo_postal" (ngModelChange)="validarCodigoPostal()"
+                [class.input-error]="errores['codigo_postal']" />
+              <span *ngIf="cargandoCP" class="spinner"
+                style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;border-width:2px;border-color:rgba(77,15,96,0.2);border-top-color:#4D0F60"></span>
+            </div>
+            <span class="field-error" *ngIf="errores['codigo_postal']">{{ errores['codigo_postal'] }}</span>
+          </div>
+          <div class="field">
+            <label>Estado</label>
+            <select class="field-input" [(ngModel)]="estado">
+              <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+              <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
+            </select>
+          </div>
+        </div>
 
-<!-- CIUDAD + MUNICIPIO -->
-<div class="form-row">
-  <div class="field">
-    <label>Ciudad</label>
-    <select class="field-input" [(ngModel)]="ciudad" (ngModelChange)="onCiudadChange()">
-      <option value="">{{ cargandoCP ? 'Cargando...' : (ciudadesDelEstado.length === 0 ? 'Selecciona' : 'Selecciona ciudad') }}</option>
-      <option *ngFor="let c of ciudadesDelEstado" [value]="c">{{ c }}</option>
-    </select>
-  </div>
-  <div class="field">
-    <label>Municipio</label>
-    <select class="field-input" [(ngModel)]="municipio" (ngModelChange)="onMunicipioChange()">
-      <option value="">{{ cargandoCP ? 'Cargando...' : (municipiosDelCiudad.length === 0 ? 'Selecciona' : 'Selecciona municipio') }}</option>
-      <option *ngFor="let m of municipiosDelCiudad" [value]="m">{{ m }}</option>
-    </select>
-  </div>
-</div>
+        <!-- CIUDAD + MUNICIPIO (INSTITUCIÓN) -->
+        <div class="form-row">
+          <div class="field">
+            <label>Ciudad</label>
+            <select class="field-input" [(ngModel)]="ciudad" (ngModelChange)="onCiudadChange()">
+              <option value="">{{ cargandoCP ? 'Cargando...' : (ciudadesDelEstado.length === 0 ? 'Selecciona' : 'Selecciona ciudad') }}</option>
+              <option *ngFor="let c of ciudadesDelEstado" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Municipio</label>
+            <select class="field-input" [(ngModel)]="municipio" (ngModelChange)="onMunicipioChange()">
+              <option value="">{{ cargandoCP ? 'Cargando...' : (municipiosDelCiudad.length === 0 ? 'Selecciona' : 'Selecciona municipio') }}</option>
+              <option *ngFor="let m of municipiosDelCiudad" [value]="m">{{ m }}</option>
+            </select>
+          </div>
+        </div>
 
-<!-- COLONIA -->
-<div class="field">
-  <label>Colonia</label>
-  <select class="field-input" [(ngModel)]="colonia">
-    <option value="">{{ cargandoCP ? 'Cargando...' : (coloniasDelMunicipio.length === 0 ? 'Selecciona' : 'Selecciona colonia') }}</option>
-    <option *ngFor="let c of coloniasDelMunicipio" [value]="c">{{ c }}</option>
-  </select>
-</div>
+        <!-- COLONIA (INSTITUCIÓN) -->
+        <div class="field">
+          <label>Colonia</label>
+          <select class="field-input" [(ngModel)]="colonia">
+            <option value="">{{ cargandoCP ? 'Cargando...' : (coloniasDelMunicipio.length === 0 ? 'Selecciona' : 'Selecciona colonia') }}</option>
+            <option *ngFor="let c of coloniasDelMunicipio" [value]="c">{{ c }}</option>
+          </select>
+        </div>
 
-<!-- DIRECCIÓN -->
-<div class="field">
-  <label>Dirección <span class="section-opcional"></span></label>
-  <input class="field-input" type="text" placeholder="Calle, número"
-    [(ngModel)]="direccion" />
-</div>
+        <!-- DIRECCIÓN (INSTITUCIÓN) -->
+        <div class="field">
+          <label>Dirección <span class="section-opcional"></span></label>
+          <input class="field-input" type="text" placeholder="Calle, número"
+            [(ngModel)]="direccion" />
+        </div>
 
-        <!-- ── SECCIÓN GEOLOCALIZACIÓN ─────────────────────────────────────── -->
+        <!-- SECCIÓN GEOLOCALIZACIÓN -->
         <p class="section-label">
           📍 Ubicación geográfica
           <span class="section-opcional">(opcional — permite validar presencia del usuario)</span>
@@ -151,15 +150,14 @@
           </p>
         </div>
 
-        <!-- Mapa Google Maps -->
-<app-mapa-selector
-  #mapaRef
-  [lat]="mapaLat"
-  [lng]="mapaLng"
-  mapId="mapa-registro"
-  (coordenadasChange)="onCoordsChange($event)"
-  (lugarChange)="onLugarChange($event)">
-</app-mapa-selector>
+        <app-mapa-selector
+          #mapaRef
+          [lat]="mapaLat"
+          [lng]="mapaLng"
+          mapId="mapa-registro"
+          (coordenadasChange)="onCoordsChange($event)"
+          (lugarChange)="onLugarChange($event)">
+        </app-mapa-selector>
 
         <!-- Radio -->
         <div class="field radio-field-standalone">
@@ -167,12 +165,11 @@
           <input class="field-input" type="number" min="50" max="5000"
             placeholder="200" [(ngModel)]="form.radio_metros" />
         </div>
-        <!-- ─────────────────────────────────────────────────────────────────── -->
 
-        <!-- SEPARADOR ADMIN -->
+        <!-- ══ SEPARADOR ADMIN ══ -->
         <p class="section-label">Datos del administrador</p>
 
-        <!-- NOMBRE + APELLIDOS -->
+        <!-- NOMBRE + APELLIDOS ADMIN -->
         <div class="form-row tres-cols">
           <div class="field">
             <label>Nombre(s)</label>
@@ -196,6 +193,63 @@
             <span class="field-error" *ngIf="errores['apellido_materno']">{{ errores['apellido_materno'] }}</span>
           </div>
         </div>
+
+        <!-- CP ADMIN + ESTADO ADMIN -->
+        <div class="form-row">
+          <div class="field">
+            <label>Código Postal</label>
+            <div class="input-wrapper">
+              <input class="field-input" type="text" placeholder="5 dígitos" maxlength="5"
+                [(ngModel)]="admin_codigo_postal" (ngModelChange)="validarCodigoPostalAdmin()"
+                [class.input-error]="errores['admin_codigo_postal']" />
+              <span *ngIf="admin_cargandoCP" class="spinner"
+                style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;border-width:2px;border-color:rgba(77,15,96,0.2);border-top-color:#4D0F60"></span>
+            </div>
+            <span class="field-error" *ngIf="errores['admin_codigo_postal']">{{ errores['admin_codigo_postal'] }}</span>
+          </div>
+          <div class="field">
+            <label>Estado</label>
+            <select class="field-input" [(ngModel)]="admin_estado">
+              <option value="">{{ admin_cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+              <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- CIUDAD ADMIN + MUNICIPIO ADMIN -->
+        <div class="form-row">
+          <div class="field">
+            <label>Ciudad</label>
+            <select class="field-input" [(ngModel)]="admin_ciudad" (ngModelChange)="onAdminCiudadChange()">
+              <option value="">{{ admin_cargandoCP ? 'Cargando...' : (admin_ciudadesDelEstado.length === 0 ? 'Selecciona' : 'Selecciona ciudad') }}</option>
+              <option *ngFor="let c of admin_ciudadesDelEstado" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Municipio</label>
+            <select class="field-input" [(ngModel)]="admin_municipio" (ngModelChange)="onAdminMunicipioChange()">
+              <option value="">{{ admin_cargandoCP ? 'Cargando...' : (admin_municipiosDelCiudad.length === 0 ? 'Selecciona' : 'Selecciona municipio') }}</option>
+              <option *ngFor="let m of admin_municipiosDelCiudad" [value]="m">{{ m }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- COLONIA ADMIN -->
+        <div class="field">
+          <label>Colonia</label>
+          <select class="field-input" [(ngModel)]="admin_colonia">
+            <option value="">{{ admin_cargandoCP ? 'Cargando...' : (admin_coloniasDelMunicipio.length === 0 ? 'Selecciona' : 'Selecciona colonia') }}</option>
+            <option *ngFor="let c of admin_coloniasDelMunicipio" [value]="c">{{ c }}</option>
+          </select>
+        </div>
+
+        <!-- DIRECCIÓN ADMIN -->
+        <div class="field">
+          <label>Dirección</label>
+          <input class="field-input" type="text" placeholder="Calle, número"
+            [(ngModel)]="admin_direccion" />
+        </div>
+        <!-- ── FIN DIRECCIÓN ADMIN ── -->
 
         <!-- CORREO ADMIN -->
         <div class="field">

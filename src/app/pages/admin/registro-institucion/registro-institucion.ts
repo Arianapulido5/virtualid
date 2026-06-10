@@ -31,6 +31,7 @@ export class RegistroInstitucion implements OnDestroy {
   private dominioTimer: any = null;
   verificandoDominio = false;
 
+  // ── Dirección INSTITUCIÓN ─────────────────────────────────────────────────
   codigo_postal    = '';
   estado           = '';
   ciudad           = '';
@@ -46,6 +47,23 @@ export class RegistroInstitucion implements OnDestroy {
   coloniasDelMunicipio: string[] = [];
   private _mapaCiudadMunicipios: Map<string, { id: string; nombre: string }[]> = new Map();
   private _mapaColonias: Map<string, string[]> = new Map();
+
+  // ── Dirección ADMINISTRADOR ───────────────────────────────────────────────
+  admin_codigo_postal    = '';
+  admin_estado           = '';
+  admin_ciudad           = '';
+  admin_municipio        = '';
+  admin_colonia          = '';
+  admin_direccion        = '';
+  admin_cargandoCP       = false;
+
+  private _admin_estadoId    = '';
+  private _admin_municipioId = '';
+  admin_ciudadesDelEstado:    string[] = [];
+  admin_municipiosDelCiudad:  string[] = [];
+  admin_coloniasDelMunicipio: string[] = [];
+  private _admin_mapaCiudadMunicipios: Map<string, { id: string; nombre: string }[]> = new Map();
+  private _admin_mapaColonias: Map<string, string[]> = new Map();
 
   @ViewChild(MapaSelectorComponent) mapaSelector?: MapaSelectorComponent;
 
@@ -111,7 +129,7 @@ export class RegistroInstitucion implements OnDestroy {
 
   get tieneUpperCase() { return /[A-Z]/.test(this.form.contrasena); }
   get tieneNumero()    { return /[0-9]/.test(this.form.contrasena); }
-  get tieneEspecial()  { return /[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>/?]/.test(this.form.contrasena); }
+  get tieneEspecial()  { return /[!@#$%^&*()\-_=+\[\]{};':\"\\|,.<>/?]/.test(this.form.contrasena); }
 
   constructor(
     private http: HttpClient,
@@ -149,10 +167,10 @@ export class RegistroInstitucion implements OnDestroy {
     if (lugar.cp && lugar.cp.length === 5 && (lugar.cp !== this.codigo_postal || esModoManual)) {
       this._cpVinoDeMapa = !esModoManual;
       this.codigo_postal = lugar.cp;
-      this._limpiarGeo();
+      this._limpiarGeoInst();
       this.cargandoCP = true;
       this.cdr.detectChanges();
-      this._buscarCP(lugar.cp);
+      this._buscarCPInst(lugar.cp);
       return;
     }
 
@@ -161,11 +179,13 @@ export class RegistroInstitucion implements OnDestroy {
       if (this.codigo_postal && this.codigo_postal.length === 5) return;
     }
 
-    this._limpiarGeo();
+    this._limpiarGeoInst();
     if (lugar.ciudad) this.ciudad = lugar.ciudad;
     if (lugar.estado) this.estado = lugar.estado;
     this.cdr.detectChanges();
   }
+
+  // ── CP INSTITUCIÓN ────────────────────────────────────────────────────────
 
   validarCodigoPostal(): void {
     const v = this.codigo_postal.replace(/\D/g, '').slice(0, 5);
@@ -173,7 +193,7 @@ export class RegistroInstitucion implements OnDestroy {
 
     if (v && v.length !== 5) {
       this.errores['codigo_postal'] = 'Debe tener exactamente 5 dígitos.';
-      this._limpiarGeo();
+      this._limpiarGeoInst();
       return;
     }
     this.errores['codigo_postal'] = undefined;
@@ -181,31 +201,13 @@ export class RegistroInstitucion implements OnDestroy {
     if (v.length === 5) {
       this._cpVinoDeMapa = false;
       this.cargandoCP = true;
-      this._limpiarGeo();
+      this._limpiarGeoInst();
       this.cdr.detectChanges();
-      this._buscarCP(v);
+      this._buscarCPInst(v);
     }
   }
 
-  // Fetch con retry — sin headers extras para no disparar preflight CORS
-  private async _fetchConRetry(url: string, intentos = 3): Promise<any> {
-    for (let i = 0; i < intentos; i++) {
-      const ctrl = new AbortController();
-      const tid  = setTimeout(() => ctrl.abort(), 10000);
-      try {
-        const res = await fetch(url, { signal: ctrl.signal, cache: 'no-store' });
-        clearTimeout(tid);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return await res.json();
-      } catch (e) {
-        clearTimeout(tid);
-        if (i === intentos - 1) throw e;
-        await new Promise(r => setTimeout(r, 600 * (i + 1)));
-      }
-    }
-  }
-
-  private async _buscarCP(cp: string) {
+  private async _buscarCPInst(cp: string) {
     try {
       const jsonCP = await this._fetchConRetry(`${SEPOMEX_BASE}/cp/${cp}.json`);
       const postcodes: any[] = jsonCP?.data?.postcodes ?? [];
@@ -228,7 +230,6 @@ export class RegistroInstitucion implements OnDestroy {
       this.ciudad       = ciudadCP;
       this.municipio    = municipioNombreCP;
 
-      // Poblar selects solo con datos del CP (sin llamar estado.json)
       this.ciudadesDelEstado   = ciudadCP ? [ciudadCP] : [];
       this.municipiosDelCiudad = municipioNombreCP ? [municipioNombreCP] : [];
       this._mapaCiudadMunicipios.set(ciudadCP, [{ id: municipioIdCP, nombre: municipioNombreCP }]);
@@ -266,7 +267,7 @@ export class RegistroInstitucion implements OnDestroy {
     } catch (e) {
       this.errores['codigo_postal'] = 'No se encontró información para este CP.';
       this.cargandoCP = false;
-      this._limpiarGeo();
+      this._limpiarGeoInst();
       this.cdr.detectChanges();
     }
   }
@@ -275,38 +276,19 @@ export class RegistroInstitucion implements OnDestroy {
     this.municipio = ''; this.colonia = '';
     this.municipiosDelCiudad = []; this.coloniasDelMunicipio = [];
     this._municipioId = '';
-    this._actualizarMunicipios(this.ciudad, '');
+    this._actualizarMunicipiosInst(this.ciudad, '');
     this.municipio = this.municipiosDelCiudad[0] ?? '';
-    if (this.municipio) await this._cargarColonias(this.municipio);
+    if (this.municipio) await this._cargarColoniasInst(this.municipio);
     this.cdr.detectChanges();
   }
 
   async onMunicipioChange() {
     this.colonia = ''; this.coloniasDelMunicipio = [];
-    await this._cargarColonias(this.municipio);
+    await this._cargarColoniasInst(this.municipio);
     this.cdr.detectChanges();
   }
 
-  private _construirMapaCiudadMunicipios(postcodes: any[], municipios: any[]) {
-    this._mapaCiudadMunicipios.clear();
-    const idToNombre = new Map<string, string>();
-    municipios.forEach(m => idToNombre.set(m.c_mnpio, m.d_mnpio));
-    postcodes.forEach((p: any) => {
-      const ciudad = (p.d_ciudad ?? '').trim();
-      const cMnpio = (p.c_mnpio  ?? '').trim();
-      const dMnpio = (idToNombre.get(cMnpio) ?? p.d_mnpio ?? '').trim();
-      if (!ciudad || !dMnpio) return;
-      if (!this._mapaCiudadMunicipios.has(ciudad)) this._mapaCiudadMunicipios.set(ciudad, []);
-      const lista = this._mapaCiudadMunicipios.get(ciudad)!;
-      if (!lista.find(x => x.id === cMnpio)) lista.push({ id: cMnpio, nombre: dMnpio });
-    });
-    municipios.forEach(m => {
-      if (!this._mapaCiudadMunicipios.has(m.d_mnpio))
-        this._mapaCiudadMunicipios.set(m.d_mnpio, [{ id: m.c_mnpio, nombre: m.d_mnpio }]);
-    });
-  }
-
-  private _actualizarMunicipios(ciudad: string, preseleccionar: string) {
+  private _actualizarMunicipiosInst(ciudad: string, preseleccionar: string) {
     const lista = this._mapaCiudadMunicipios.get(ciudad) ?? [];
     this.municipiosDelCiudad = lista.map(x => x.nombre).sort();
     if (!this.municipiosDelCiudad.length && ciudad) this.municipiosDelCiudad = [ciudad];
@@ -314,7 +296,7 @@ export class RegistroInstitucion implements OnDestroy {
       ? preseleccionar : (this.municipiosDelCiudad[0] ?? '');
   }
 
-  private async _cargarColonias(municipioNombre: string) {
+  private async _cargarColoniasInst(municipioNombre: string) {
     let municipioId = '';
     for (const [, lista] of this._mapaCiudadMunicipios) {
       const found = lista.find(x => x.nombre === municipioNombre);
@@ -340,11 +322,150 @@ export class RegistroInstitucion implements OnDestroy {
     finally { this.cargandoCP = false; this.cdr.detectChanges(); }
   }
 
-  private _limpiarGeo() {
+  private _limpiarGeoInst() {
     this.estado = ''; this.ciudad = ''; this.municipio = ''; this.colonia = '';
     this._estadoId = ''; this._municipioId = '';
     this.ciudadesDelEstado = []; this.municipiosDelCiudad = []; this.coloniasDelMunicipio = [];
     this._mapaCiudadMunicipios.clear(); this._mapaColonias.clear();
+  }
+
+  // ── CP ADMINISTRADOR ──────────────────────────────────────────────────────
+
+  validarCodigoPostalAdmin(): void {
+    const v = this.admin_codigo_postal.replace(/\D/g, '').slice(0, 5);
+    this.admin_codigo_postal = v;
+
+    if (v && v.length !== 5) {
+      this.errores['admin_codigo_postal'] = 'Debe tener exactamente 5 dígitos.';
+      this._limpiarGeoAdmin();
+      return;
+    }
+    this.errores['admin_codigo_postal'] = undefined;
+
+    if (v.length === 5) {
+      this.admin_cargandoCP = true;
+      this._limpiarGeoAdmin();
+      this.cdr.detectChanges();
+      this._buscarCPAdmin(v);
+    }
+  }
+
+  private async _buscarCPAdmin(cp: string) {
+    try {
+      const jsonCP = await this._fetchConRetry(`${SEPOMEX_BASE}/cp/${cp}.json`);
+      const postcodes: any[] = jsonCP?.data?.postcodes ?? [];
+      if (!postcodes.length) throw new Error('Sin registros para CP ' + cp);
+
+      const primero           = postcodes[0];
+      const estadoRaw         = (primero.d_estado ?? '').trim();
+      const estadoNorm        = this.normalizarEstado(estadoRaw);
+      const estadoId          = primero.c_estado ?? this.estadoToId(estadoNorm);
+      const municipioNombreCP = (primero.d_mnpio ?? '').trim();
+      const municipioIdCP     = (primero.c_mnpio  ?? '').trim();
+      const ciudadCP          = (primero.d_ciudad ?? municipioNombreCP).trim() || municipioNombreCP;
+      const coloniasCP        = [...new Set<string>(
+        postcodes.map((p: any) => (p.d_asenta ?? '').trim()).filter(Boolean)
+      )].sort();
+
+      this._admin_estadoId    = estadoId;
+      this._admin_municipioId = municipioIdCP;
+      this.admin_estado       = estadoNorm;
+      this.admin_ciudad       = ciudadCP;
+      this.admin_municipio    = municipioNombreCP;
+
+      this.admin_ciudadesDelEstado   = ciudadCP ? [ciudadCP] : [];
+      this.admin_municipiosDelCiudad = municipioNombreCP ? [municipioNombreCP] : [];
+      this._admin_mapaCiudadMunicipios.set(ciudadCP, [{ id: municipioIdCP, nombre: municipioNombreCP }]);
+      this._admin_mapaColonias.set(municipioIdCP, coloniasCP);
+      this.admin_coloniasDelMunicipio = coloniasCP;
+      this.admin_colonia = coloniasCP[0] ?? '';
+
+      this.errores['admin_codigo_postal'] = undefined;
+      this.admin_cargandoCP = false;
+      this.cdr.detectChanges();
+
+    } catch (e) {
+      this.errores['admin_codigo_postal'] = 'No se encontró información para este CP.';
+      this.admin_cargandoCP = false;
+      this._limpiarGeoAdmin();
+      this.cdr.detectChanges();
+    }
+  }
+
+  async onAdminCiudadChange() {
+    this.admin_municipio = ''; this.admin_colonia = '';
+    this.admin_municipiosDelCiudad = []; this.admin_coloniasDelMunicipio = [];
+    this._admin_municipioId = '';
+    this._actualizarMunicipiosAdmin(this.admin_ciudad, '');
+    this.admin_municipio = this.admin_municipiosDelCiudad[0] ?? '';
+    if (this.admin_municipio) await this._cargarColoniasAdmin(this.admin_municipio);
+    this.cdr.detectChanges();
+  }
+
+  async onAdminMunicipioChange() {
+    this.admin_colonia = ''; this.admin_coloniasDelMunicipio = [];
+    await this._cargarColoniasAdmin(this.admin_municipio);
+    this.cdr.detectChanges();
+  }
+
+  private _actualizarMunicipiosAdmin(ciudad: string, preseleccionar: string) {
+    const lista = this._admin_mapaCiudadMunicipios.get(ciudad) ?? [];
+    this.admin_municipiosDelCiudad = lista.map(x => x.nombre).sort();
+    if (!this.admin_municipiosDelCiudad.length && ciudad) this.admin_municipiosDelCiudad = [ciudad];
+    this.admin_municipio = (preseleccionar && this.admin_municipiosDelCiudad.includes(preseleccionar))
+      ? preseleccionar : (this.admin_municipiosDelCiudad[0] ?? '');
+  }
+
+  private async _cargarColoniasAdmin(municipioNombre: string) {
+    let municipioId = '';
+    for (const [, lista] of this._admin_mapaCiudadMunicipios) {
+      const found = lista.find(x => x.nombre === municipioNombre);
+      if (found) { municipioId = found.id; break; }
+    }
+    if (!municipioId) { this.admin_coloniasDelMunicipio = []; return; }
+    this._admin_municipioId = municipioId;
+    if (this._admin_mapaColonias.has(municipioId)) {
+      this.admin_coloniasDelMunicipio = this._admin_mapaColonias.get(municipioId)!;
+      this.admin_colonia = this.admin_coloniasDelMunicipio[0] ?? '';
+      return;
+    }
+    try {
+      this.admin_cargandoCP = true; this.cdr.detectChanges();
+      const url  = `${SEPOMEX_BASE}/estado/${this._admin_estadoId}/municipio/${municipioId}.json`;
+      const json = await this._fetchConRetry(url);
+      const posts: any[] = json?.data?.postcodes ?? [];
+      const colonias = [...new Set<string>(posts.map((p: any) => (p.d_asenta ?? '').trim()).filter(Boolean))].sort();
+      this._admin_mapaColonias.set(municipioId, colonias);
+      this.admin_coloniasDelMunicipio = colonias;
+      this.admin_colonia = colonias[0] ?? '';
+    } catch { this.admin_coloniasDelMunicipio = []; }
+    finally { this.admin_cargandoCP = false; this.cdr.detectChanges(); }
+  }
+
+  private _limpiarGeoAdmin() {
+    this.admin_estado = ''; this.admin_ciudad = ''; this.admin_municipio = ''; this.admin_colonia = '';
+    this._admin_estadoId = ''; this._admin_municipioId = '';
+    this.admin_ciudadesDelEstado = []; this.admin_municipiosDelCiudad = []; this.admin_coloniasDelMunicipio = [];
+    this._admin_mapaCiudadMunicipios.clear(); this._admin_mapaColonias.clear();
+  }
+
+  // ── Utilidades compartidas ────────────────────────────────────────────────
+
+  private async _fetchConRetry(url: string, intentos = 3): Promise<any> {
+    for (let i = 0; i < intentos; i++) {
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), 10000);
+      try {
+        const res = await fetch(url, { signal: ctrl.signal, cache: 'no-store' });
+        clearTimeout(tid);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (e) {
+        clearTimeout(tid);
+        if (i === intentos - 1) throw e;
+        await new Promise(r => setTimeout(r, 600 * (i + 1)));
+      }
+    }
   }
 
   private normalizarEstado(texto: string): string {
@@ -359,6 +480,8 @@ export class RegistroInstitucion implements OnDestroy {
     const key = estadoNombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     return this.estadoIdMap[key] ?? '';
   }
+
+  // ── Validaciones ──────────────────────────────────────────────────────────
 
   private verificarDominioDisponible(dominio: string): void {
     if (this.dominioTimer) clearTimeout(this.dominioTimer);
@@ -448,6 +571,8 @@ export class RegistroInstitucion implements OnDestroy {
     return Object.values(this.errores).every(e => e === undefined);
   }
 
+  // ── Envío ─────────────────────────────────────────────────────────────────
+
   registrar(): void {
     this.errorMsg = '';
     if (this.verificandoDominio) { this.errorMsg = 'Espera a que se verifique el dominio.'; return; }
@@ -469,10 +594,18 @@ export class RegistroInstitucion implements OnDestroy {
       correo_admin:       this.form.correo_admin,
       contrasena:         this.form.contrasena,
       radio_metros:       this.form.radio_metros || 200,
-      codigo_postal:      this.codigo_postal || null,
-      municipio:          this.municipio     || null,
-      colonia:            this.colonia       || null,
-      direccion:          this.direccion     || null,
+      // Institución
+      codigo_postal:      this.codigo_postal  || null,
+      municipio:          this.municipio      || null,
+      colonia:            this.colonia        || null,
+      direccion:          this.direccion      || null,
+      // Administrador
+      admin_codigo_postal: this.admin_codigo_postal || null,
+      admin_estado:        this.admin_estado        || null,
+      admin_ciudad:        this.admin_ciudad        || null,
+      admin_municipio:     this.admin_municipio     || null,
+      admin_colonia:       this.admin_colonia        || null,
+      admin_direccion:     this.admin_direccion      || null,
     };
 
     if (this.form.latitud  !== '' && this.form.latitud  !== null) payload.latitud  = this.form.latitud;
