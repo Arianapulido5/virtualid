@@ -153,12 +153,14 @@
 
         <!-- Mapa Google Maps -->
 <app-mapa-selector
+  #mapaRef
   [lat]="mapaLat"
   [lng]="mapaLng"
   mapId="mapa-registro"
   (coordenadasChange)="onCoordsChange($event)"
   (lugarChange)="onLugarChange($event)">
 </app-mapa-selector>
+
         <!-- Radio -->
         <div class="field radio-field-standalone">
           <label class="field-label">Radio permitido (metros)</label>

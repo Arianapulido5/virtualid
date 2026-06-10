@@ -26,6 +26,7 @@ export class RegistroInstitucion implements OnDestroy {
 
   mapaLat: number | null = null;
   mapaLng: number | null = null;
+  private _cpVinoDeMapa = false;
 
   private dominioTimer: any = null;
   verificandoDominio = false;
@@ -125,15 +126,12 @@ export class RegistroInstitucion implements OnDestroy {
   togglePassword() { this.showPassword = !this.showPassword; }
   toggleConfirm()  { this.showConfirm  = !this.showConfirm;  }
 
-  // ── Mapa ──────────────────────────────────────────────────────────────────
   onCoordsChange(coords: { lat: number; lng: number } | null): void {
     if (coords) {
       this.form.latitud  = coords.lat;
       this.form.longitud = coords.lng;
       this.mapaLat = coords.lat;
       this.mapaLng = coords.lng;
-      // No llamar _reverseGeocodeToAddress aquí porque mapa-selector
-      // ya emite lugarChange con cp via reverseGeocode interno
     } else {
       this.form.latitud  = '';
       this.form.longitud = '';
@@ -146,8 +144,8 @@ export class RegistroInstitucion implements OnDestroy {
   onLugarChange(lugar: { ciudad: string; estado: string; cp?: string } | null): void {
     if (!lugar) return;
 
-    // Si viene CP desde el mapa, úsalo para llenar todo via SEPOMEX
     if (lugar.cp && lugar.cp.length === 5 && lugar.cp !== this.codigo_postal) {
+      this._cpVinoDeMapa = true;
       this.codigo_postal = lugar.cp;
       this._limpiarGeo();
       this.cargandoCP = true;
@@ -156,13 +154,16 @@ export class RegistroInstitucion implements OnDestroy {
       return;
     }
 
-    // Si no hay CP, llenar ciudad y estado directo
+    if (lugar.cp && lugar.cp === this.codigo_postal) return;
+
+    if (this.codigo_postal && this.codigo_postal.length === 5) return;
+
+    this._limpiarGeo();
     if (lugar.ciudad) this.ciudad = lugar.ciudad;
     if (lugar.estado) this.estado = lugar.estado;
     this.cdr.detectChanges();
   }
 
-  // ── Código Postal ─────────────────────────────────────────────────────────
   validarCodigoPostal(): void {
     const v = this.codigo_postal.replace(/\D/g, '').slice(0, 5);
     this.codigo_postal = v;
@@ -175,6 +176,7 @@ export class RegistroInstitucion implements OnDestroy {
     this.errores['codigo_postal'] = undefined;
 
     if (v.length === 5) {
+      this._cpVinoDeMapa = false;
       this.cargandoCP = true;
       this._limpiarGeo();
       this.cdr.detectChanges();
@@ -190,19 +192,19 @@ export class RegistroInstitucion implements OnDestroy {
       const postcodes: any[] = jsonCP?.data?.postcodes ?? [];
       if (!postcodes.length) throw new Error('Sin registros para CP ' + cp);
 
-      const primero        = postcodes[0];
-      const estadoRaw      = (primero.d_estado ?? '').trim();
-      const estadoNorm     = this.normalizarEstado(estadoRaw);
-      const estadoId       = primero.c_estado ?? this.estadoToId(estadoNorm);
-      const coloniasCP     = postcodes.map((p: any) => (p.d_asenta ?? '').trim()).filter(Boolean);
+      const primero           = postcodes[0];
+      const estadoRaw         = (primero.d_estado ?? '').trim();
+      const estadoNorm        = this.normalizarEstado(estadoRaw);
+      const estadoId          = primero.c_estado ?? this.estadoToId(estadoNorm);
+      const coloniasCP        = postcodes.map((p: any) => (p.d_asenta ?? '').trim()).filter(Boolean);
       const municipioNombreCP = (primero.d_mnpio ?? '').trim();
       const municipioIdCP     = (primero.c_mnpio  ?? '').trim();
 
       const resEstado = await fetch(`${SEPOMEX_BASE}/estado/${estadoId}.json`, { headers: { Accept: 'application/json' } });
       if (!resEstado.ok) throw new Error('Estado no encontrado');
-      const jsonEstado = await resEstado.json();
-      const municipios: any[]       = jsonEstado?.data?.municipios ?? [];
-      const postcodesEstado: any[]  = jsonEstado?.data?.postcodes  ?? [];
+      const jsonEstado        = await resEstado.json();
+      const municipios: any[]      = jsonEstado?.data?.municipios ?? [];
+      const postcodesEstado: any[] = jsonEstado?.data?.postcodes  ?? [];
 
       this._construirMapaCiudadMunicipios(postcodesEstado, municipios);
 
@@ -235,22 +237,32 @@ export class RegistroInstitucion implements OnDestroy {
       this.cargandoCP = false;
       this.cdr.detectChanges();
 
-      // Mover el mapa a la ubicación del CP
-      fetch(`https://nominatim.openstreetmap.org/search?postalcode=${cp}&country=MX&format=json&limit=1`)
-        .then(r => r.json())
-        .then(data => {
-          if (data?.[0]) {
-            const lat = parseFloat(parseFloat(data[0].lat).toFixed(7));
-            const lng = parseFloat(parseFloat(data[0].lon).toFixed(7));
-            this.mapaLat = lat;
-            this.mapaLng = lng;
-            this.form.latitud  = lat;
-            this.form.longitud = lng;
-            if (this.mapaSelector) this.mapaSelector.moverA(lat, lng);
-            this.cdr.detectChanges();
-          }
-        })
-        .catch(() => {});
+      if (!this._cpVinoDeMapa) {
+        fetch(`https://nominatim.openstreetmap.org/search?postalcode=${cp}&country=MX&format=json&limit=1`)
+          .then(r => r.json())
+          .then(data => {
+            if (data?.[0]) {
+              const lat = parseFloat(parseFloat(data[0].lat).toFixed(7));
+              const lng = parseFloat(parseFloat(data[0].lon).toFixed(7));
+              this.mapaLat = lat;
+              this.mapaLng = lng;
+              this.form.latitud  = lat;
+              this.form.longitud = lng;
+             if (this.mapaSelector) {
+  this.mapaSelector.lat = lat;
+  this.mapaSelector.lng = lng;
+  this.mapaSelector.latInicial = lat;
+  this.mapaSelector.lngInicial = lng;
+  this.mapaSelector.moverA(lat, lng);
+}
+              this.cdr.detectChanges();
+            }
+            this._cpVinoDeMapa = false;
+          })
+          .catch(() => { this._cpVinoDeMapa = false; });
+      } else {
+        this._cpVinoDeMapa = false;
+      }
 
     } catch (e) {
       this.errores['codigo_postal'] = 'No se encontró información para este CP.';
@@ -351,7 +363,6 @@ export class RegistroInstitucion implements OnDestroy {
     return this.estadoIdMap[key] ?? '';
   }
 
-  // ── Verificación dominio ──────────────────────────────────────────────────
   private verificarDominioDisponible(dominio: string): void {
     if (this.dominioTimer) clearTimeout(this.dominioTimer);
     this.dominioTimer = setTimeout(() => {
@@ -370,7 +381,6 @@ export class RegistroInstitucion implements OnDestroy {
     }, 600);
   }
 
-  // ── Validaciones ──────────────────────────────────────────────────────────
   v = {
     nombre_institucion: () => {
       const val = String(this.form.nombre_institucion).trim();

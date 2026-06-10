@@ -3,9 +3,9 @@
 
   <!-- TABS -->
   <div class="modo-tabs">
-    <button type="button" class="modo-tab" [class.activo]="modo === 'mapa'" (click)="setModo('mapa')">
-       Seleccionar en mapa
-    </button>
+<button type="button" class="modo-tab" [class.activo]="modo === 'mapa'" (click)="abrirMapa()">
+   Seleccionar en mapa
+</button>
     <button type="button" class="modo-tab" [class.activo]="modo === 'actual'" (click)="usarUbicacionActual()">
        Usar mi ubicación
     </button>

@@ -24,6 +24,9 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
   @Input() lng: number | null = null;
   @Input() mapId: string = 'mapa';
 
+  @Input() latInicial: number | null = null;
+@Input() lngInicial: number | null = null;
+
   @Output() coordenadasChange = new EventEmitter<{ lat: number; lng: number } | null>();
   @Output() lugarChange = new EventEmitter<{ ciudad: string; estado: string; cp?: string } | null>();
 
@@ -35,6 +38,7 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
 
   private map:    any = null;
   private marker: any = null;
+  private _pendingCenter: { lat: number; lng: number } | null = null;
 
   private readonly DEFAULT_LAT = 18.8868;
   private readonly DEFAULT_LNG = -97.0917;
@@ -48,41 +52,53 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
     }
   }
 
+  abrirMapa(): void {
+  const lat = this.latInicial ?? this.lat;
+  const lng = this.lngInicial ?? this.lng;
+  this.setModo('mapa', lat ?? undefined, lng ?? undefined);
+}
+
   ngOnDestroy(): void { this.destruirMapa(); }
 
-  setModo(m: Modo): void {
-    if (m !== 'mapa') { this.destruirMapa(); }
-    this.modo = m;
-    this.cdr.detectChanges();
+    setModo(m: Modo, lat?: number, lng?: number): void {
+  if (m !== 'mapa') { this.destruirMapa(); }
+  this.modo = m;
+  this.cdr.detectChanges();
 
-    if (m === 'mapa') {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => this.ngZone.run(() =>
-            this.iniciarMapbox(
-              this.lat ?? pos.coords.latitude,
-              this.lng ?? pos.coords.longitude,
-              pos.coords.latitude,
-              pos.coords.longitude
-            )),
-          () => this.ngZone.run(() =>
-            this.iniciarMapbox(this.lat ?? this.DEFAULT_LAT, this.lng ?? this.DEFAULT_LNG)),
-          { timeout: 4000 }
-        );
-      } else {
-        this.iniciarMapbox(this.lat ?? this.DEFAULT_LAT, this.lng ?? this.DEFAULT_LNG);
-      }
-    }
-  }
-
-  // Método público para que el padre mueva el mapa desde CP
-  moverA(lat: number, lng: number): void {
-    if (this.map && this.mapaListo) {
-      this.map.flyTo({ center: [lng, lat], zoom: 15 });
-      this.ponerMarcador(lng, lat);
-    } else {
+  if (m === 'mapa') {
+    if (lat != null && lng != null) {
       this.lat = lat;
       this.lng = lng;
+      this.iniciarMapbox(lat, lng);
+      return;
+    }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => this.ngZone.run(() =>
+          this.iniciarMapbox(
+            pos.coords.latitude,
+            pos.coords.longitude,
+            pos.coords.latitude,
+            pos.coords.longitude
+          )),
+        () => this.ngZone.run(() =>
+          this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG)),
+        { timeout: 4000 }
+      );
+    } else {
+      this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG);
+    }
+  }
+}
+
+  moverA(lat: number, lng: number): void {
+    this.lat = lat;
+    this.lng = lng;
+    if (this.map && this.mapaListo) {
+      this.map.flyTo({ center: [lng, lat], zoom: 15 });
+      this.ponerMarcador(lng, lat, true);
+    } else {
+      this._pendingCenter = { lat, lng };
     }
   }
 
@@ -119,31 +135,34 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
           setTimeout(() => this.map?.resize(), 50);
         });
 
-        // Si hay coords previas del padre, poner marcador
-        if (this.lat !== null && this.lng !== null) {
-          this.ponerMarcador(this.lng!, this.lat!);
+        if (this._pendingCenter) {
+          const pc = this._pendingCenter;
+          this.map.setCenter([pc.lng, pc.lat]);
+          this.ponerMarcador(pc.lng, pc.lat, true);
+          this._pendingCenter = null;
         }
 
-        // Punto azul de ubicación actual
+        if (this.lat !== null && this.lng !== null) {
+          this.ponerMarcador(this.lng!, this.lat!, true);
+        }
+
         if (centerLat && centerLng) {
           new mapboxgl.Marker({ color: '#4285F4', scale: 0.7 })
             .setLngLat([centerLng, centerLat])
             .setPopup(new mapboxgl.Popup().setText('Tu ubicación actual'))
             .addTo(this.map);
 
-          // Si no había marcador previo, emitir la ubicación actual y llenar campos
-          if (this.lat === null || this.lng === null) {
-            this.ngZone.run(() => {
-              const lat = parseFloat(centerLat.toFixed(7));
-              const lng = parseFloat(centerLng.toFixed(7));
+          this.ngZone.run(() => {
+            const lat = parseFloat(centerLat.toFixed(7));
+            const lng = parseFloat(centerLng.toFixed(7));
+            if (this.lat === null || this.lng === null) {
               this.lat = lat;
               this.lng = lng;
-              this.ponerMarcador(lng, lat);
+              this.ponerMarcador(lng, lat, false);
               this.coordenadasChange.emit({ lat, lng });
-              this.reverseGeocode(lng, lat);
-              this.cdr.detectChanges();
-            });
-          }
+            }
+            this.cdr.detectChanges();
+          });
         }
       });
 
@@ -151,7 +170,7 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
         this.ngZone.run(() => {
           const lat = parseFloat(e.lngLat.lat.toFixed(7));
           const lng = parseFloat(e.lngLat.lng.toFixed(7));
-          this.ponerMarcador(lng, lat);
+          this.ponerMarcador(lng, lat, false);
         });
       });
 
@@ -163,7 +182,7 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
     setTimeout(() => tryInit(15), 50);
   }
 
-  private ponerMarcador(lng: number, lat: number): void {
+  private ponerMarcador(lng: number, lat: number, skipGeocode = false): void {
     if (!this.map) return;
 
     if (this.marker) {
@@ -188,23 +207,45 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
 
     this.lat = lat; this.lng = lng;
     this.coordenadasChange.emit({ lat, lng });
-    this.reverseGeocode(lng, lat);
+    if (!skipGeocode) this.reverseGeocode(lng, lat);
     this.cdr.detectChanges();
   }
 
-  // Cambiado: usa Nominatim con zoom=18 para CP exacto, y emite cp
   private reverseGeocode(lng: number, lat: number): void {
-    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es&zoom=18&addressdetails=1`)
+    fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json` +
+      `?access_token=${MAPBOX_TOKEN}&country=MX&types=postcode,locality,place&language=es`
+    )
       .then(r => r.json())
       .then(data => {
         this.ngZone.run(() => {
-          const a = data?.address;
-          if (!a) return;
+          const features = data?.features ?? [];
 
-          const cp        = (a.postcode ?? '').replace(/\D/g, '').slice(0, 5);
-          const ciudad    = a.city ?? a.town ?? a.village ?? a.municipality ?? a.county ?? '';
-          const estadoRaw = a.state ?? '';
-          const estado    = this.normalizarEstado(estadoRaw);
+          let cp      = '';
+          let ciudad  = '';
+          let estado  = '';
+
+          for (const f of features) {
+            if (f.place_type?.includes('postcode') && !cp) {
+              cp = (f.text ?? '').replace(/\D/g, '').slice(0, 5);
+            }
+            if ((f.place_type?.includes('locality') || f.place_type?.includes('place')) && !ciudad) {
+              ciudad = f.text ?? '';
+            }
+            if (!estado) {
+              const region = f.context?.find((c: any) => c.id?.startsWith('region'));
+              if (region) estado = this.normalizarEstado(region.text ?? '');
+            }
+          }
+
+          if (!estado) {
+            for (const f of features) {
+              const region = f.context?.find((c: any) => c.id?.startsWith('region'));
+              if (region) { estado = this.normalizarEstado(region.text ?? ''); break; }
+            }
+          }
+
+          console.log('Mapbox CP:', cp, 'ciudad:', ciudad, 'estado:', estado);
 
           this.lugarChange.emit({
             ciudad,
@@ -215,6 +256,55 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
         });
       })
       .catch(() => {});
+  }
+
+  private _buscarCPporColonia(colonia: string, municipio: string, estado: string): Promise<string> {
+    const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const colNorm    = norm(colonia);
+    const estadoNorm = norm(estado);
+    const munNorm    = norm(municipio);
+
+    const estadoIdMap: Record<string, string> = {
+      'aguascalientes':'01','baja california':'02','baja california sur':'03',
+      'campeche':'04','coahuila':'05','colima':'06','chiapas':'07','chihuahua':'08',
+      'ciudad de mexico':'09','durango':'10','guanajuato':'11','guerrero':'12',
+      'hidalgo':'13','jalisco':'14','estado de mexico':'15','michoacan':'16',
+      'morelos':'17','nayarit':'18','nuevo leon':'19','oaxaca':'20','puebla':'21',
+      'queretaro':'22','quintana roo':'23','san luis potosi':'24','sinaloa':'25',
+      'sonora':'26','tabasco':'27','tamaulipas':'28','tlaxcala':'29',
+      'veracruz':'30','yucatan':'31','zacatecas':'32'
+    };
+
+    const estadoId = estadoIdMap[estadoNorm] ?? '';
+    if (!estadoId) return Promise.resolve('');
+
+    return fetch(
+      `https://sepomex.nitrostudio.com.mx/api/20241009/estado/${estadoId}.json`,
+      { headers: { Accept: 'application/json' } }
+    )
+      .then(r => r.json())
+      .then(json => {
+        const postcodes: any[] = json?.data?.postcodes ?? [];
+        if (!postcodes.length) return '';
+
+        const exacto = postcodes.find(p => {
+          const pCol = norm(p.d_asenta ?? '');
+          const pMun = norm(p.d_mnpio  ?? '');
+          return pCol === colNorm && (!munNorm || pMun.includes(munNorm) || munNorm.includes(pMun));
+        });
+        if (exacto?.d_codigo) return String(exacto.d_codigo).padStart(5, '0');
+
+        const parcial = postcodes.find(p => {
+          const pCol = norm(p.d_asenta ?? '');
+          const pMun = norm(p.d_mnpio  ?? '');
+          return (pCol.includes(colNorm) || colNorm.includes(pCol)) &&
+                 (!munNorm || pMun.includes(munNorm) || munNorm.includes(pMun));
+        });
+        if (parcial?.d_codigo) return String(parcial.d_codigo).padStart(5, '0');
+
+        return '';
+      })
+      .catch(() => '');
   }
 
   private readonly ESTADOS = [
