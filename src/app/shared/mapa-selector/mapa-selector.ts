@@ -1,4 +1,3 @@
-// src/app/shared/mapa-selector/mapa-selector.ts
 import {
   Component, Input, Output, EventEmitter,
   OnDestroy, OnChanges, SimpleChanges,
@@ -7,7 +6,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// ⚠️ REEMPLAZA ESTO con tu token de Mapbox (gratis en mapbox.com)
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYXJpYW5hcHVsaWRvLTciLCJhIjoiY21td2YxdXM4MnB4cjJxcHk4aWsyc2ljcSJ9.rE19cHh6UFvEncYVjSULrg';
 
 declare const mapboxgl: any;
@@ -27,7 +25,7 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
   @Input() mapId: string = 'mapa';
 
   @Output() coordenadasChange = new EventEmitter<{ lat: number; lng: number } | null>();
-  @Output() lugarChange = new EventEmitter<{ ciudad: string; estado: string } | null>();
+  @Output() lugarChange = new EventEmitter<{ ciudad: string; estado: string; cp?: string } | null>();
 
   modo: Modo  = 'ninguno';
   cargandoGeo = false;
@@ -61,8 +59,12 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => this.ngZone.run(() =>
-            this.iniciarMapbox(this.lat ?? pos.coords.latitude, this.lng ?? pos.coords.longitude,
-                               pos.coords.latitude, pos.coords.longitude)),
+            this.iniciarMapbox(
+              this.lat ?? pos.coords.latitude,
+              this.lng ?? pos.coords.longitude,
+              pos.coords.latitude,
+              pos.coords.longitude
+            )),
           () => this.ngZone.run(() =>
             this.iniciarMapbox(this.lat ?? this.DEFAULT_LAT, this.lng ?? this.DEFAULT_LNG)),
           { timeout: 4000 }
@@ -70,6 +72,17 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
       } else {
         this.iniciarMapbox(this.lat ?? this.DEFAULT_LAT, this.lng ?? this.DEFAULT_LNG);
       }
+    }
+  }
+
+  // Método público para que el padre mueva el mapa desde CP
+  moverA(lat: number, lng: number): void {
+    if (this.map && this.mapaListo) {
+      this.map.flyTo({ center: [lng, lat], zoom: 15 });
+      this.ponerMarcador(lng, lat);
+    } else {
+      this.lat = lat;
+      this.lng = lng;
     }
   }
 
@@ -92,37 +105,48 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
 
       this.map = new mapboxgl.Map({
         container: divId,
-        style: 'mapbox://styles/mapbox/streets-v12',   // estilo Streets (similar a Google Maps)
+        style: 'mapbox://styles/mapbox/streets-v12',
         center: [centerLng ?? markerLng, centerLat ?? markerLat],
         zoom: 15
       });
 
-      // Controles de zoom y orientación
       this.map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
       this.map.on('load', () => {
         this.ngZone.run(() => {
           this.mapaListo = true;
           this.cdr.detectChanges();
-          // Forzar recálculo de tamaño después de que Angular quite la clase mapa-cargando-div
           setTimeout(() => this.map?.resize(), 50);
         });
 
-        // Si hay coords previas, colocar marcador
+        // Si hay coords previas del padre, poner marcador
         if (this.lat !== null && this.lng !== null) {
           this.ponerMarcador(this.lng!, this.lat!);
         }
 
-        // Punto azul de posición actual (si es diferente al marcador)
+        // Punto azul de ubicación actual
         if (centerLat && centerLng) {
           new mapboxgl.Marker({ color: '#4285F4', scale: 0.7 })
             .setLngLat([centerLng, centerLat])
             .setPopup(new mapboxgl.Popup().setText('Tu ubicación actual'))
             .addTo(this.map);
+
+          // Si no había marcador previo, emitir la ubicación actual y llenar campos
+          if (this.lat === null || this.lng === null) {
+            this.ngZone.run(() => {
+              const lat = parseFloat(centerLat.toFixed(7));
+              const lng = parseFloat(centerLng.toFixed(7));
+              this.lat = lat;
+              this.lng = lng;
+              this.ponerMarcador(lng, lat);
+              this.coordenadasChange.emit({ lat, lng });
+              this.reverseGeocode(lng, lat);
+              this.cdr.detectChanges();
+            });
+          }
         }
       });
 
-      // Clic para seleccionar
       this.map.on('click', (e: any) => {
         this.ngZone.run(() => {
           const lat = parseFloat(e.lngLat.lat.toFixed(7));
@@ -131,7 +155,6 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
         });
       });
 
-      // Cursor crosshair al pasar
       this.map.on('mousemove', () => {
         this.map.getCanvas().style.cursor = 'crosshair';
       });
@@ -146,10 +169,7 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
     if (this.marker) {
       this.marker.setLngLat([lng, lat]);
     } else {
-      this.marker = new mapboxgl.Marker({
-        color: '#4D0F60',
-        draggable: true
-      })
+      this.marker = new mapboxgl.Marker({ color: '#4D0F60', draggable: true })
         .setLngLat([lng, lat])
         .setPopup(new mapboxgl.Popup().setHTML('<b>📍 Institución</b><br><small>Arrastra para ajustar</small>'))
         .addTo(this.map);
@@ -172,34 +192,29 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
     this.cdr.detectChanges();
   }
 
+  // Cambiado: usa Nominatim con zoom=18 para CP exacto, y emite cp
   private reverseGeocode(lng: number, lat: number): void {
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?types=place,region&language=es&access_token=${MAPBOX_TOKEN}`;
-    fetch(url)
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es&zoom=18&addressdetails=1`)
       .then(r => r.json())
       .then(data => {
         this.ngZone.run(() => {
-          const features = data.features ?? [];
-          let ciudad = '';
-          let estado  = '';
+          const a = data?.address;
+          if (!a) return;
 
-          for (const f of features) {
-            const tipos = f.place_type ?? [];
-            if (tipos.includes('place')  && !ciudad) ciudad = f.text ?? '';
-            if (tipos.includes('region') && !estado) {
-              // Mapbox devuelve el estado en español si se pide language=es
-              const texto = f.text ?? '';
-              // Normalizar al nombre exacto del array estadosMexico
-              estado = this.normalizarEstado(texto);
-            }
-          }
+          const cp        = (a.postcode ?? '').replace(/\D/g, '').slice(0, 5);
+          const ciudad    = a.city ?? a.town ?? a.village ?? a.municipality ?? a.county ?? '';
+          const estadoRaw = a.state ?? '';
+          const estado    = this.normalizarEstado(estadoRaw);
 
-          if (ciudad || estado) {
-            this.lugarChange.emit({ ciudad, estado });
-          }
+          this.lugarChange.emit({
+            ciudad,
+            estado,
+            cp: cp.length === 5 ? cp : undefined
+          });
           this.cdr.detectChanges();
         });
       })
-      .catch(() => {}); // silencioso si falla
+      .catch(() => {});
   }
 
   private readonly ESTADOS = [
@@ -211,7 +226,6 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
     'Tabasco','Tamaulipas','Tlaxcala','Veracruz','Yucatán','Zacatecas'
   ];
 
-  // Aliases para nombres que Mapbox devuelve diferente
   private readonly ALIASES: Record<string, string> = {
     'veracruz de ignacio de la llave': 'Veracruz',
     'michoacan de ocampo':             'Michoacán',
@@ -232,25 +246,16 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
 
   private normalizarEstado(texto: string): string {
     if (!texto) return '';
-    const normaliza = (s: string) => s.toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const normaliza = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     const textoNorm = normaliza(texto);
-
-    // 1. Buscar en aliases primero
     if (this.ALIASES[textoNorm]) return this.ALIASES[textoNorm];
-
-    // 2. Coincidencia exacta normalizada
     const exacto = this.ESTADOS.find(e => normaliza(e) === textoNorm);
     if (exacto) return exacto;
-
-    // 3. Coincidencia parcial — si el texto contiene el nombre del estado o viceversa
     const parcial = this.ESTADOS.find(e => {
       const eNorm = normaliza(e);
       return textoNorm.includes(eNorm) || eNorm.includes(textoNorm);
     });
-    if (parcial) return parcial;
-
-    return texto;
+    return parcial ?? texto;
   }
 
   private destruirMapa(): void {
@@ -266,6 +271,7 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
       this.lat = parseFloat(lat.toFixed(7));
       this.lng = parseFloat(lng.toFixed(7));
       this.coordenadasChange.emit({ lat: this.lat, lng: this.lng });
+      this.reverseGeocode(this.lng, this.lat);
     } else {
       this.lat = null; this.lng = null;
       this.coordenadasChange.emit(null);
@@ -286,6 +292,7 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
           this.lng = parseFloat(pos.coords.longitude.toFixed(7));
           this.cargandoGeo = false;
           this.coordenadasChange.emit({ lat: this.lat!, lng: this.lng! });
+          this.reverseGeocode(this.lng!, this.lat!);
           this.cdr.detectChanges();
         });
       },

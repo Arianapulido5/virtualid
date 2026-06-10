@@ -80,27 +80,61 @@
           </div>
         </div>
 
+        <!-- CÓDIGO POSTAL + ESTADO -->
+<div class="form-row">
+  <div class="field">
+    <label>Código Postal</label>
+    <div class="input-wrapper">
+      <input class="field-input" type="text" placeholder="5 dígitos" maxlength="5"
+        [(ngModel)]="codigo_postal" (ngModelChange)="validarCodigoPostal()"
+        [class.input-error]="errores['codigo_postal']" />
+      <span *ngIf="cargandoCP" class="spinner"
+        style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;border-width:2px;border-color:rgba(77,15,96,0.2);border-top-color:#4D0F60"></span>
+    </div>
+    <span class="field-error" *ngIf="errores['codigo_postal']">{{ errores['codigo_postal'] }}</span>
+  </div>
+  <div class="field">
+    <label>Estado</label>
+    <select class="field-input" [(ngModel)]="estado">
+      <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+      <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
+    </select>
+  </div>
+</div>
 
-        <!-- CIUDAD + ESTADO -->
-        <div class="form-row">
-          <div class="field">
-            <label>Ciudad </label>
-            <input class="field-input" type="text" placeholder="Córdoba"
-              [(ngModel)]="form.ciudad" (ngModelChange)="v.ciudad()"
-              [class.input-error]="errores['ciudad']" />
-            <span class="field-error" *ngIf="errores['ciudad']">{{ errores['ciudad'] }}</span>
-          </div>
-          <div class="field">
-            <label>Estado</label>
-            <select class="field-input"
-              [(ngModel)]="form.estado" (ngModelChange)="v.estado()"
-              [class.input-error]="errores['estado']">
-              <option value="">Selecciona</option>
-              <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
-            </select>
-            <span class="field-error" *ngIf="errores['estado']">{{ errores['estado'] }}</span>
-          </div>
-        </div>
+<!-- CIUDAD + MUNICIPIO -->
+<div class="form-row">
+  <div class="field">
+    <label>Ciudad</label>
+    <select class="field-input" [(ngModel)]="ciudad" (ngModelChange)="onCiudadChange()">
+      <option value="">{{ cargandoCP ? 'Cargando...' : (ciudadesDelEstado.length === 0 ? 'Selecciona' : 'Selecciona ciudad') }}</option>
+      <option *ngFor="let c of ciudadesDelEstado" [value]="c">{{ c }}</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Municipio</label>
+    <select class="field-input" [(ngModel)]="municipio" (ngModelChange)="onMunicipioChange()">
+      <option value="">{{ cargandoCP ? 'Cargando...' : (municipiosDelCiudad.length === 0 ? 'Selecciona' : 'Selecciona municipio') }}</option>
+      <option *ngFor="let m of municipiosDelCiudad" [value]="m">{{ m }}</option>
+    </select>
+  </div>
+</div>
+
+<!-- COLONIA -->
+<div class="field">
+  <label>Colonia</label>
+  <select class="field-input" [(ngModel)]="colonia">
+    <option value="">{{ cargandoCP ? 'Cargando...' : (coloniasDelMunicipio.length === 0 ? 'Selecciona' : 'Selecciona colonia') }}</option>
+    <option *ngFor="let c of coloniasDelMunicipio" [value]="c">{{ c }}</option>
+  </select>
+</div>
+
+<!-- DIRECCIÓN -->
+<div class="field">
+  <label>Dirección <span class="section-opcional">(opcional)</span></label>
+  <input class="field-input" type="text" placeholder="Calle, número"
+    [(ngModel)]="direccion" />
+</div>
 
         <!-- ── SECCIÓN GEOLOCALIZACIÓN ─────────────────────────────────────── -->
         <p class="section-label">
@@ -118,14 +152,13 @@
         </div>
 
         <!-- Mapa Google Maps -->
-        <app-mapa-selector
-          [lat]="mapaLat"
-          [lng]="mapaLng"
-          mapId="mapa-registro"
-          (coordenadasChange)="onCoordsChange($event)"
-          (lugarChange)="onLugarChange($event)">
-        </app-mapa-selector>
-
+<app-mapa-selector
+  [lat]="mapaLat"
+  [lng]="mapaLng"
+  mapId="mapa-registro"
+  (coordenadasChange)="onCoordsChange($event)"
+  (lugarChange)="onLugarChange($event)">
+</app-mapa-selector>
         <!-- Radio -->
         <div class="field radio-field-standalone">
           <label class="field-label">Radio permitido (metros)</label>

@@ -1,5 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -29,7 +28,6 @@ export class EditarInstitucion implements OnInit {
     tipo:               '',
     rfc:                '',
     dominio:            '',
-    correo_contacto:    '',
     ciudad:             '',
     estado:             '',
     latitud:            '' as string | number,
@@ -54,8 +52,17 @@ export class EditarInstitucion implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void { this.cargarDatos(); }
+ngOnInit(): void {
+  this.cargarDatos();
+  const style = document.createElement('style');
+  style.id = 'hide-scrollbar-editar';
+  style.textContent = `::-webkit-scrollbar { display: none; } body { scrollbar-width: none; }`;
+  document.head.appendChild(style);
+}
 
+ngOnDestroy(): void {
+  document.getElementById('hide-scrollbar-editar')?.remove();
+}
   onCoordsChange(coords: { lat: number; lng: number } | null): void {
     if (coords) {
       this.form.latitud  = coords.lat;
@@ -88,7 +95,6 @@ export class EditarInstitucion implements OnInit {
         this.form.tipo               = data.tipo            ?? '';
         this.form.rfc                = data.rfc             ?? '';
         this.form.dominio            = data.dominio_correo  ?? '';
-        this.form.correo_contacto    = data.correo_contacto ?? '';
         this.form.ciudad             = data.ciudad          ?? '';
         this.form.estado             = data.estado          ?? '';
         this.form.latitud            = data.latitud         ?? '';
@@ -130,13 +136,6 @@ export class EditarInstitucion implements OnInit {
       else if (!val.includes('.'))   this.errores['dominio'] = 'Dominio inválido.';
       else                           this.errores['dominio'] = undefined;
     },
-    correo_contacto: () => {
-      const val = this.form.correo_contacto.trim();
-      const re  = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-      if (!val)               this.errores['correo_contacto'] = 'El correo es obligatorio.';
-      else if (!re.test(val)) this.errores['correo_contacto'] = 'Ingresa un correo válido.';
-      else                    this.errores['correo_contacto'] = undefined;
-    },
     ciudad: () => {
       this.errores['ciudad'] = !this.form.ciudad.trim() ? 'La ciudad es obligatoria.' : undefined;
     },
@@ -165,7 +164,6 @@ export class EditarInstitucion implements OnInit {
       tipo:            this.form.tipo,
       rfc:             this.form.rfc,
       dominio:         this.form.dominio,
-      correo_contacto: this.form.correo_contacto,
       ciudad:          this.form.ciudad,
       estado:          this.form.estado,
       radio_metros:    this.form.radio_metros || 200,

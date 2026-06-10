@@ -72,14 +72,6 @@
             </div>
           </div>
 
-          <!-- CORREO CONTACTO -->
-          <div class="field">
-            <label class="field-label">Correo de contacto *</label>
-            <input class="field-input" type="email" placeholder="admisiones@utec.edu.mx"
-              [(ngModel)]="form.correo_contacto" (ngModelChange)="v.correo_contacto()"
-              [class.input-error]="errores['correo_contacto']" />
-            <span class="field-error" *ngIf="errores['correo_contacto']">{{ errores['correo_contacto'] }}</span>
-          </div>
 
           <!-- CIUDAD + ESTADO -->
           <div class="form-row">
