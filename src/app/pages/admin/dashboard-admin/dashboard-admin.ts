@@ -100,6 +100,9 @@ export class DashboardAdmin implements OnInit {
     return this.actividad.slice(0, MAX_ACTIVIDAD);
   }
 
+  irUsuarios(): void    { this.router.navigate(['/admin/usuarios']); }
+  irCredenciales(): void { this.router.navigate(['/admin/credenciales']); }
+
   revisar(id: number): void { this.router.navigate(['/admin/credenciales', id, 'validar']); }
   verHistorial(): void { this.router.navigate(['/admin/historial-global']); }
 

@@ -1,0 +1,500 @@
+// src/app/pages/olvide-contrasena/olvide-contrasena.scss
+
+// ─────────────────────────────────────────────
+//  TOKENS
+// ─────────────────────────────────────────────
+$purple-dark:  #4D0F60;
+$purple-mid:   #6B2080;
+$blue-dark:    #32488C;
+$bg:           #EDF2F4;
+$white:        #ffffff;
+$text-main:    #0F0C0C;
+$text-soft:    #4A4D56;
+$danger:       #e53935;
+$success:      #2e7d32;
+
+// ─────────────────────────────────────────────
+//  KEYFRAMES
+// ─────────────────────────────────────────────
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes bgOrbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(30px, -50px) scale(1.08); }
+  66%       { transform: translate(-20px, 25px) scale(0.94); }
+}
+
+@keyframes bgOrbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(-35px, 35px) scale(1.1); }
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(36px) scale(0.93); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes logoIn {
+  from { opacity: 0; transform: scale(0.6) rotate(-12deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes logoGlow {
+  0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  50%       { box-shadow: 0 8px 28px rgba(77,15,96,0.5); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(28px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes successIconFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-8px) scale(1.05); }
+}
+
+@keyframes successCardIn {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes btnPulse {
+  0%   { box-shadow: 0 4px 18px rgba(77,15,96,0.4), 0 0 0 0 rgba(77,15,96,0.35); }
+  70%  { box-shadow: 0 4px 18px rgba(77,15,96,0.4), 0 0 0 12px rgba(77,15,96,0); }
+  100% { box-shadow: 0 4px 18px rgba(77,15,96,0.4), 0 0 0 0 rgba(77,15,96,0); }
+}
+
+@keyframes arrowSlide {
+  0%, 100% { transform: translateX(0); }
+  50%       { transform: translateX(-4px); }
+}
+
+@keyframes modalIconPop {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  60%  { transform: scale(1.2) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ─────────────────────────────────────────────
+//  PAGE — fondo con orbs
+// ─────────────────────────────────────────────
+.olvide-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, $purple-dark 0%, #3a0b48 35%, $blue-dark 70%, #1e2d5c 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 10s ease infinite;
+  font-family: 'Open Sans', sans-serif;
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(107,32,128,0.3) 0%, transparent 70%);
+    top: -140px; left: -100px;
+    pointer-events: none;
+    animation: bgOrbFloat1 13s ease-in-out infinite;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(63,91,169,0.25) 0%, transparent 70%);
+    bottom: -100px; right: -80px;
+    pointer-events: none;
+    animation: bgOrbFloat2 10s ease-in-out infinite;
+  }
+}
+
+// ─────────────────────────────────────────────
+//  MODAL — igual que editar-administrador
+// ─────────────────────────────────────────────
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(5px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0.22s ease both;
+}
+
+.modal-card {
+  background: $bg;
+  border-radius: 24px;
+  padding: 44px 40px;
+  max-width: 400px; width: 90%;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 16px; text-align: center;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.6) inset;
+  animation: slideUp 0.32s cubic-bezier(.34,1.2,.64,1) both;
+
+  h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 22px; font-weight: 700;
+    color: $text-main; margin: 0;
+    animation: fadeInUp 0.4s ease 0.15s both;
+  }
+
+  p {
+    font-size: 14px; color: $text-soft;
+    margin: 0; line-height: 1.6;
+    animation: fadeInUp 0.4s ease 0.22s both;
+  }
+}
+
+.modal-icon {
+  width: 76px; height: 76px;
+  background: linear-gradient(135deg, $blue-dark, $purple-mid);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; color: $white; font-weight: 700;
+  box-shadow: 0 8px 28px rgba(50,72,140,0.35);
+  animation: modalIconPop 0.5s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+.btn-aceptar {
+  margin-top: 6px; padding: 13px 48px;
+  background: linear-gradient(135deg, $purple-dark 0%, $blue-dark 50%, $purple-mid 100%);
+  background-size: 250% 250%;
+  color: $white; border: none; border-radius: 10px;
+  font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(77,15,96,0.3);
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+  animation: gradientShift 4s ease infinite, fadeInUp 0.4s ease 0.3s both;
+
+  &:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 10px 28px rgba(77,15,96,0.42);
+  }
+  &:active { transform: translateY(0) scale(0.97); }
+}
+
+// ─────────────────────────────────────────────
+//  CARD
+// ─────────────────────────────────────────────
+.olvide-card {
+  background: $bg;
+  border-radius: 24px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow:
+    0 28px 72px rgba(0,0,0,0.38),
+    0 0 0 1px rgba(255,255,255,0.15) inset;
+  position: relative;
+  z-index: 1;
+  animation: cardIn 0.6s cubic-bezier(.34,1.2,.64,1) both;
+}
+
+// ─────────────────────────────────────────────
+//  LOGO
+// ─────────────────────────────────────────────
+.logo-circle {
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $blue-dark, $purple-mid);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  margin-bottom: 4px;
+  animation: logoIn 0.65s cubic-bezier(.34,1.56,.64,1) 0.2s both, logoGlow 3s ease-in-out infinite;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+
+  &:hover { transform: scale(1.08) rotate(-5deg); }
+
+  span {
+    color: $white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 19px; font-weight: 800; letter-spacing: 2px;
+  }
+}
+
+// ─────────────────────────────────────────────
+//  TEXTOS
+// ─────────────────────────────────────────────
+.card-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px; font-weight: 700;
+  color: $text-main; text-align: center; margin: 0;
+  animation: fadeInUp 0.5s ease 0.3s both;
+}
+
+.card-subtitle {
+  font-size: 13px; color: $text-soft;
+  text-align: center; line-height: 1.6; margin: 0;
+  animation: fadeInUp 0.5s ease 0.38s both;
+
+  strong { color: $purple-dark; font-weight: 700; }
+}
+
+.card-nota {
+  font-size: 12px; color: $text-soft;
+  opacity: 0.7; text-align: center; margin: 0;
+  animation: fadeInUp 0.5s ease 0.45s both;
+}
+
+// ─────────────────────────────────────────────
+//  ICONO ÉXITO
+// ─────────────────────────────────────────────
+.success-icon {
+  font-size: 52px; margin: 4px 0;
+  animation: successCardIn 0.5s cubic-bezier(.34,1.56,.64,1) both,
+             successIconFloat 3s ease-in-out 0.6s infinite;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+}
+
+// ─────────────────────────────────────────────
+//  FORMULARIO
+// ─────────────────────────────────────────────
+.form-group {
+  display: flex; flex-direction: column; gap: 6px; width: 100%;
+  animation: fadeInUp 0.45s ease 0.44s both;
+}
+
+.form-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px; font-weight: 600; color: $text-soft;
+  transition: color 0.2s;
+}
+
+.form-input {
+  padding: 12px 14px;
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px; color: $text-soft;
+  background-color: $white;
+  width: 100%; box-sizing: border-box;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.15s;
+
+  &:focus {
+    outline: none;
+    border-color: $purple-dark;
+    box-shadow: 0 0 0 4px rgba(77,15,96,0.1);
+    transform: translateY(-1px);
+  }
+
+  &:not(:focus):hover { border-color: rgba(77,15,96,0.35); }
+  &::placeholder { color: #aaa; }
+
+  &.form-input-error {
+    border-color: $danger;
+    background: #fff5f5;
+    box-shadow: 0 0 0 3px rgba(229,57,53,0.1);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  INPUT WRAPPER (password)
+// ─────────────────────────────────────────────
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  .form-input {
+    padding-right: 46px;
+  }
+
+  .eye-btn {
+    position: absolute; right: 12px;
+    background: none; border: none; cursor: pointer;
+    padding: 6px; color: $text-soft;
+    display: flex; align-items: center; border-radius: 6px;
+    transition: color 0.2s, background 0.2s, transform 0.2s cubic-bezier(.34,1.56,.64,1);
+
+    svg { width: 20px; height: 20px; }
+
+    &:hover {
+      color: $purple-dark;
+      background: rgba(77,15,96,0.08);
+      transform: scale(1.15);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  REQUISITOS
+// ─────────────────────────────────────────────
+.requisitos {
+  list-style: none;
+  margin: 0; padding: 10px 14px;
+  width: 100%; box-sizing: border-box;
+  background: rgba(77,15,96,0.04);
+  border-radius: 8px;
+  border-left: 3px solid rgba(77,15,96,0.2);
+  display: flex; flex-direction: column; gap: 4px;
+  animation: fadeInUp 0.3s ease both;
+
+  li {
+    font-size: 11.5px; color: $danger;
+    display: flex; align-items: center; gap: 5px;
+    transition: color 0.25s, transform 0.3s cubic-bezier(.34,1.2,.64,1);
+
+    &.ok {
+      color: $success;
+      font-weight: 600;
+      transform: translateX(4px);
+    }
+  }
+
+  .req-icon { font-size: 12px; font-weight: 700; }
+}
+
+// ─────────────────────────────────────────────
+//  MENSAJES
+// ─────────────────────────────────────────────
+.field-ok {
+  font-size: 11.5px; color: $success;
+  font-weight: 600; margin-top: 2px; display: block;
+  animation: fadeInUp 0.25s ease both;
+}
+
+.error-msg {
+  width: 100%;
+  font-size: 13px; color: #c62828;
+  background: #fdecea;
+  border: 1px solid $danger;
+  border-left: 4px solid $danger;
+  border-radius: 10px;
+  padding: 10px 14px; margin: 0;
+  box-sizing: border-box;
+  text-align: center;
+  animation: fadeInUp 0.3s ease both;
+}
+
+// ─────────────────────────────────────────────
+//  BOTÓN PRINCIPAL
+// ─────────────────────────────────────────────
+.btn-primary {
+  width: 100%;
+  padding: 13px;
+  border: none; border-radius: 10px;
+  background: linear-gradient(135deg, $purple-dark 0%, $blue-dark 50%, $purple-mid 100%);
+  background-size: 250% 250%;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: $white; cursor: pointer;
+  margin-top: 4px;
+  position: relative; overflow: hidden;
+  letter-spacing: 0.3px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 48px;
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s;
+  animation: gradientShift 5s ease infinite,
+             btnPulse 3.5s ease-in-out 1s infinite,
+             fadeInUp 0.5s ease 0.52s both;
+
+  &::before {
+    content: '';
+    position: absolute; top: 0; left: -80%;
+    width: 55%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 14px 32px rgba(77,15,96,0.48);
+    &::before { left: 130%; }
+  }
+
+  &:active:not(:disabled) { transform: translateY(0) scale(0.97); }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    animation: none;
+  }
+}
+
+.spinner-btn {
+  width: 18px; height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.35);
+  border-top-color: $white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+// ─────────────────────────────────────────────
+//  BACK LINK
+// ─────────────────────────────────────────────
+.back-login {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: $text-soft;
+  text-decoration: none; cursor: pointer;
+  padding: 6px 12px 6px 8px; border-radius: 8px;
+  border: 1.5px solid transparent;
+  transition: color 0.2s, background 0.2s, border-color 0.2s,
+              transform 0.22s cubic-bezier(.34,1.56,.64,1);
+  margin-top: 4px;
+  animation: fadeInUp 0.5s ease 0.6s both;
+
+  svg {
+    width: 16px; height: 16px;
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  &:hover {
+    color: $purple-dark;
+    background: rgba(77,15,96,0.07);
+    border-color: rgba(77,15,96,0.2);
+    transform: translateX(-3px);
+    svg { animation: arrowSlide 0.6s ease-in-out infinite; }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  RESPONSIVE
+// ─────────────────────────────────────────────
+@media (max-width: 480px) {
+  .olvide-card  { padding: 30px 22px; border-radius: 20px; }
+  .modal-card   { padding: 32px 24px !important; }
+  .card-title   { font-size: 20px; }
+  .logo-circle  { width: 64px; height: 64px; span { font-size: 16px; } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.1ms !important;
+  }
+}

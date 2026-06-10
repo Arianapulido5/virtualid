@@ -154,6 +154,9 @@
     &::before { transform: scaleY(1); }
   }
 }
+.stat-card.clickeable {
+  cursor: pointer;
+}
 
 .stat-label {
   font-family: 'Montserrat', sans-serif;

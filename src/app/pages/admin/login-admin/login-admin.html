@@ -45,9 +45,8 @@
 
     <!-- OLVIDÉ CONTRASEÑA -->
     <div class="row-options">
-      <a routerLink="/olvide-contrasena" class="forgot-link">¿Olvidaste tu contraseña?</a>
+    <a routerLink="/admin/olvide-contrasena" class="forgot-link">¿Olvidaste tu contraseña?</a>
     </div>
-
     <!-- ERROR GENERAL -->
     <p *ngIf="errorGeneral" class="error-general">{{ errorGeneral }}</p>
 
@@ -57,10 +56,6 @@
       <span *ngIf="cargando" class="spinner"></span>
     </button>
 
-    <!-- LINKS DE REGISTRO -->
-    <a routerLink="/registro" class="register-link">
-      ¿No tienes cuenta? Regístrate aquí
-    </a>
 
     <div class="divider"></div>
 

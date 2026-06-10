@@ -1,0 +1,151 @@
+<!-- src/app/pages/olvide-contrasena/olvide-contrasena.html -->
+<div class="olvide-page">
+
+  <!-- ══ MODAL ÉXITO ══ -->
+  <div class="modal-overlay" *ngIf="resetExitoso">
+    <div class="modal-card">
+      <div class="modal-icon">✓</div>
+      <h3>¡Contraseña actualizada!</h3>
+      <p>Tu contraseña ha sido restablecida correctamente. Ya puedes iniciar sesión.</p>
+      <button class="btn-aceptar" (click)="irALogin()">Aceptar</button>
+    </div>
+  </div>
+
+  <div class="olvide-card">
+
+    <!-- Logo -->
+    <div class="logo-circle"><span>VID</span></div>
+
+    <!-- ══ PASO 2: Formulario nueva contraseña ══════════════════ -->
+    @if (token && !resetExitoso) {
+
+      <h1 class="card-title">Nueva contraseña</h1>
+      <p class="card-subtitle">Crea una contraseña segura para tu cuenta.</p>
+
+      <!-- Nueva contraseña -->
+      <div class="form-group">
+        <label class="form-label">Nueva contraseña</label>
+        <div class="input-wrapper">
+          <input
+            class="form-input"
+            [type]="showNueva ? 'text' : 'password'"
+            placeholder="••••••••••"
+            [(ngModel)]="nuevaContrasena"
+            autocomplete="new-password"
+          />
+          <button type="button" class="eye-btn" (click)="showNueva = !showNueva">
+            <svg *ngIf="!showNueva" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+              <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+            <svg *ngIf="showNueva" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Requisitos -->
+      <ul class="requisitos" *ngIf="nuevaContrasena.length > 0">
+        <li [class.ok]="hasMinLength">
+          <span class="req-icon">{{ hasMinLength ? '✓' : '✗' }}</span> Mínimo 8 caracteres
+        </li>
+        <li [class.ok]="hasUppercase">
+          <span class="req-icon">{{ hasUppercase ? '✓' : '✗' }}</span> Al menos una mayúscula
+        </li>
+        <li [class.ok]="hasLowercase">
+          <span class="req-icon">{{ hasLowercase ? '✓' : '✗' }}</span> Al menos una minúscula
+        </li>
+        <li [class.ok]="hasNumber">
+          <span class="req-icon">{{ hasNumber ? '✓' : '✗' }}</span> Al menos un número
+        </li>
+        <li [class.ok]="hasSpecial">
+          <span class="req-icon">{{ hasSpecial ? '✓' : '✗' }}</span> Al menos un carácter especial
+        </li>
+      </ul>
+
+      <!-- Confirmar contraseña -->
+      <div class="form-group">
+        <label class="form-label">Confirmar contraseña</label>
+        <div class="input-wrapper">
+          <input
+            class="form-input"
+            [type]="showConfirmar ? 'text' : 'password'"
+            placeholder="••••••••••"
+            [(ngModel)]="confirmarContrasena"
+            autocomplete="new-password"
+          />
+          <button type="button" class="eye-btn" (click)="showConfirmar = !showConfirmar">
+            <svg *ngIf="!showConfirmar" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+              <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+            <svg *ngIf="showConfirmar" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+            </svg>
+          </button>
+        </div>
+        <span class="field-ok"
+          *ngIf="confirmarContrasena.length > 0 && nuevaContrasena === confirmarContrasena">
+          ✓ Las contraseñas coinciden
+        </span>
+      </div>
+
+      <p class="error-msg" *ngIf="errorReset">{{ errorReset }}</p>
+
+      <button class="btn-primary" (click)="restablecerContrasena()" [disabled]="cargandoReset">
+        <span *ngIf="!cargandoReset">Guardar nueva contraseña</span>
+        <span *ngIf="cargandoReset" class="spinner-btn"></span>
+      </button>
+
+      <a class="back-login" routerLink="'/admin/login'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Volver al inicio de sesión
+      </a>
+
+    }
+
+    <!-- ══ PASO 1: Ingresar correo ══════════════════════════════ -->
+    @else if (!token && !resetExitoso) {
+
+      <h1 class="card-title">¿Olvidaste tu contraseña?</h1>
+      <p class="card-subtitle">
+        Ingresa tu correo y podrás crear una nueva contraseña de inmediato.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">Correo electrónico</label>
+        <input
+          class="form-input"
+          type="email"
+          placeholder="usuario@email.com"
+          [(ngModel)]="correo"
+          (keydown.enter)="enviar()"
+          [class.form-input-error]="error"
+        />
+      </div>
+
+      <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+      <button class="btn-primary" (click)="enviar()" [disabled]="cargando">
+        <span *ngIf="!cargando">Continuar</span>
+        <span *ngIf="cargando" class="spinner-btn"></span>
+      </button>
+
+      <a class="back-login" routerLink="'/admin/login'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Volver al inicio de sesión
+      </a>
+
+    }
+
+  </div>
+</div>

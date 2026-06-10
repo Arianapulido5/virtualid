@@ -6,13 +6,10 @@
   <main class="main-content">
     <div class="page-body">
 
-      <!-- CARGANDO -->
       <div *ngIf="cargando" class="estado-txt">Cargando información...</div>
 
-      <!-- ERROR -->
       <div *ngIf="!cargando && errorMsg" class="estado-txt error">{{ errorMsg }}</div>
 
-      <!-- CONTENIDO -->
       <ng-container *ngIf="!cargando && !errorMsg && institucion">
 
         <div class="page-header">
@@ -24,7 +21,6 @@
 
         <div class="institucion-grid">
 
-          <!-- DATOS GENERALES -->
           <div class="card datos-card">
             <div class="card-header-row">
               <span class="card-label">Datos Generales</span>
@@ -35,9 +31,7 @@
               <div class="inst-avatar">{{ iniciales }}</div>
               <div class="inst-info">
                 <span class="inst-nombre">{{ institucion.nombre }}</span>
-                <span class="inst-contacto">
-                  {{ institucion.correo_contacto }} · {{ institucion.dominio_correo }}
-                </span>
+                <span class="inst-contacto">{{ institucion.dominio_correo }}</span>
               </div>
             </div>
 
@@ -60,12 +54,7 @@
                 <span class="dato-label">Dominio institucional</span>
                 <span class="dato-valor">{{ institucion.dominio_correo }}</span>
               </div>
-              <div class="dato-row">
-                <span class="dato-label">Correo de contacto</span>
-                <span class="dato-valor">{{ institucion.correo_contacto }}</span>
-              </div>
 
-              <!-- UBICACIÓN INLINE -->
               <div class="dato-row ubicacion-row" *ngIf="tieneUbicacion()">
                 <span class="dato-label">Ubicación</span>
                 <div class="dato-ubicacion-val">
@@ -85,7 +74,6 @@
             </div>
           </div>
 
-          <!-- RESUMEN — cada item es clickeable y navega a su sección -->
           <div class="card resumen-card">
             <h3 class="resumen-title">Resumen</h3>
             <div class="resumen-lista">

@@ -36,7 +36,7 @@
         <!-- NOMBRE + TIPO -->
         <div class="form-row">
           <div class="field">
-            <label>Nombre de la institución *</label>
+            <label>Nombre de la institución</label>
             <input class="field-input" type="text" placeholder="Universidad Tecnológica"
               [(ngModel)]="form.nombre_institucion" (ngModelChange)="v.nombre_institucion()"
               [class.input-error]="errores['nombre_institucion']" />
@@ -44,7 +44,7 @@
           </div>
           <div class="field">
             <!-- ✅ CAMBIO: select con opciones predefinidas -->
-            <label>Tipo *</label>
+            <label>Tipo</label>
             <select class="field-input"
               [(ngModel)]="form.tipo" (ngModelChange)="v.tipo()"
               [class.input-error]="errores['tipo']">
@@ -64,14 +64,14 @@
         <!-- RFC + DOMINIO -->
         <div class="form-row">
           <div class="field">
-            <label>RFC *</label>
+            <label>RFC</label>
             <input class="field-input" type="text" placeholder="UTE200101AB" maxlength="12"
               [(ngModel)]="form.rfc" (ngModelChange)="v.rfc()"
               [class.input-error]="errores['rfc']" />
             <span class="field-error" *ngIf="errores['rfc']">{{ errores['rfc'] }}</span>
           </div>
           <div class="field">
-            <label>Dominio de correo institucional *</label>
+            <label>Dominio de correo institucional</label>
             <input class="field-input" type="text" placeholder="@utec.edu.mx"
               [(ngModel)]="form.dominio" (ngModelChange)="v.dominio()"
               [class.input-error]="errores['dominio']" />
@@ -80,26 +80,18 @@
           </div>
         </div>
 
-        <!-- CORREO CONTACTO -->
-        <div class="field">
-          <label>Correo de contacto *</label>
-          <input class="field-input" type="email" placeholder="admisiones@utec.edu.mx"
-            [(ngModel)]="form.correo_contacto" (ngModelChange)="v.correo_contacto()"
-            [class.input-error]="errores['correo_contacto']" />
-          <span class="field-error" *ngIf="errores['correo_contacto']">{{ errores['correo_contacto'] }}</span>
-        </div>
 
         <!-- CIUDAD + ESTADO -->
         <div class="form-row">
           <div class="field">
-            <label>Ciudad *</label>
+            <label>Ciudad </label>
             <input class="field-input" type="text" placeholder="Córdoba"
               [(ngModel)]="form.ciudad" (ngModelChange)="v.ciudad()"
               [class.input-error]="errores['ciudad']" />
             <span class="field-error" *ngIf="errores['ciudad']">{{ errores['ciudad'] }}</span>
           </div>
           <div class="field">
-            <label>Estado *</label>
+            <label>Estado</label>
             <select class="field-input"
               [(ngModel)]="form.estado" (ngModelChange)="v.estado()"
               [class.input-error]="errores['estado']">
@@ -148,22 +140,22 @@
         <!-- NOMBRE + APELLIDOS -->
         <div class="form-row tres-cols">
           <div class="field">
-            <label>Nombre(s) *</label>
-            <input class="field-input" type="text" placeholder="María"
+            <label>Nombre(s)</label>
+            <input class="field-input" type="text" placeholder="Guillermo"
               [(ngModel)]="form.nombre" (ngModelChange)="v.nombre()"
               [class.input-error]="errores['nombre']" />
             <span class="field-error" *ngIf="errores['nombre']">{{ errores['nombre'] }}</span>
           </div>
           <div class="field">
-            <label>Apellido paterno *</label>
-            <input class="field-input" type="text" placeholder="Contreras"
+            <label>Apellido paterno</label>
+            <input class="field-input" type="text" placeholder="Castellanos"
               [(ngModel)]="form.apellido_paterno" (ngModelChange)="v.apellido_paterno()"
               [class.input-error]="errores['apellido_paterno']" />
             <span class="field-error" *ngIf="errores['apellido_paterno']">{{ errores['apellido_paterno'] }}</span>
           </div>
           <div class="field">
-            <label>Apellido materno *</label>
-            <input class="field-input" type="text" placeholder="López"
+            <label>Apellido materno</label>
+            <input class="field-input" type="text" placeholder="Pérez"
               [(ngModel)]="form.apellido_materno" (ngModelChange)="v.apellido_materno()"
               [class.input-error]="errores['apellido_materno']" />
             <span class="field-error" *ngIf="errores['apellido_materno']">{{ errores['apellido_materno'] }}</span>
@@ -172,7 +164,7 @@
 
         <!-- CORREO ADMIN -->
         <div class="field">
-          <label>Correo del administrador *</label>
+          <label>Correo del administrador</label>
           <input class="field-input" type="email" placeholder="admin@utec.edu.mx"
             [(ngModel)]="form.correo_admin" (ngModelChange)="v.correo_admin()"
             [class.input-error]="errores['correo_admin']" />
@@ -182,7 +174,7 @@
         <!-- CONTRASEÑAS -->
         <div class="form-row">
           <div class="field">
-            <label>Contraseña *</label>
+            <label>Contraseña</label>
             <div class="input-wrapper">
               <input class="field-input" [type]="showPassword ? 'text' : 'password'"
                 placeholder="••••••••••"
@@ -216,7 +208,7 @@
           </div>
 
           <div class="field">
-            <label>Confirmar contraseña *</label>
+            <label>Confirmar contraseña</label>
             <div class="input-wrapper">
               <input class="field-input" [type]="showConfirm ? 'text' : 'password'"
                 placeholder="••••••••••"

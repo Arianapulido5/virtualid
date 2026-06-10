@@ -12,12 +12,12 @@
 
         <!-- STATS -->
         <div class="stats-grid">
-          <div class="stat-card">
+          <div class="stat-card clickeable" (click)="irUsuarios()">
             <span class="stat-label">USUARIOS REGISTRADOS</span>
             <span class="stat-value">{{ stats.usuarios_activos | number }}</span>
             <span class="stat-trend positive">con dominio institucional</span>
           </div>
-          <div class="stat-card">
+          <div class="stat-card clickeable" (click)="irCredenciales()">
             <span class="stat-label">CREDENCIALES ACTIVAS</span>
             <span class="stat-value">{{ stats.credenciales_activas | number }}</span>
             <span class="stat-trend warning" *ngIf="stats.credenciales_pendientes > 0">
@@ -59,7 +59,6 @@
               </button>
             </div>
 
-            <!-- Lista sin scroll — máximo MAX_ACTIVIDAD items -->
             <ul class="actividad-list" *ngIf="actividadVisible.length > 0">
               <li class="actividad-item clickeable"
                   *ngFor="let a of actividadVisible; let i = index"

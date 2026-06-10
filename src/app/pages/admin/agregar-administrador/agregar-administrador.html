@@ -73,7 +73,7 @@
           <div class="field">
             <label class="field-label">Correo institucional *</label>
             <input class="field-input" type="email"
-              [placeholder]="'admin2' + (dominio || '@tudominio.edu.mx')"
+              [placeholder]="'admin2' + (dominio || '@dominio.edu.mx')"
               [(ngModel)]="form.correo" (ngModelChange)="v.correo()"
               [class.input-error]="errores['correo']" />
             <span class="field-error" *ngIf="errores['correo']">{{ errores['correo'] }}</span>

@@ -36,7 +36,6 @@ export class RegistroInstitucion {
     tipo:               '',
     rfc:                '',
     dominio:            '',
-    correo_contacto:    '',
     ciudad:             '',
     estado:             '',
     nombre:             '',
@@ -183,13 +182,6 @@ export class RegistroInstitucion {
       this.errores['dominio'] = undefined;
       this.verificarDominioDisponible(val);
     },
-    correo_contacto: () => {
-      const val = String(this.form.correo_contacto).trim();
-      const re  = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-      if (!val)               this.errores['correo_contacto'] = 'El correo es obligatorio.';
-      else if (!re.test(val)) this.errores['correo_contacto'] = 'Ingresa un correo válido.';
-      else                    this.errores['correo_contacto'] = undefined;
-    },
     ciudad: () => {
       this.errores['ciudad'] = !String(this.form.ciudad).trim() ? 'La ciudad es obligatoria.' : undefined;
     },
@@ -264,7 +256,6 @@ export class RegistroInstitucion {
       tipo:               this.form.tipo,
       rfc:                this.form.rfc,
       dominio:            this.form.dominio,
-      correo_contacto:    this.form.correo_contacto,
       ciudad:             this.form.ciudad,
       estado:             this.form.estado,
       nombre:             this.form.nombre,
@@ -295,6 +286,6 @@ export class RegistroInstitucion {
     });
   }
 
-  irAlLogin(): void { this.router.navigate(['/login']); }
-  cancelar(): void  { this.router.navigate(['/login']); }
+  irAlLogin(): void { this.router.navigate(['/admin/login']); }
+  cancelar(): void  { this.router.navigate(['/admin/login']); }
 }

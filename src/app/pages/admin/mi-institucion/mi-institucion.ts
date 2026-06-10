@@ -11,7 +11,6 @@ interface InstitucionData {
   tipo:            string;
   rfc:             string;
   dominio_correo:  string;
-  correo_contacto: string;
   ciudad:          string;
   estado:          string;
   creado_en:       string;

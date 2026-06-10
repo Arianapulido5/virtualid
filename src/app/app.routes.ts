@@ -42,6 +42,8 @@ export const routes: Routes = [
 
   // ── ADMIN LOGIN ────────────────────────────────────────────────────────────
   { path: 'admin/login', loadComponent: () => import('./pages/admin/login-admin/login-admin').then(m => m.Login) },
+  { path: 'admin/olvide-contrasena', loadComponent: () => import('./pages/admin/olvide-contrasena-admin/olvide-contrasena-admin').then(m => m.OlvideContrasenaAdmin) },
+
 
   // ── ADMIN (protegido) ──────────────────────────────────────────────────────
   {

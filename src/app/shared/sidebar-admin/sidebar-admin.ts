@@ -51,6 +51,6 @@ export class SidebarAdminComponent implements OnInit, OnDestroy {
     this.adminInfo.limpiar();
     localStorage.removeItem('token');
     localStorage.removeItem('rol');
-    this.router.navigate(['/login']);
+    this.router.navigate(['admin/login']);
   }
 }
