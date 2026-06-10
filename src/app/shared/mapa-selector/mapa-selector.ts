@@ -24,13 +24,10 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
   @Input() lng: number | null = null;
   @Input() mapId: string = 'mapa';
 
-  @Input() latInicial: number | null = null;
-@Input() lngInicial: number | null = null;
-
   @Output() coordenadasChange = new EventEmitter<{ lat: number; lng: number } | null>();
   @Output() lugarChange = new EventEmitter<{ ciudad: string; estado: string; cp?: string } | null>();
 
-  modo: Modo  = 'ninguno';
+  modo: Modo = 'ninguno';
   cargandoGeo = false;
   mapaListo   = false;
   inputLat    = '';
@@ -47,47 +44,50 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['lat'] || changes['lng']) && this.lat === null && this.lng === null) {
-      this.inputLat = ''; this.inputLng = '';
+      this.inputLat = '';
+      this.inputLng = '';
       if (this.marker) { this.marker.remove(); this.marker = null; }
     }
   }
 
-  abrirMapa(): void {
-  const lat = this.latInicial ?? this.lat;
-  const lng = this.lngInicial ?? this.lng;
-  this.setModo('mapa', lat ?? undefined, lng ?? undefined);
-}
-
   ngOnDestroy(): void { this.destruirMapa(); }
 
-    setModo(m: Modo, lat?: number, lng?: number): void {
+  // Llamado desde el tab "Seleccionar en mapa"
+  abrirMapa(): void {
+    this.setModo('mapa');
+  }
+
+  setModo(m: Modo): void {
   if (m !== 'mapa') { this.destruirMapa(); }
   this.modo = m;
+
+  // Si cambia a manual y ya hay coords, pre-llenar los campos
+  if (m === 'manual' && this.lat != null && this.lng != null) {
+this.inputLat = this.lat.toFixed(6);
+this.inputLng = this.lng.toFixed(6);
+  }
+
   this.cdr.detectChanges();
 
-  if (m === 'mapa') {
-    if (lat != null && lng != null) {
-      this.lat = lat;
-      this.lng = lng;
-      this.iniciarMapbox(lat, lng);
-      return;
-    }
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => this.ngZone.run(() =>
-          this.iniciarMapbox(
-            pos.coords.latitude,
-            pos.coords.longitude,
-            pos.coords.latitude,
-            pos.coords.longitude
-          )),
-        () => this.ngZone.run(() =>
-          this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG)),
-        { timeout: 4000 }
-      );
-    } else {
-      this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG);
-    }
+  if (m !== 'mapa') return;
+
+  if (this.lat != null && this.lng != null) {
+    this.iniciarMapbox(this.lat, this.lng, null, null);
+    return;
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => this.ngZone.run(() =>
+        this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG, pos.coords.latitude, pos.coords.longitude)
+      ),
+      () => this.ngZone.run(() =>
+        this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG, null, null)
+      ),
+      { timeout: 4000 }
+    );
+  } else {
+    this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG, null, null);
   }
 }
 
@@ -102,9 +102,11 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
     }
   }
 
+  // markerLat/markerLng: donde poner marcador si ya hay coords
+  // geoLat/geoLng: donde centrar la vista por geolocalización (null = no geoloc)
   private iniciarMapbox(
     markerLat: number, markerLng: number,
-    centerLat?: number, centerLng?: number
+    geoLat: number | null, geoLng: number | null
   ): void {
     const divId = `mapbox-${this.mapId}`;
 
@@ -119,10 +121,14 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
 
       mapboxgl.accessToken = MAPBOX_TOKEN;
 
+      // Centro del mapa: geoloc si hay, si no el marcador/default
+      const centerLng = geoLng ?? markerLng;
+      const centerLat = geoLat ?? markerLat;
+
       this.map = new mapboxgl.Map({
         container: divId,
         style: 'mapbox://styles/mapbox/streets-v12',
-        center: [centerLng ?? markerLng, centerLat ?? markerLat],
+        center: [centerLng, centerLat],
         zoom: 15
       });
 
@@ -135,37 +141,39 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
           setTimeout(() => this.map?.resize(), 50);
         });
 
+        // Pendiente de moverA() llamado antes de que cargara
         if (this._pendingCenter) {
           const pc = this._pendingCenter;
+          this._pendingCenter = null;
           this.map.setCenter([pc.lng, pc.lat]);
           this.ponerMarcador(pc.lng, pc.lat, true);
-          this._pendingCenter = null;
+          return;
         }
 
-        if (this.lat !== null && this.lng !== null) {
-          this.ponerMarcador(this.lng!, this.lat!, true);
+        // Si hay coords ya definidas, poner marcador ahí (sin geocodificar ni emitir)
+        if (this.lat != null && this.lng != null) {
+          this.ponerMarcador(this.lng, this.lat, true);
+          return;
         }
 
-        if (centerLat && centerLng) {
-          new mapboxgl.Marker({ color: '#4285F4', scale: 0.7 })
-            .setLngLat([centerLng, centerLat])
-            .setPopup(new mapboxgl.Popup().setText('Tu ubicación actual'))
-            .addTo(this.map);
+        // Sin coords: poner marquito azul de "tu ubicación" solo como referencia visual,
+        // SIN emitir coordenadas ni hacer reverse geocode.
+        if (geoLat != null && geoLng != null) {
+  new mapboxgl.Marker({ color: '#4285F4', scale: 0.7 })
+    .setLngLat([geoLng, geoLat])
+    .setPopup(new mapboxgl.Popup().setText('Tu ubicación actual'))
+    .addTo(this.map);
 
-          this.ngZone.run(() => {
-            const lat = parseFloat(centerLat.toFixed(7));
-            const lng = parseFloat(centerLng.toFixed(7));
-            if (this.lat === null || this.lng === null) {
-              this.lat = lat;
-              this.lng = lng;
-              this.ponerMarcador(lng, lat, false);
-              this.coordenadasChange.emit({ lat, lng });
-            }
-            this.cdr.detectChanges();
-          });
-        }
+  // Emitir coords y geocodificar para llenar los campos del padre
+  this.lat = parseFloat(geoLat.toFixed(7));
+  this.lng = parseFloat(geoLng.toFixed(7));
+  this.coordenadasChange.emit({ lat: this.lat, lng: this.lng });
+  this.reverseGeocode(this.lng, this.lat);
+  this.cdr.detectChanges();
+}
       });
 
+      // Clic en el mapa → poner/mover marcador morado y emitir
       this.map.on('click', (e: any) => {
         this.ngZone.run(() => {
           const lat = parseFloat(e.lngLat.lat.toFixed(7));
@@ -205,9 +213,14 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
       });
     }
 
-    this.lat = lat; this.lng = lng;
-    this.coordenadasChange.emit({ lat, lng });
-    if (!skipGeocode) this.reverseGeocode(lng, lat);
+    this.lat = lat;
+    this.lng = lng;
+
+    if (!skipGeocode) {
+      this.coordenadasChange.emit({ lat, lng });
+      this.reverseGeocode(lng, lat);
+    }
+
     this.cdr.detectChanges();
   }
 
@@ -220,23 +233,19 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
       .then(data => {
         this.ngZone.run(() => {
           const features = data?.features ?? [];
-
-          let cp      = '';
-          let ciudad  = '';
-          let estado  = '';
+          let cp = '', ciudad = '', estado = '';
 
           for (const f of features) {
-            if (f.place_type?.includes('postcode') && !cp) {
+            if (f.place_type?.includes('postcode') && !cp)
               cp = (f.text ?? '').replace(/\D/g, '').slice(0, 5);
-            }
-            if ((f.place_type?.includes('locality') || f.place_type?.includes('place')) && !ciudad) {
+            if ((f.place_type?.includes('locality') || f.place_type?.includes('place')) && !ciudad)
               ciudad = f.text ?? '';
-            }
             if (!estado) {
               const region = f.context?.find((c: any) => c.id?.startsWith('region'));
               if (region) estado = this.normalizarEstado(region.text ?? '');
             }
           }
+          
 
           if (!estado) {
             for (const f of features) {
@@ -245,66 +254,11 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
             }
           }
 
-          console.log('Mapbox CP:', cp, 'ciudad:', ciudad, 'estado:', estado);
-
-          this.lugarChange.emit({
-            ciudad,
-            estado,
-            cp: cp.length === 5 ? cp : undefined
-          });
+          this.lugarChange.emit({ ciudad, estado, cp: cp.length === 5 ? cp : undefined });
           this.cdr.detectChanges();
         });
       })
       .catch(() => {});
-  }
-
-  private _buscarCPporColonia(colonia: string, municipio: string, estado: string): Promise<string> {
-    const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-    const colNorm    = norm(colonia);
-    const estadoNorm = norm(estado);
-    const munNorm    = norm(municipio);
-
-    const estadoIdMap: Record<string, string> = {
-      'aguascalientes':'01','baja california':'02','baja california sur':'03',
-      'campeche':'04','coahuila':'05','colima':'06','chiapas':'07','chihuahua':'08',
-      'ciudad de mexico':'09','durango':'10','guanajuato':'11','guerrero':'12',
-      'hidalgo':'13','jalisco':'14','estado de mexico':'15','michoacan':'16',
-      'morelos':'17','nayarit':'18','nuevo leon':'19','oaxaca':'20','puebla':'21',
-      'queretaro':'22','quintana roo':'23','san luis potosi':'24','sinaloa':'25',
-      'sonora':'26','tabasco':'27','tamaulipas':'28','tlaxcala':'29',
-      'veracruz':'30','yucatan':'31','zacatecas':'32'
-    };
-
-    const estadoId = estadoIdMap[estadoNorm] ?? '';
-    if (!estadoId) return Promise.resolve('');
-
-    return fetch(
-      `https://sepomex.nitrostudio.com.mx/api/20241009/estado/${estadoId}.json`,
-      { headers: { Accept: 'application/json' } }
-    )
-      .then(r => r.json())
-      .then(json => {
-        const postcodes: any[] = json?.data?.postcodes ?? [];
-        if (!postcodes.length) return '';
-
-        const exacto = postcodes.find(p => {
-          const pCol = norm(p.d_asenta ?? '');
-          const pMun = norm(p.d_mnpio  ?? '');
-          return pCol === colNorm && (!munNorm || pMun.includes(munNorm) || munNorm.includes(pMun));
-        });
-        if (exacto?.d_codigo) return String(exacto.d_codigo).padStart(5, '0');
-
-        const parcial = postcodes.find(p => {
-          const pCol = norm(p.d_asenta ?? '');
-          const pMun = norm(p.d_mnpio  ?? '');
-          return (pCol.includes(colNorm) || colNorm.includes(pCol)) &&
-                 (!munNorm || pMun.includes(munNorm) || munNorm.includes(pMun));
-        });
-        if (parcial?.d_codigo) return String(parcial.d_codigo).padStart(5, '0');
-
-        return '';
-      })
-      .catch(() => '');
   }
 
   private readonly ESTADOS = [
@@ -321,7 +275,6 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
     'michoacan de ocampo':             'Michoacán',
     'michoacán de ocampo':             'Michoacán',
     'coahuila de zaragoza':            'Coahuila',
-    'guerrero':                        'Guerrero',
     'mexico':                          'Estado de México',
     'méxico':                          'Estado de México',
     'estado de mexico':                'Estado de México',
@@ -336,16 +289,12 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
 
   private normalizarEstado(texto: string): string {
     if (!texto) return '';
-    const normaliza = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
-    const textoNorm = normaliza(texto);
-    if (this.ALIASES[textoNorm]) return this.ALIASES[textoNorm];
-    const exacto = this.ESTADOS.find(e => normaliza(e) === textoNorm);
+    const n = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const t = n(texto);
+    if (this.ALIASES[t]) return this.ALIASES[t];
+    const exacto = this.ESTADOS.find(e => n(e) === t);
     if (exacto) return exacto;
-    const parcial = this.ESTADOS.find(e => {
-      const eNorm = normaliza(e);
-      return textoNorm.includes(eNorm) || eNorm.includes(textoNorm);
-    });
-    return parcial ?? texto;
+    return this.ESTADOS.find(e => { const en = n(e); return t.includes(en) || en.includes(t); }) ?? texto;
   }
 
   private destruirMapa(): void {

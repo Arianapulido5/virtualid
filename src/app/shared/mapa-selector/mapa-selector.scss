@@ -10,9 +10,21 @@ $dark:   #4A4D56;
 @keyframes spin     { to { transform: rotate(360deg); } }
 
 :host { display: block; width: 100%; }
-.mapa-wrap { display: flex; flex-direction: column; gap: 12px; animation: fadeInUp 0.35s ease both; }
 
-.modo-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.mapa-wrap {
+  display: flex; flex-direction: column; gap: 12px;
+  animation: fadeInUp 0.35s ease both;
+  border: 1.5px solid $border;
+  border-radius: 14px;
+  background: $white;
+  overflow: hidden;
+}
+
+.modo-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 16px 16px 0 16px;
+}
+
 .modo-tab {
   padding: 8px 16px; border: 1.5px solid $border; border-radius: 8px;
   background: $white; color: $dark;
@@ -24,31 +36,26 @@ $dark:   #4A4D56;
 
 .modo-vacio {
   font-family: 'Open Sans', sans-serif; font-size: 13px; color: #bbb;
-  text-align: center; padding: 20px; background: $bg;
-  border-radius: 10px; border: 1.5px dashed $border;
+  text-align: center; padding: 20px 16px 16px;
 }
 
 .mapa-cargando {
   display: flex; align-items: center; gap: 12px;
-  padding: 16px; background: $bg; border-radius: 10px; border: 1.5px solid $border;
+  padding: 16px; margin: 0 16px;
+  background: $bg; border-radius: 10px; border: 1.5px solid $border;
   span { font-family: 'Open Sans', sans-serif; font-size: 13px; color: $dark; }
 }
 
-// CRÍTICO: altura fija explícita para Mapbox — SIEMPRE debe tener height
 .mapa-container {
   width: 100%;
   height: 320px;
-  border-radius: 12px;
-  border: 1.5px solid $border;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border-top: 1.5px solid $border;
+  border-bottom: 1.5px solid $border;
   overflow: hidden;
   transition: border-color 0.2s, opacity 0.3s;
 
-  // Mientras carga: visible pero transparente — así Mapbox puede medir el div
   &.mapa-cargando-div { opacity: 0; pointer-events: none; }
-  &:hover { border-color: rgba(77,15,96,0.35); }
 
-  // Mapbox controles
   :global(.mapboxgl-ctrl-group) {
     border-radius: 8px !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
@@ -66,11 +73,17 @@ $dark:   #4A4D56;
 }
 
 .mapa-hint {
-  font-family: 'Open Sans', sans-serif; font-size: 11.5px; color: #999; margin: -4px 0 0;
+  font-family: 'Open Sans', sans-serif; font-size: 11.5px; color: #999;
+  margin: -4px 0 0; padding: 0 16px 4px;
   a { color: $purple; font-weight: 600; text-decoration: none; &:hover { text-decoration: underline; } }
 }
 
-.manual-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; animation: fadeInUp 0.3s ease both; }
+.manual-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  animation: fadeInUp 0.3s ease both;
+  padding: 0 16px;
+}
+
 .manual-field { display: flex; flex-direction: column; gap: 5px; }
 .manual-label { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: #111; }
 .manual-input {
@@ -85,6 +98,7 @@ $dark:   #4A4D56;
 .geo-cargando {
   display: flex; align-items: center; gap: 12px; padding: 20px 16px;
   background: rgba(77,15,96,0.04); border-radius: 10px; border: 1.5px solid rgba(77,15,96,0.1);
+  margin: 0 16px;
   span { font-family: 'Open Sans', sans-serif; font-size: 13px; color: $dark; }
 }
 .geo-spinner {
@@ -97,6 +111,7 @@ $dark:   #4A4D56;
   display: flex; align-items: center; gap: 10px;
   background: rgba(26,122,74,0.06); border: 1.5px solid rgba(26,122,74,0.2);
   border-radius: 10px; padding: 10px 14px; flex-wrap: wrap;
+  margin: 0 16px 16px;
 }
 .coords-check { font-size: 14px; color: #1a7a4a; font-weight: 700; }
 .coord-item   { display: flex; align-items: center; gap: 6px; }
@@ -113,13 +128,18 @@ $dark:   #4A4D56;
   &:hover { background: rgba(169,56,69,0.08); transform: translateY(-1px); }
 }
 
-.mapa-sin-coords { font-family: 'Open Sans', sans-serif; font-size: 12px; color: #bbb; text-align: center; padding: 2px 0; }
+.mapa-sin-coords {
+  font-family: 'Open Sans', sans-serif; font-size: 12px; color: #bbb;
+  text-align: center; padding: 2px 16px 16px;
+}
 
 @media (max-width: 600px) {
-  .modo-tabs { flex-direction: column; }
+  .modo-tabs { flex-direction: column; padding: 12px 12px 0; }
   .modo-tab  { width: 100%; text-align: center; }
   .mapa-container { height: 240px; }
-  .manual-row { grid-template-columns: 1fr; }
-  .mapa-coords { flex-direction: column; align-items: flex-start; }
+  .manual-row { grid-template-columns: 1fr; padding: 0 12px; }
+  .mapa-coords { margin: 0 12px 12px; flex-direction: column; align-items: flex-start; }
   .btn-quitar  { margin-left: 0; width: 100%; text-align: center; }
+  .mapa-hint { padding: 0 12px 4px; }
+  .mapa-sin-coords { padding: 2px 12px 12px; }
 }

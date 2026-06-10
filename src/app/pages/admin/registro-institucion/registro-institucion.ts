@@ -142,27 +142,31 @@ export class RegistroInstitucion implements OnDestroy {
   }
 
   onLugarChange(lugar: { ciudad: string; estado: string; cp?: string } | null): void {
-    if (!lugar) return;
+  if (!lugar) return;
 
-    if (lugar.cp && lugar.cp.length === 5 && lugar.cp !== this.codigo_postal) {
-      this._cpVinoDeMapa = true;
-      this.codigo_postal = lugar.cp;
-      this._limpiarGeo();
-      this.cargandoCP = true;
-      this.cdr.detectChanges();
-      this._buscarCP(lugar.cp);
-      return;
-    }
+  const esModoManual = this.mapaSelector?.modo === 'manual';
 
-    if (lugar.cp && lugar.cp === this.codigo_postal) return;
-
-    if (this.codigo_postal && this.codigo_postal.length === 5) return;
-
+  if (lugar.cp && lugar.cp.length === 5 && (lugar.cp !== this.codigo_postal || esModoManual)) {
+    this._cpVinoDeMapa = !esModoManual;
+    this.codigo_postal = lugar.cp;
     this._limpiarGeo();
-    if (lugar.ciudad) this.ciudad = lugar.ciudad;
-    if (lugar.estado) this.estado = lugar.estado;
+    this.cargandoCP = true;
     this.cdr.detectChanges();
+    this._buscarCP(lugar.cp);
+    return;
   }
+
+  if (!esModoManual) {
+    if (lugar.cp && lugar.cp === this.codigo_postal) return;
+    if (this.codigo_postal && this.codigo_postal.length === 5) return;
+  }
+  
+
+  this._limpiarGeo();
+  if (lugar.ciudad) this.ciudad = lugar.ciudad;
+  if (lugar.estado) this.estado = lugar.estado;
+  this.cdr.detectChanges();
+}
 
   validarCodigoPostal(): void {
     const v = this.codigo_postal.replace(/\D/g, '').slice(0, 5);
@@ -236,31 +240,31 @@ export class RegistroInstitucion implements OnDestroy {
 
       this.cargandoCP = false;
       this.cdr.detectChanges();
-
-      if (!this._cpVinoDeMapa) {
-        fetch(`https://nominatim.openstreetmap.org/search?postalcode=${cp}&country=MX&format=json&limit=1`)
-          .then(r => r.json())
-          .then(data => {
-            if (data?.[0]) {
-              const lat = parseFloat(parseFloat(data[0].lat).toFixed(7));
-              const lng = parseFloat(parseFloat(data[0].lon).toFixed(7));
-              this.mapaLat = lat;
-              this.mapaLng = lng;
-              this.form.latitud  = lat;
-              this.form.longitud = lng;
-             if (this.mapaSelector) {
-  this.mapaSelector.lat = lat;
-  this.mapaSelector.lng = lng;
-  this.mapaSelector.latInicial = lat;
-  this.mapaSelector.lngInicial = lng;
-  this.mapaSelector.moverA(lat, lng);
+if (!this._cpVinoDeMapa) {
+  const MAPBOX_TOKEN = 'pk.eyJ1IjoiYXJpYW5hcHVsaWRvLTciLCJhIjoiY21td2YxdXM4MnB4cjJxcHk4aWsyc2ljcSJ9.rE19cHh6UFvEncYVjSULrg';
+  fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${cp}.json?country=MX&types=postcode&access_token=${MAPBOX_TOKEN}`)
+    .then(r => r.json())
+    .then(data => {
+      const center = data?.features?.[0]?.center;
+      if (center) {
+        const lat = parseFloat(center[1].toFixed(7));
+        const lng = parseFloat(center[0].toFixed(7));
+        this.mapaLat = lat;
+        this.mapaLng = lng;
+        this.form.latitud  = lat;
+        this.form.longitud = lng;
+        if (this.mapaSelector) {
+          this.mapaSelector.moverA(lat, lng);
+        }
+        this.cdr.detectChanges();
+      }
+      this._cpVinoDeMapa = false;
+    })
+    .catch(() => { this._cpVinoDeMapa = false; });
 }
-              this.cdr.detectChanges();
-            }
-            this._cpVinoDeMapa = false;
-          })
-          .catch(() => { this._cpVinoDeMapa = false; });
-      } else {
+     
+     
+      else {
         this._cpVinoDeMapa = false;
       }
 
