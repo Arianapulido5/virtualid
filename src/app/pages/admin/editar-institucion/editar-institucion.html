@@ -39,17 +39,26 @@
           <!-- NOMBRE + TIPO -->
           <div class="form-row">
             <div class="field">
-              <label class="field-label">Nombre de la institución *</label>
+              <label class="field-label">Nombre de la institución</label>
               <input class="field-input" type="text" placeholder="Universidad Tecnológica"
                 [(ngModel)]="form.nombre_institucion" (ngModelChange)="v.nombre_institucion()"
                 [class.input-error]="errores['nombre_institucion']" />
               <span class="field-error" *ngIf="errores['nombre_institucion']">{{ errores['nombre_institucion'] }}</span>
             </div>
             <div class="field">
-              <label class="field-label">Tipo *</label>
-              <input class="field-input" type="text" placeholder="Universidad pública"
+              <label class="field-label">Tipo</label>
+              <select class="field-input"
                 [(ngModel)]="form.tipo" (ngModelChange)="v.tipo()"
-                [class.input-error]="errores['tipo']" />
+                [class.input-error]="errores['tipo']">
+                <option value="">Selecciona</option>
+                <option value="Universidad pública">Universidad pública</option>
+                <option value="Universidad privada">Universidad privada</option>
+                <option value="Instituto tecnológico">Instituto tecnológico</option>
+                <option value="Preparatoria pública">Preparatoria pública</option>
+                <option value="Preparatoria privada">Preparatoria privada</option>
+                <option value="Centro de investigación">Centro de investigación</option>
+                <option value="Otro">Otro</option>
+              </select>
               <span class="field-error" *ngIf="errores['tipo']">{{ errores['tipo'] }}</span>
             </div>
           </div>
@@ -57,14 +66,14 @@
           <!-- RFC + DOMINIO -->
           <div class="form-row">
             <div class="field">
-              <label class="field-label">RFC *</label>
+              <label class="field-label">RFC</label>
               <input class="field-input" type="text" placeholder="UTE200101ABC" maxlength="13"
                 [(ngModel)]="form.rfc" (ngModelChange)="v.rfc()"
                 [class.input-error]="errores['rfc']" />
               <span class="field-error" *ngIf="errores['rfc']">{{ errores['rfc'] }}</span>
             </div>
             <div class="field">
-              <label class="field-label">Dominio de correo institucional *</label>
+              <label class="field-label">Dominio de correo institucional</label>
               <input class="field-input" type="text" placeholder="@utec.edu.mx"
                 [(ngModel)]="form.dominio" (ngModelChange)="v.dominio()"
                 [class.input-error]="errores['dominio']" />
@@ -72,26 +81,65 @@
             </div>
           </div>
 
-
-          <!-- CIUDAD + ESTADO -->
+          <!-- CÓDIGO POSTAL + ESTADO -->
           <div class="form-row">
             <div class="field">
-              <label class="field-label">Ciudad *</label>
-              <input class="field-input" type="text" placeholder="Córdoba"
-                [(ngModel)]="form.ciudad" (ngModelChange)="v.ciudad()"
-                [class.input-error]="errores['ciudad']" />
-              <span class="field-error" *ngIf="errores['ciudad']">{{ errores['ciudad'] }}</span>
+              <label class="field-label">Código Postal</label>
+              <div class="input-wrapper">
+                <input class="field-input" type="text" placeholder="5 dígitos" maxlength="5"
+                  [(ngModel)]="codigo_postal" (ngModelChange)="validarCodigoPostal()"
+                  [class.input-error]="errores['codigo_postal']" />
+                <span *ngIf="cargandoCP" class="cp-spinner"></span>
+              </div>
+              <span class="field-error" *ngIf="errores['codigo_postal']">{{ errores['codigo_postal'] }}</span>
             </div>
             <div class="field">
-              <label class="field-label">Estado *</label>
+              <label class="field-label">Estado</label>
               <select class="field-input"
                 [(ngModel)]="form.estado" (ngModelChange)="v.estado()"
                 [class.input-error]="errores['estado']">
-                <option value="">Selecciona</option>
+                <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
                 <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
               </select>
               <span class="field-error" *ngIf="errores['estado']">{{ errores['estado'] }}</span>
             </div>
+          </div>
+
+          <!-- CIUDAD + MUNICIPIO -->
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">Ciudad</label>
+              <select class="field-input"
+                [(ngModel)]="form.ciudad" (ngModelChange)="onCiudadChange()"
+                [class.input-error]="errores['ciudad']">
+                <option value="">{{ cargandoCP ? 'Cargando...' : (ciudadesDelEstado.length === 0 ? 'Selecciona' : 'Selecciona ciudad') }}</option>
+                <option *ngFor="let c of ciudadesDelEstado" [value]="c">{{ c }}</option>
+              </select>
+              <span class="field-error" *ngIf="errores['ciudad']">{{ errores['ciudad'] }}</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Municipio</label>
+              <select class="field-input" [(ngModel)]="municipio" (ngModelChange)="onMunicipioChange()">
+                <option value="">{{ cargandoCP ? 'Cargando...' : (municipiosDelCiudad.length === 0 ? 'Selecciona' : 'Selecciona municipio') }}</option>
+                <option *ngFor="let m of municipiosDelCiudad" [value]="m">{{ m }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- COLONIA -->
+          <div class="field">
+            <label class="field-label">Colonia</label>
+            <select class="field-input" [(ngModel)]="colonia">
+              <option value="">{{ cargandoCP ? 'Cargando...' : (coloniasDelMunicipio.length === 0 ? 'Selecciona' : 'Selecciona colonia') }}</option>
+              <option *ngFor="let c of coloniasDelMunicipio" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+
+          <!-- DIRECCIÓN -->
+          <div class="field">
+            <label class="field-label">Dirección</label>
+            <input class="field-input" type="text" placeholder="Calle, número"
+              [(ngModel)]="direccion" />
           </div>
 
           <!-- GEOLOCALIZACIÓN -->
@@ -105,16 +153,18 @@
             <p class="geo-info-text">
               Si marcas la ubicación en el mapa, los usuarios solo podrán generar su QR cuando
               estén físicamente cerca de la institución. Deja el mapa sin marcador para desactivar
-              esta validación.
+              esta validación. Al seleccionar un punto, el campo Dirección se llenará automáticamente.
             </p>
           </div>
 
           <app-mapa-selector
+            #mapaRef
             [lat]="mapaLat"
             [lng]="mapaLng"
             mapId="mapa-editar"
             (coordenadasChange)="onCoordsChange($event)"
-            (lugarChange)="onLugarChange($event)">
+            (lugarChange)="onLugarChange($event)"
+            (direccionChange)="onDireccionChange($event)">
           </app-mapa-selector>
 
           <div class="field radio-field-standalone">

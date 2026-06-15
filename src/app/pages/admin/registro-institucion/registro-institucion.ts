@@ -185,6 +185,13 @@ export class RegistroInstitucion implements OnDestroy {
     this.cdr.detectChanges();
   }
 
+  onDireccionChange(dir: string): void {
+  if (dir) {
+    this.direccion = dir;
+    this.cdr.detectChanges();
+  }
+}
+
   // ── CP INSTITUCIÓN ────────────────────────────────────────────────────────
 
   validarCodigoPostal(): void {

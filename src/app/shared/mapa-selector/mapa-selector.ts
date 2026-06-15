@@ -25,7 +25,8 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
   @Input() mapId: string = 'mapa';
 
   @Output() coordenadasChange = new EventEmitter<{ lat: number; lng: number } | null>();
-  @Output() lugarChange = new EventEmitter<{ ciudad: string; estado: string; cp?: string } | null>();
+  @Output() lugarChange       = new EventEmitter<{ ciudad: string; estado: string; cp?: string } | null>();
+  @Output() direccionChange   = new EventEmitter<string>(); // ← NUEVO
 
   modo: Modo = 'ninguno';
   cargandoGeo = false;
@@ -52,44 +53,42 @@ export class MapaSelectorComponent implements OnDestroy, OnChanges {
 
   ngOnDestroy(): void { this.destruirMapa(); }
 
-  // Llamado desde el tab "Seleccionar en mapa"
   abrirMapa(): void {
     this.setModo('mapa');
   }
 
   setModo(m: Modo): void {
-  if (m !== 'mapa') { this.destruirMapa(); }
-  this.modo = m;
+    if (m !== 'mapa') { this.destruirMapa(); }
+    this.modo = m;
 
-  // Si cambia a manual y ya hay coords, pre-llenar los campos
-  if (m === 'manual' && this.lat != null && this.lng != null) {
-this.inputLat = this.lat.toFixed(6);
-this.inputLng = this.lng.toFixed(6);
+    if (m === 'manual' && this.lat != null && this.lng != null) {
+      this.inputLat = this.lat.toFixed(6);
+      this.inputLng = this.lng.toFixed(6);
+    }
+
+    this.cdr.detectChanges();
+
+    if (m !== 'mapa') return;
+
+    if (this.lat != null && this.lng != null) {
+      this.iniciarMapbox(this.lat, this.lng, null, null);
+      return;
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => this.ngZone.run(() =>
+          this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG, pos.coords.latitude, pos.coords.longitude)
+        ),
+        () => this.ngZone.run(() =>
+          this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG, null, null)
+        ),
+        { timeout: 4000 }
+      );
+    } else {
+      this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG, null, null);
+    }
   }
-
-  this.cdr.detectChanges();
-
-  if (m !== 'mapa') return;
-
-  if (this.lat != null && this.lng != null) {
-    this.iniciarMapbox(this.lat, this.lng, null, null);
-    return;
-  }
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => this.ngZone.run(() =>
-        this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG, pos.coords.latitude, pos.coords.longitude)
-      ),
-      () => this.ngZone.run(() =>
-        this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG, null, null)
-      ),
-      { timeout: 4000 }
-    );
-  } else {
-    this.iniciarMapbox(this.DEFAULT_LAT, this.DEFAULT_LNG, null, null);
-  }
-}
 
   moverA(lat: number, lng: number): void {
     this.lat = lat;
@@ -102,8 +101,6 @@ this.inputLng = this.lng.toFixed(6);
     }
   }
 
-  // markerLat/markerLng: donde poner marcador si ya hay coords
-  // geoLat/geoLng: donde centrar la vista por geolocalización (null = no geoloc)
   private iniciarMapbox(
     markerLat: number, markerLng: number,
     geoLat: number | null, geoLng: number | null
@@ -121,7 +118,6 @@ this.inputLng = this.lng.toFixed(6);
 
       mapboxgl.accessToken = MAPBOX_TOKEN;
 
-      // Centro del mapa: geoloc si hay, si no el marcador/default
       const centerLng = geoLng ?? markerLng;
       const centerLat = geoLat ?? markerLat;
 
@@ -141,7 +137,6 @@ this.inputLng = this.lng.toFixed(6);
           setTimeout(() => this.map?.resize(), 50);
         });
 
-        // Pendiente de moverA() llamado antes de que cargara
         if (this._pendingCenter) {
           const pc = this._pendingCenter;
           this._pendingCenter = null;
@@ -150,30 +145,16 @@ this.inputLng = this.lng.toFixed(6);
           return;
         }
 
-        // Si hay coords ya definidas, poner marcador ahí (sin geocodificar ni emitir)
         if (this.lat != null && this.lng != null) {
           this.ponerMarcador(this.lng, this.lat, true);
           return;
         }
 
-        // Sin coords: poner marquito azul de "tu ubicación" solo como referencia visual,
-        // SIN emitir coordenadas ni hacer reverse geocode.
         if (geoLat != null && geoLng != null) {
-  new mapboxgl.Marker({ color: '#4285F4', scale: 0.7 })
-    .setLngLat([geoLng, geoLat])
-    .setPopup(new mapboxgl.Popup().setText('Tu ubicación actual'))
-    .addTo(this.map);
-
-  // Emitir coords y geocodificar para llenar los campos del padre
-  this.lat = parseFloat(geoLat.toFixed(7));
-  this.lng = parseFloat(geoLng.toFixed(7));
-  this.coordenadasChange.emit({ lat: this.lat, lng: this.lng });
-  this.reverseGeocode(this.lng, this.lat);
-  this.cdr.detectChanges();
+  this.ponerMarcador(geoLng, geoLat, false);
 }
       });
 
-      // Clic en el mapa → poner/mover marcador morado y emitir
       this.map.on('click', (e: any) => {
         this.ngZone.run(() => {
           const lat = parseFloat(e.lngLat.lat.toFixed(7));
@@ -227,15 +208,19 @@ this.inputLng = this.lng.toFixed(6);
   private reverseGeocode(lng: number, lat: number): void {
     fetch(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json` +
-      `?access_token=${MAPBOX_TOKEN}&country=MX&types=postcode,locality,place&language=es`
+      `?access_token=${MAPBOX_TOKEN}&country=MX&types=address,postcode,locality,place&language=es`
     )
       .then(r => r.json())
       .then(data => {
         this.ngZone.run(() => {
           const features = data?.features ?? [];
-          let cp = '', ciudad = '', estado = '';
+          let cp = '', ciudad = '', estado = '', direccion = '';
 
           for (const f of features) {
+            // Dirección legible: primer resultado tipo address o poi
+            if (!direccion && (f.place_type?.includes('address') || f.place_type?.includes('poi'))) {
+              direccion = f.place_name ?? '';
+            }
             if (f.place_type?.includes('postcode') && !cp)
               cp = (f.text ?? '').replace(/\D/g, '').slice(0, 5);
             if ((f.place_type?.includes('locality') || f.place_type?.includes('place')) && !ciudad)
@@ -245,7 +230,16 @@ this.inputLng = this.lng.toFixed(6);
               if (region) estado = this.normalizarEstado(region.text ?? '');
             }
           }
-          
+
+          // Fallback: si no hay tipo address, usar el primer resultado
+          if (!direccion && features.length > 0) {
+            direccion = features[0].place_name ?? '';
+          }
+
+          // Limpiar ", México" del final
+          if (direccion) {
+            direccion = direccion.replace(/,\s*México$/i, '').trim();
+          }
 
           if (!estado) {
             for (const f of features) {
@@ -255,6 +249,10 @@ this.inputLng = this.lng.toFixed(6);
           }
 
           this.lugarChange.emit({ ciudad, estado, cp: cp.length === 5 ? cp : undefined });
+
+          // ── Emitir dirección geocodificada ──
+          if (direccion) this.direccionChange.emit(direccion);
+
           this.cdr.detectChanges();
         });
       })

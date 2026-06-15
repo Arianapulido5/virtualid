@@ -12,17 +12,14 @@
   --danger:  #e53935;
   --success: #2e7d32;
   display: block; width: 100%;
-
-:host ::ng-deep ::-webkit-scrollbar {
-  width: 0;
-  background: transparent;
-}
 }
 
-@keyframes spin         { to { transform: rotate(360deg); } }
-@keyframes fadeIn       { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fadeInUp     { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideUp      { from { transform: translateY(28px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+:host ::ng-deep ::-webkit-scrollbar { width: 0; background: transparent; }
+
+@keyframes spin          { to { transform: rotate(360deg); } }
+@keyframes fadeIn        { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp      { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp       { from { transform: translateY(28px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 @keyframes modalIconPop  { 0% { transform: scale(0) rotate(-15deg); opacity: 0; } 60% { transform: scale(1.2) rotate(4deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
 @keyframes fieldIn       { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -32,6 +29,9 @@
 @keyframes arrowSlide    { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-5px); } }
 @keyframes btnPulse      { 0% { box-shadow: 0 4px 16px rgba(77,15,96,0.35), 0 0 0 0 rgba(77,15,96,0.35); } 70% { box-shadow: 0 4px 16px rgba(77,15,96,0.35), 0 0 0 10px rgba(77,15,96,0); } 100% { box-shadow: 0 4px 16px rgba(77,15,96,0.35), 0 0 0 0 rgba(77,15,96,0); } }
 
+// ─────────────────────────────────────────────
+//  LAYOUT
+// ─────────────────────────────────────────────
 .admin-layout { display: flex; min-height: 100vh; background: var(--bg); width: 100%; }
 
 .main-content {
@@ -49,6 +49,9 @@
   min-height: min-content;
 }
 
+// ─────────────────────────────────────────────
+//  BACK LINK
+// ─────────────────────────────────────────────
 .back-link {
   display: inline-flex; align-items: center;
   color: var(--dark); margin-bottom: 4px;
@@ -66,11 +69,16 @@
   }
 }
 
+// ─────────────────────────────────────────────
+//  FORM HEADER
+// ─────────────────────────────────────────────
 .form-header { margin-bottom: 4px; animation: fadeInUp 0.45s ease 0.1s both; }
+.form-title  { font-family: 'Montserrat', sans-serif; font-size: 22px; font-weight: 800; color: var(--black); margin: 0 0 6px; }
+.form-sub    { font-family: 'Open Sans', sans-serif; font-size: 13px; color: #888; margin: 0; }
 
-.form-title { font-family: 'Montserrat', sans-serif; font-size: 22px; font-weight: 800; color: var(--black); margin: 0 0 6px; }
-.form-sub   { font-family: 'Open Sans', sans-serif; font-size: 13px; color: #888; margin: 0; }
-
+// ─────────────────────────────────────────────
+//  FORM CARD
+// ─────────────────────────────────────────────
 .form-card {
   background: var(--white); border-radius: 16px; padding: 28px 32px;
   box-shadow: 0 2px 14px rgba(0,0,0,0.07);
@@ -80,18 +88,19 @@
   &:hover { box-shadow: 0 6px 24px rgba(77,15,96,0.1); }
 }
 
-.form-row {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%;
-}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; }
 
 .field {
   display: flex; flex-direction: column; gap: 5px; min-width: 0; width: 100%;
   animation: fieldIn 0.4s ease both;
-  @for $i from 1 through 12 { &:nth-child(#{$i}) { animation-delay: #{0.04 * $i + 0.2}s; } }
+  @for $i from 1 through 14 { &:nth-child(#{$i}) { animation-delay: #{0.04 * $i + 0.2}s; } }
 }
 
 .field-label { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: var(--black); transition: color 0.2s; }
 
+// ─────────────────────────────────────────────
+//  INPUTS
+// ─────────────────────────────────────────────
 .field-input {
   width: 100%; padding: 11px 14px;
   border: 1.5px solid #e0e4ec; border-radius: 10px;
@@ -112,6 +121,42 @@ select.field-input {
   padding-right: 36px; cursor: pointer;
 }
 
+// ─────────────────────────────────────────────
+//  INPUT WRAPPER + SPINNER CP
+// ─────────────────────────────────────────────
+.input-wrapper {
+  position: relative; display: flex; align-items: center; width: 100%;
+  input { width: 100%; }
+}
+
+.cp-spinner {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px;
+  border: 2px solid rgba(77,15,96,0.2); border-top-color: var(--purple);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+  display: inline-block; pointer-events: none;
+}
+
+// ─────────────────────────────────────────────
+//  MENSAJES
+// ─────────────────────────────────────────────
+.field-error {
+  font-size: 11.5px; color: var(--danger); min-height: 16px; display: block;
+  animation: fadeInUp 0.25s ease both;
+}
+
+.error-msg {
+  font-size: 13px; color: #c62828; background: #fdecea;
+  border: 1px solid var(--danger); border-left: 4px solid var(--danger);
+  border-radius: 10px; padding: 10px 14px; margin: 0;
+  animation: fadeInUp 0.3s ease both;
+}
+
+.estado-txt { padding: 32px; text-align: center; color: #888; font-size: 14px; animation: fadeIn 0.3s ease both; }
+
+// ─────────────────────────────────────────────
+//  SEPARADORES
+// ─────────────────────────────────────────────
 .section-label {
   font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; color: var(--purple);
   margin: 6px 0 2px; border-bottom: 1.5px solid rgba(77,15,96,0.12);
@@ -120,16 +165,27 @@ select.field-input {
 
 .section-opcional { font-weight: 400; font-size: 11.5px; color: #aaa; margin-left: 6px; }
 
-.field-error { font-size: 11.5px; color: var(--danger); min-height: 16px; display: block; animation: fadeInUp 0.25s ease both; }
+// ─────────────────────────────────────────────
+//  GEOLOCALIZACIÓN
+// ─────────────────────────────────────────────
+.geo-info-box {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: rgba(50,72,140,0.06);
+  border: 1px solid rgba(50,72,140,0.18); border-left: 3px solid var(--blue);
+  border-radius: 10px; padding: 12px 14px; animation: fadeInUp 0.4s ease both;
+  transition: border-color 0.25s, box-shadow 0.25s;
 
-.error-msg {
-  font-size: 13px; color: #c62828; background: #fdecea;
-  border: 1px solid var(--danger); border-left: 4px solid var(--danger);
-  border-radius: 10px; padding: 10px 14px; margin: 0; animation: fadeInUp 0.3s ease both;
+  &:hover { box-shadow: 0 3px 12px rgba(50,72,140,0.12); }
+
+  .geo-info-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .geo-info-text { font-family: 'Open Sans', sans-serif; font-size: 12.5px; color: var(--dark); line-height: 1.55; margin: 0; }
 }
 
-.estado-txt { padding: 32px; text-align: center; color: #888; font-size: 14px; animation: fadeIn 0.3s ease both; }
+.radio-field-standalone { max-width: 220px; }
 
+// ─────────────────────────────────────────────
+//  ACCIONES
+// ─────────────────────────────────────────────
 .form-actions { display: flex; gap: 14px; padding-top: 8px; animation: fadeInUp 0.45s ease 0.5s both; }
 
 .btn-cancelar {
@@ -157,7 +213,10 @@ select.field-input {
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
     transform: skewX(-20deg); transition: left 0.55s ease; pointer-events: none;
   }
-  &:hover:not(:disabled) { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 28px rgba(77,15,96,0.42); &::before { left: 130%; } }
+  &:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 28px rgba(77,15,96,0.42);
+    &::before { left: 130%; }
+  }
   &:active:not(:disabled) { transform: translateY(0) scale(0.97); }
   &:disabled { opacity: 0.5; cursor: not-allowed; animation: none; background: #aaa; box-shadow: none; }
 }
@@ -168,18 +227,9 @@ select.field-input {
   border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block;
 }
 
-.geo-info-box {
-  display: flex; align-items: flex-start; gap: 10px;
-  background: rgba(50,72,140,0.06);
-  border: 1px solid rgba(50,72,140,0.18); border-left: 3px solid #32488C;
-  border-radius: 10px; padding: 12px 14px; animation: fadeInUp 0.4s ease both;
-
-  .geo-info-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-  .geo-info-text { font-family: 'Open Sans', sans-serif; font-size: 12.5px; color: #4A4D56; line-height: 1.55; margin: 0; }
-}
-
-.radio-field-standalone { max-width: 220px; }
-
+// ─────────────────────────────────────────────
+//  MODAL
+// ─────────────────────────────────────────────
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(5px);
   display: flex; align-items: center; justify-content: center;
@@ -219,6 +269,60 @@ select.field-input {
   &:active { transform: translateY(0) scale(0.97); }
 }
 
+// ─────────────────────────────────────────────
+//  MAPA SELECTOR — ng-deep
+// ─────────────────────────────────────────────
+:host ::ng-deep app-mapa-selector {
+  display: block;
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 4px 20px rgba(50,72,140,0.15);
+  border: 2px solid rgba(77,15,96,0.12);
+  transition: border-color 0.25s, box-shadow 0.3s;
+  animation: fadeInUp 0.45s ease 0.35s both;
+
+  &:hover {
+    border-color: rgba(77,15,96,0.35);
+    box-shadow: 0 8px 32px rgba(77,15,96,0.18);
+  }
+}
+
+:host ::ng-deep app-mapa-selector > div,
+:host ::ng-deep app-mapa-selector .mapa-container,
+:host ::ng-deep app-mapa-selector .map-container {
+  border-radius: 12px; overflow: hidden;
+}
+
+:host ::ng-deep app-mapa-selector google-map,
+:host ::ng-deep app-mapa-selector .map-wrap {
+  display: block; border-radius: 12px; overflow: hidden;
+}
+
+:host ::ng-deep app-mapa-selector input[type="text"],
+:host ::ng-deep app-mapa-selector .pac-input,
+:host ::ng-deep app-mapa-selector .search-box {
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid #e0e4ec; border-radius: 10px;
+  font-family: 'Open Sans', sans-serif; font-size: 13px;
+  color: var(--black); background: var(--white);
+  outline: none; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  margin-bottom: 10px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  &:focus { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(77,15,96,0.1); }
+}
+
+:host ::ng-deep app-mapa-selector button {
+  font-family: 'Montserrat', sans-serif; font-weight: 600;
+  border-radius: 8px; transition: all 0.2s;
+}
+
+:host ::ng-deep app-mapa-selector p,
+:host ::ng-deep app-mapa-selector .mapa-info {
+  font-family: 'Open Sans', sans-serif; font-size: 12px; color: var(--dark);
+}
+
+// ─────────────────────────────────────────────
+//  RESPONSIVE
+// ─────────────────────────────────────────────
 @media (max-width: 1024px) {
   .main-content { margin-left: 0 !important; width: 100% !important; }
 }
@@ -229,6 +333,7 @@ select.field-input {
   .form-row { grid-template-columns: 1fr !important; }
   .form-actions { flex-direction: column; }
   .btn-cancelar, .btn-guardar { width: 100%; }
+  .radio-field-standalone { max-width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {

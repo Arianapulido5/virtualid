@@ -1,3 +1,4 @@
+// src/app/pages/admin/mi-institucion/mi-institucion.ts
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -17,6 +18,10 @@ interface InstitucionData {
   latitud:         number | null;
   longitud:        number | null;
   radio_metros:    number | null;
+  codigo_postal:   string | null;
+  municipio:       string | null;
+  colonia:         string | null;
+  direccion:       string | null;
   stats: {
     usuarios_registrados: number;
     credenciales_activas: number;
@@ -37,10 +42,13 @@ export class MiInstitucion implements OnInit {
   cargando    = true;
   errorMsg    = '';
 
-  institucion: InstitucionData | null = null;
-  iniciales    = '';
-  direccionGeo = '';
-  cargandoGeo  = false;
+  institucion:  InstitucionData | null = null;
+  iniciales     = '';
+
+  // Dirección que se muestra en la fila — puede venir del campo `direccion`
+  // de la BD o, si está vacío, del reverse geocode de las coordenadas
+  direccionMostrar  = '';
+  cargandoDireccion = false;
 
   resumen: { label: string; valor: string; ruta: string }[] = [
     { label: 'Usuarios registrados', valor: '—', ruta: '/admin/usuarios' },
@@ -60,10 +68,10 @@ export class MiInstitucion implements OnInit {
   irA(ruta: string): void { this.router.navigate([ruta]); }
 
   cargar(): void {
-    this.cargando    = true;
-    this.errorMsg    = '';
-    this.institucion = null;
-    this.direccionGeo = '';
+    this.cargando         = true;
+    this.errorMsg         = '';
+    this.institucion      = null;
+    this.direccionMostrar = '';
 
     const token   = localStorage.getItem('token') ?? '';
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
@@ -89,8 +97,13 @@ export class MiInstitucion implements OnInit {
           this.cargando = false;
           this.cdr.detectChanges();
 
-          if (data.latitud && data.longitud) {
-            this.obtenerDireccion(data.latitud, data.longitud);
+          // Si hay dirección guardada en BD, mostrarla directamente
+          if (data.direccion && data.direccion.trim()) {
+            this.direccionMostrar = data.direccion.trim();
+            this.cdr.detectChanges();
+          } else if (data.latitud && data.longitud) {
+            // Sin dirección guardada pero con coordenadas: hacer reverse geocode
+            this.geocodificarDireccion(data.latitud, data.longitud);
           }
         },
         error: (err) => {
@@ -102,9 +115,8 @@ export class MiInstitucion implements OnInit {
       });
   }
 
-  private obtenerDireccion(lat: number, lng: number): void {
-    this.cargandoGeo  = true;
-    this.direccionGeo = '';
+  private geocodificarDireccion(lat: number, lng: number): void {
+    this.cargandoDireccion = true;
     this.cdr.detectChanges();
 
     this.http.get<any>(
@@ -122,16 +134,15 @@ export class MiInstitucion implements OnInit {
           if (a.city || a.town || a.village)
             partes.push(a.city ?? a.town ?? a.village);
           if (a.state) partes.push(a.state);
-          this.direccionGeo = partes.filter(Boolean).join(', ') || res.display_name;
+          this.direccionMostrar = partes.filter(Boolean).join(', ') || res.display_name;
         }
-        this.cargandoGeo = false;
+        this.cargandoDireccion = false;
         this.cdr.detectChanges();
       },
-      error: () => { this.cargandoGeo = false; this.direccionGeo = ''; this.cdr.detectChanges(); }
+      error: () => {
+        this.cargandoDireccion = false;
+        this.cdr.detectChanges();
+      }
     });
-  }
-
-  tieneUbicacion(): boolean {
-    return !!(this.institucion?.latitud && this.institucion?.longitud);
   }
 }

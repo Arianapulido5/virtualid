@@ -38,39 +38,62 @@
             <div class="divider"></div>
 
             <div class="datos-lista">
+
               <div class="dato-row">
                 <span class="dato-label">Tipo</span>
                 <span class="dato-valor">{{ institucion.tipo }}</span>
               </div>
+
               <div class="dato-row">
                 <span class="dato-label">RFC</span>
                 <span class="dato-valor">{{ institucion.rfc }}</span>
               </div>
-              <div class="dato-row">
-                <span class="dato-label">Ciudad</span>
-                <span class="dato-valor">{{ institucion.ciudad }}, {{ institucion.estado }}</span>
-              </div>
+
               <div class="dato-row">
                 <span class="dato-label">Dominio institucional</span>
                 <span class="dato-valor">{{ institucion.dominio_correo }}</span>
               </div>
 
-              <div class="dato-row ubicacion-row" *ngIf="tieneUbicacion()">
-                <span class="dato-label">Ubicación</span>
+              <div class="dato-row">
+                <span class="dato-label">Código Postal</span>
+                <span class="dato-valor" *ngIf="institucion.codigo_postal">{{ institucion.codigo_postal }}</span>
+                <span class="dato-valor sin-geo" *ngIf="!institucion.codigo_postal">—</span>
+              </div>
+
+              <div class="dato-row">
+                <span class="dato-label">Estado</span>
+                <span class="dato-valor">{{ institucion.estado }}</span>
+              </div>
+
+              <div class="dato-row">
+                <span class="dato-label">Ciudad</span>
+                <span class="dato-valor">{{ institucion.ciudad }}</span>
+              </div>
+
+              <div class="dato-row">
+                <span class="dato-label">Municipio</span>
+                <span class="dato-valor" *ngIf="institucion.municipio">{{ institucion.municipio }}</span>
+                <span class="dato-valor sin-geo" *ngIf="!institucion.municipio">—</span>
+              </div>
+
+              <div class="dato-row">
+                <span class="dato-label">Colonia</span>
+                <span class="dato-valor" *ngIf="institucion.colonia">{{ institucion.colonia }}</span>
+                <span class="dato-valor sin-geo" *ngIf="!institucion.colonia">—</span>
+              </div>
+
+              <div class="dato-row ubicacion-row">
+                <span class="dato-label">Dirección</span>
                 <div class="dato-ubicacion-val">
-                  <span class="dato-valor" *ngIf="!cargandoGeo && direccionGeo">{{ direccionGeo }}</span>
-                  <span class="dato-valor sin-geo" *ngIf="!cargandoGeo && !direccionGeo">Coordenadas registradas</span>
-                  <div class="skeleton-line short" *ngIf="cargandoGeo"></div>
-                  <span class="ubicacion-radio-inline">
+                  <span class="dato-valor" *ngIf="!cargandoDireccion && direccionMostrar">{{ direccionMostrar }}</span>
+                  <span class="dato-valor sin-geo" *ngIf="!cargandoDireccion && !direccionMostrar">—</span>
+                  <div class="skeleton-line short" *ngIf="cargandoDireccion"></div>
+                  <span class="ubicacion-radio-inline" *ngIf="institucion.latitud && institucion.longitud">
                     Radio: <strong>{{ institucion.radio_metros || 200 }} m</strong>
                   </span>
                 </div>
               </div>
 
-              <div class="dato-row" *ngIf="!tieneUbicacion()">
-                <span class="dato-label">Ubicación</span>
-                <span class="dato-valor sin-geo">Sin validación geográfica</span>
-              </div>
             </div>
           </div>
 
