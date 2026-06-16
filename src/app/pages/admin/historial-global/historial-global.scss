@@ -161,13 +161,15 @@
     font-family: 'Montserrat', sans-serif;
     font-size: 11px; font-weight: 700; color: var(--dark); letter-spacing: 0.5px;
 
-    &:nth-child(1) { width: 28%; }  // USUARIO
-    &:nth-child(2) { width: 22%; }  // PUNTO DE ACCESO
-    &:nth-child(3) { width: 20%; }  // FECHA Y HORA
-    &:nth-child(4) { width: 18%; }  // RESULTADO
-    &:nth-child(5) { width: 12%; }  // (vacío — ver detalle)
-  }
+    
+  &:nth-child(1) { width: 28%; padding-left: 88px; }
+  &:nth-child(2) { width: 22%; padding-left: 18px; }
+  &:nth-child(3) { width: 20%; padding-left: 25px; }
+  &:nth-child(4) { width: 18%; padding-left: 25px; }
+  &:nth-child(5) { width: 12%; padding-left: 18px; }
 }
+  }
+
 
 // ─────────────────────────────────────────────
 //  FILAS
@@ -203,6 +205,14 @@
       .ver-detalle-hint { opacity: 1; }
     }
   }
+
+ 
+  td:nth-child(1) { padding-left: 30px; }
+  td:nth-child(2) { padding-left: 38px; }
+  td:nth-child(3) { padding-left: 18px; }
+  td:nth-child(4) { padding-left: 18px; }
+  td:nth-child(5) { padding-left: 35px; }
+
 }
 
 // ─────────────────────────────────────────────
@@ -280,12 +290,12 @@ td.col-usuario {
 // ─────────────────────────────────────────────
 //  VER DETALLE HINT
 // ─────────────────────────────────────────────
-.col-accion { text-align: center; }
 
 .ver-detalle-hint {
   font-family: 'Montserrat', sans-serif;
   font-size: 12px; font-weight: 700; color: var(--purple);
-  opacity: 0; transition: opacity 0.2s ease; white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.2s ease; white-space: nowrap;
 }
 
 // ─────────────────────────────────────────────

@@ -104,7 +104,7 @@
 
         <div class="filtro-grupo search-grupo">
           <input class="search-input" type="text" placeholder="Buscar usuario..."
-            [(ngModel)]="busqueda" (keyup.enter)="buscar()" />
+          [(ngModel)]="busquedaValue" (keyup.enter)="buscar()" />
           <button class="btn-buscar" (click)="buscar()">BUSCAR</button>
         </div>
       </div>
@@ -170,7 +170,7 @@
               </td>
               <td>
                 <span class="resultado-badge" [ngClass]="r.exitoso ? 'exitoso' : 'denegado'">
-                  {{ r.exitoso ? '●' : '✕' }} {{ r.exitoso ? 'Exitoso' : 'Denegado' }}
+                  {{ r.exitoso ? '' : '' }} {{ r.exitoso ? 'Exitoso' : 'Denegado' }}
                 </span>
               </td>
             </tr>

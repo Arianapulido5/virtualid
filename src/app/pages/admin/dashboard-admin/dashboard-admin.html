@@ -27,7 +27,7 @@
               Sin pendientes
             </span>
           </div>
-          <div class="stat-card">
+          <div class="stat-card clickeable" (click)="irAccesosHoy()">
             <span class="stat-label">ACCESOS HOY</span>
             <span class="stat-value">{{ stats.accesos_hoy | number }}</span>
             <span class="stat-trend positive" *ngIf="stats.accesos_hoy > 0">
@@ -35,8 +35,8 @@
             </span>
             <span class="stat-trend" *ngIf="stats.accesos_hoy === 0">Sin accesos hoy</span>
           </div>
-          <div class="stat-card">
-            <span class="stat-label">ACCESOS DENEGADOS HOY</span>
+            <div class="stat-card clickeable" (click)="irDenegadosHoy()">
+              <span class="stat-label">ACCESOS DENEGADOS HOY</span>
             <span class="stat-value">{{ stats.accesos_denegados_hoy | number }}</span>
             <span class="stat-trend danger" *ngIf="stats.accesos_denegados_hoy > 0">
               ↑ {{ stats.accesos_denegados_hoy }} hoy

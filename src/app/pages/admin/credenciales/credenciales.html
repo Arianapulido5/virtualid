@@ -68,7 +68,7 @@
                 <td class="col-estado">
                   <span class="estado-badge" [ngClass]="c.estado.toLowerCase()">
                     <span class="estado-dot">
-                      {{ c.estado === 'Pendiente' ? '⏳' : c.estado === 'Activa' ? '●' : '✕' }}
+                      {{ c.estado === 'Pendiente' ? '' : c.estado === 'Activa' ? '' : '' }}
                     </span>
                     {{ c.estado }}
                   </span>
@@ -105,15 +105,6 @@
                *ngIf="credencialesFiltradas().length === 0">
             No se encontraron credenciales.
           </div>
-        </div>
-
-        <!-- PAGINACIÓN fuera del scroll, siempre visible -->
-        <div class="paginacion">
-          <button class="pag-btn" [disabled]="paginaActual === 1" (click)="paginaActual = paginaActual - 1">‹</button>
-          <button class="pag-btn" [class.active]="paginaActual === 1" (click)="paginaActual = 1">1</button>
-          <button class="pag-btn" [class.active]="paginaActual === 2" (click)="paginaActual = 2">2</button>
-          <button class="pag-btn" [class.active]="paginaActual === 3" (click)="paginaActual = 3">3</button>
-          <button class="pag-btn" (click)="paginaActual = paginaActual + 1">›</button>
         </div>
 
       </div>

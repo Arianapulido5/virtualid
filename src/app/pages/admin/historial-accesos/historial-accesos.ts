@@ -1,5 +1,5 @@
 // src/app/pages/admin/historial-accesos/historial-accesos.ts
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -44,7 +44,7 @@ interface PuntoInfo {
   templateUrl: './historial-accesos.html',
   styleUrls: ['./historial-accesos.scss']
 })
-export class HistorialAccesos implements OnInit {
+export class HistorialAccesos implements OnInit, OnDestroy {
 
   cargando   = true;
   procesando = false;
@@ -56,8 +56,20 @@ export class HistorialAccesos implements OnInit {
   errorFecha      = '';
   filtroResultado = 'todos';
   filtroTipo      = 'todos';
-  busqueda        = '';
   paginaActual    = 1;
+
+  private _busqueda = '';
+  private busquedaTimeout: any;
+
+  get busquedaValue(): string { return this._busqueda; }
+  set busquedaValue(v: string) {
+    this._busqueda = v;
+    clearTimeout(this.busquedaTimeout);
+    this.busquedaTimeout = setTimeout(() => {
+      this.paginaActual = 1;
+      this.cargar();
+    }, 350);
+  }
 
   punto: PuntoInfo = {
     id: 0, nombre: '', descripcion: '', tipo: '',
@@ -70,13 +82,11 @@ export class HistorialAccesos implements OnInit {
     total_registros: 0, por_pagina: 20
   };
 
-  // ── Modal confirmación ──────────────────────────────────────────────────────
   confirmVisible = false;
   confirmTitulo  = '';
   confirmMensaje = '';
   private confirmCallback: (() => void) | null = null;
 
-  // ── Modal resultado ─────────────────────────────────────────────────────────
   modalVisible = false;
   modalTitulo  = '';
   modalMensaje = '';
@@ -97,11 +107,14 @@ export class HistorialAccesos implements OnInit {
     this.cargar();
   }
 
+  ngOnDestroy(): void {
+    clearTimeout(this.busquedaTimeout);
+  }
+
   private get headers(): HttpHeaders {
     return new HttpHeaders({ Authorization: `Bearer ${localStorage.getItem('token') ?? ''}` });
   }
 
-  // ── Carga de datos ──────────────────────────────────────────────────────────
   cargar(): void {
     this.cargando = true;
     this.cdr.detectChanges();
@@ -119,7 +132,7 @@ export class HistorialAccesos implements OnInit {
       params['periodo'] = this.periodo;
     }
 
-    if (this.busqueda.trim()) params['busqueda'] = this.busqueda.trim();
+    if (this._busqueda.trim()) params['busqueda'] = this._busqueda.trim();
 
     const query = new URLSearchParams(params).toString();
     const url   = `${this.apiBase}/historial/punto/${this.puntoId}?${query}`;
@@ -163,7 +176,7 @@ export class HistorialAccesos implements OnInit {
     this.cargar();
   }
 
-  buscar(): void        { this.paginaActual = 1; this.cargar(); }
+  buscar(): void         { this.paginaActual = 1; this.cargar(); }
   onFiltroChange(): void { this.paginaActual = 1; this.cargar(); }
 
   irPagina(p: number): void {
@@ -182,7 +195,6 @@ export class HistorialAccesos implements OnInit {
     return rango;
   }
 
-  // ── Eliminar punto de acceso ────────────────────────────────────────────────
   pedirEliminarPunto(): void {
     this.pedirConfirmacion(
       'Eliminar punto de acceso',
@@ -202,24 +214,15 @@ export class HistorialAccesos implements OnInit {
       next: () => {
         this.procesando         = false;
         this._redirigirAlCerrar = true;
-        this.mostrarResultado(
-          'Punto eliminado',
-          `"${this.punto.nombre}" ha sido eliminado correctamente del sistema.`,
-          'exito'
-        );
+        this.mostrarResultado('Punto eliminado', `"${this.punto.nombre}" ha sido eliminado correctamente del sistema.`, 'exito');
       },
       error: (err) => {
         this.procesando = false;
-        this.mostrarResultado(
-          'Error al eliminar',
-          err?.error?.message ?? 'No se pudo eliminar el punto de acceso.',
-          'error'
-        );
+        this.mostrarResultado('Error al eliminar', err?.error?.message ?? 'No se pudo eliminar el punto de acceso.', 'error');
       }
     });
   }
 
-  // ── Modales ─────────────────────────────────────────────────────────────────
   private pedirConfirmacion(titulo: string, mensaje: string, accion: () => void): void {
     this.confirmTitulo   = titulo;
     this.confirmMensaje  = mensaje;
@@ -257,7 +260,6 @@ export class HistorialAccesos implements OnInit {
     this.cdr.detectChanges();
   }
 
-  // ── Helpers de vista ────────────────────────────────────────────────────────
   iniciales(r: Registro): string {
     return (r.nombre[0] + r.apellido_paterno[0]).toUpperCase();
   }
@@ -286,7 +288,7 @@ export class HistorialAccesos implements OnInit {
   detalle(r: Registro): string {
     if (!r.exitoso && r.motivo_denegacion) return `⚠ ${r.motivo_denegacion}`;
     if (!r.exitoso) return '⚠ Acceso denegado';
-    return `Credencial válida · ${r.numero_id ?? ''}`;
+    return `Credencial válida `;
   }
 
   esAdvertencia(r: Registro): boolean {

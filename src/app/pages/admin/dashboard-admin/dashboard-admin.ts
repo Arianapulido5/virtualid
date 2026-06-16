@@ -138,4 +138,16 @@ export class DashboardAdmin implements OnInit {
     if (diff < 86400) return `Hace ${Math.floor(diff / 3600)}h`;
     return `Hace ${Math.floor(diff / 86400)}d`;
   }
+
+  irAccesosHoy(): void {
+  this.router.navigate(['/admin/historial-global'], {
+    queryParams: { periodo: 'hoy', resultado: 'todos' }
+  });
+}
+
+irDenegadosHoy(): void {
+  this.router.navigate(['/admin/historial-global'], {
+    queryParams: { periodo: 'hoy', resultado: 'denegado' }
+  });
+}
 }

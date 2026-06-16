@@ -87,7 +87,7 @@
               <span class="dato-val" style="text-transform:capitalize"
                     [style.color]="credencial.estado === 'activa' ? '#2e7d32' :
                                    credencial.estado === 'revocada' ? '#A93845' : '#e65100'">
-                ● {{ credencial.estado }}
+                 {{ credencial.estado }}
               </span>
             </div>
           </div>
@@ -139,7 +139,7 @@
             <div class="verif-row" *ngFor="let v of verificacion">
               <span class="verif-label">{{ v.label }}</span>
               <span class="verif-resultado" [ngClass]="v.tipo">
-                {{ v.tipo === 'ok' ? '' : v.tipo === 'warn' ? '—' : '' }}
+                {{ v.tipo === 'ok' ? '' : v.tipo === 'warn' ? '' : '' }}
                 {{ v.resultado }}
               </span>
             </div>

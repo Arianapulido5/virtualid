@@ -2,7 +2,7 @@
 
   <app-sidebar-admin paginaActiva="usuarios" />
 
-  <!-- ══ MODAL CONFIRMACIÓN (¿estás seguro?) ══ -->
+  <!-- ══ MODAL CONFIRMACIÓN ══ -->
   <div class="modal-overlay" *ngIf="confirmVisible">
     <div class="modal-card">
       <div class="modal-icon confirm-icon">?</div>
@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <!-- ══ MODAL RESULTADO (éxito / error) ══ -->
+  <!-- ══ MODAL RESULTADO ══ -->
   <div class="modal-overlay" *ngIf="modalVisible">
     <div class="modal-card">
       <div class="modal-icon" [ngClass]="modalTipo">
@@ -54,10 +54,10 @@
           {{ usuario.bloqueado ? '🔓 Desbloquear usuario' : '🔒 Bloquear usuario' }}
         </button>
         <button class="btn-mensaje" (click)="abrirMensaje()" [disabled]="procesando">
-           Enviar mensaje
+          Enviar mensaje
         </button>
         <button class="btn-eliminar" (click)="confirmarEliminar()" [disabled]="procesando">
-           Eliminar usuario
+          Eliminar usuario
         </button>
       </div>
 
@@ -91,7 +91,6 @@
               <div class="user-datos">
                 <span class="user-nombre">{{ usuario.nombre }}</span>
                 <span class="user-correo">{{ usuario.correo }}</span>
-                <span class="user-tipo">{{ usuario.tipo }}</span>
               </div>
             </div>
 
@@ -99,6 +98,10 @@
               <div class="info-row">
                 <span class="info-label">No. Identificación</span>
                 <span class="info-valor">{{ usuario.noId }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Tipo</span>
+                <span class="info-valor">{{ usuario.tipo }}</span>
               </div>
               <div class="info-row">
                 <span class="info-label">Teléfono</span>
@@ -109,8 +112,28 @@
                 <span class="info-valor">{{ usuario.fechaNacimiento }}</span>
               </div>
               <div class="info-row">
+                <span class="info-label">Código Postal</span>
+                <span class="info-valor">{{ usuario.codigo_postal }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Estado</span>
+                <span class="info-valor">{{ usuario.estado }}</span>
+              </div>
+              <div class="info-row">
                 <span class="info-label">Ciudad</span>
                 <span class="info-valor">{{ usuario.ciudad }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Municipio</span>
+                <span class="info-valor">{{ usuario.municipio }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Colonia</span>
+                <span class="info-valor">{{ usuario.colonia }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Dirección</span>
+                <span class="info-valor">{{ usuario.direccion }}</span>
               </div>
             </div>
           </div>
@@ -142,7 +165,6 @@
                   ● {{ c.estado }}
                 </span>
 
-                <!-- Activa o pendiente: mostrar Revocar -->
                 <button
                   class="btn-revocar-cred"
                   *ngIf="c.estado !== 'revocada'"
@@ -150,7 +172,6 @@
                   Revocar
                 </button>
 
-                <!-- Revocada: mostrar Rehabilitar -->
                 <button
                   class="btn-rehabilitar-cred"
                   *ngIf="c.estado === 'revocada'"

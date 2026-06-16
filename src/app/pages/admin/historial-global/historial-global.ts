@@ -5,6 +5,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { SidebarAdminComponent } from '../../../shared/sidebar-admin/sidebar-admin';
 import { environment } from '../../../../environments/environment';
+import { ActivatedRoute } from '@angular/router';
+
 
 interface Registro {
   id:                number;
@@ -44,13 +46,22 @@ export class HistorialGlobal implements OnInit {
   registros: Registro[]    = [];
   puntos:    PuntoFiltro[] = [];
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private cdr: ChangeDetectorRef
-  ) {}
+// Agrégalo al constructor:
+constructor(
+  private http: HttpClient,
+  private router: Router,
+  private route: ActivatedRoute,   // ← nuevo
+  private cdr: ChangeDetectorRef
+) {}
 
-  ngOnInit(): void { this.cargar(); }
+  ngOnInit(): void {
+  this.route.queryParams.subscribe(params => {
+    if (params['periodo'])    this.filtroPeriodo   = params['periodo'];
+    if (params['resultado'])  this.filtroResultado = params['resultado'];
+    if (params['punto_id'])   this.filtroPunto     = params['punto_id'];
+    this.cargar();
+  });
+}
 
   private headers(): HttpHeaders {
     return new HttpHeaders({ Authorization: `Bearer ${localStorage.getItem('token') ?? ''}` });

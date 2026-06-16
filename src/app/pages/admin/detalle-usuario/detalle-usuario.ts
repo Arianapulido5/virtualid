@@ -43,7 +43,9 @@ export class DetalleUsuario implements OnInit {
     id: 0, iniciales: '', avatarColor: 'purple',
     nombre: '', correo: '', tipo: '',
     noId: '', telefono: '—', fechaNacimiento: '—',
-    ciudad: '—', bloqueado: false
+    codigo_postal: '—', estado: '—', ciudad: '—',
+    municipio: '—', colonia: '—', direccion: '—',
+    bloqueado: false
   };
 
   credenciales: Credencial[] = [];
@@ -113,11 +115,16 @@ export class DetalleUsuario implements OnInit {
           correo:          u.correo,
           tipo:            u.tipo === 'empleado' ? 'Empleado' : 'Estudiante',
           noId:            u.numero_empleado,
-          telefono:        u.telefono || '—',
+          telefono:        u.telefono        || '—',
           fechaNacimiento: u.fecha_nacimiento
             ? new Date(u.fecha_nacimiento).toLocaleDateString('es-MX') : '—',
-          ciudad:   u.ciudad && u.estado ? `${u.ciudad}, ${u.estado}` : (u.ciudad || '—'),
-          bloqueado: u.bloqueado
+          codigo_postal:   u.codigo_postal   || '—',
+          estado:          u.estado          || '—',
+          ciudad:          u.ciudad          || '—',
+          municipio:       u.municipio       || '—',
+          colonia:         u.colonia         || '—',
+          direccion:       u.direccion       || '—',
+          bloqueado:       u.bloqueado
         };
         this.cargando = false;
         this.cdr.detectChanges();
