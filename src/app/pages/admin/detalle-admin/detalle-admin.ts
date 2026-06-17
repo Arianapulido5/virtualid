@@ -65,15 +65,21 @@ export class DetalleAdmin implements OnInit {
         if (!found) { this.router.navigate(['/admin/administradores']); return; }
 
         this.admin = {
-          id:          found.id,
-          iniciales:   (found.nombre.charAt(0) + found.apellido_paterno.charAt(0)).toUpperCase(),
-          avatarColor: this.colorPorId(found.id),
-          nombre:      `${found.nombre} ${found.apellido_paterno} ${found.apellido_materno}`,
-          correo:      found.correo,
-          noId:        found.numero_empleado,
-          esPrincipal: found.es_principal,
-          creado_en:   found.creado_en
-        };
+            id:           found.id,
+            iniciales:    (found.nombre.charAt(0) + found.apellido_paterno.charAt(0)).toUpperCase(),
+            avatarColor:  this.colorPorId(found.id),
+            nombre:       `${found.nombre} ${found.apellido_paterno} ${found.apellido_materno}`,
+            correo:       found.correo,
+            noId:         found.numero_empleado,
+            esPrincipal:  found.es_principal,
+            creado_en:    found.creado_en,
+            codigo_postal: found.codigo_postal ?? '',
+            estado:        found.estado        ?? '',
+            ciudad:        found.ciudad        ?? '',
+            municipio:     found.municipio     ?? '',
+            colonia:       found.colonia       ?? '',
+            direccion:     found.direccion     ?? '',
+          };
         this.cargando = false;
         this.cdr.detectChanges();
       },

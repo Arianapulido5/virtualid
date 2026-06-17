@@ -30,9 +30,14 @@
 .admin-layout { display: flex; min-height: 100vh; background: var(--bg); width: 100%; }
 
 .main-content {
-  margin-left: 210px; margin-top: 52px; flex: 1; overflow-y: auto;
-  min-height: calc(100vh - 52px); box-sizing: border-box;
+  margin-left: 210px; margin-top: 52px; flex: 1;
+  overflow-y: auto;
+  height: calc(100vh - 52px);
+  box-sizing: border-box;
   width: calc(100% - 210px); animation: fadeIn 0.4s ease both;
+
+  scrollbar-width: none;
+&::-webkit-scrollbar { display: none; }
 }
 
 .page-body {

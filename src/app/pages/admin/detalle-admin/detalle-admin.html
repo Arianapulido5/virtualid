@@ -104,6 +104,30 @@
                   <span *ngIf="!admin.esPrincipal">Secundario</span>
                 </span>
               </div>
+              <div class="info-row" *ngIf="admin.codigo_postal">
+                <span class="info-label">Código postal</span>
+                <span class="info-valor">{{ admin.codigo_postal }}</span>
+              </div>
+              <div class="info-row" *ngIf="admin.estado">
+                <span class="info-label">Estado</span>
+                <span class="info-valor">{{ admin.estado }}</span>
+              </div>
+              <div class="info-row" *ngIf="admin.ciudad">
+                <span class="info-label">Ciudad</span>
+                <span class="info-valor">{{ admin.ciudad }}</span>
+              </div>
+              <div class="info-row" *ngIf="admin.municipio">
+                <span class="info-label">Municipio</span>
+                <span class="info-valor">{{ admin.municipio }}</span>
+              </div>
+              <div class="info-row" *ngIf="admin.colonia">
+                <span class="info-label">Colonia</span>
+                <span class="info-valor">{{ admin.colonia }}</span>
+              </div>
+              <div class="info-row" *ngIf="admin.direccion">
+                <span class="info-label">Dirección</span>
+                <span class="info-valor">{{ admin.direccion }}</span>
+              </div>
               <div class="info-row">
                 <span class="info-label">Miembro desde</span>
                 <span class="info-valor">{{ formatearFecha(admin.creado_en) }}</span>

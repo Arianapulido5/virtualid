@@ -32,7 +32,7 @@
         <div class="form-header">
           <h1 class="form-title">Editar mis datos</h1>
           <p class="form-sub">
-            Actualiza tu nombre, correo institucional o contraseña de acceso al panel.
+            Actualiza tu información personal, correo institucional o contraseña de acceso al panel.
             El correo debe pertenecer al dominio
             <strong *ngIf="dominio">{{ dominio }}</strong>.
           </p>
@@ -77,7 +77,66 @@
             <span class="field-error" *ngIf="errores['correo']">{{ errores['correo'] }}</span>
           </div>
 
-          <!-- SEPARADOR -->
+          <!-- SEPARADOR DIRECCIÓN -->
+          <p class="section-label">Información personal</p>
+
+          <!-- CP + ESTADO -->
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">Código Postal</label>
+              <div class="input-wrapper">
+                <input class="field-input" type="text" placeholder="5 dígitos" maxlength="5"
+                  [(ngModel)]="codigo_postal" (ngModelChange)="validarCodigoPostal()"
+                  [class.input-error]="errores['codigo_postal']" />
+                <span *ngIf="cargandoCP" class="spinner"
+                  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;border-width:2px;border-color:rgba(77,15,96,0.2);border-top-color:#4D0F60;border-style:solid;border-radius:50%;animation:spin 0.7s linear infinite;"></span>
+              </div>
+              <span class="field-error" *ngIf="errores['codigo_postal']">{{ errores['codigo_postal'] }}</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Estado</label>
+              <select class="field-input" [(ngModel)]="estado">
+                <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+                <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- CIUDAD + MUNICIPIO -->
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">Ciudad</label>
+              <select class="field-input" [(ngModel)]="ciudad" (ngModelChange)="onCiudadChange()">
+                <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+                <option *ngFor="let c of ciudadesDelEstado" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Municipio</label>
+              <select class="field-input" [(ngModel)]="municipio" (ngModelChange)="onMunicipioChange()">
+                <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+                <option *ngFor="let m of municipiosDelCiudad" [value]="m">{{ m }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- COLONIA -->
+          <div class="field">
+            <label class="field-label">Colonia</label>
+            <select class="field-input" [(ngModel)]="colonia">
+              <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+              <option *ngFor="let c of coloniasDelMunicipio" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+
+          <!-- DIRECCIÓN -->
+          <div class="field">
+            <label class="field-label">Dirección</label>
+            <input class="field-input" type="text" placeholder="Calle, número"
+              [(ngModel)]="direccion" />
+          </div>
+
+          <!-- SEPARADOR CONTRASEÑA -->
           <p class="section-label">
             Cambiar contraseña
             <span class="section-opcional">(opcional — déjalo vacío si no quieres cambiarla)</span>

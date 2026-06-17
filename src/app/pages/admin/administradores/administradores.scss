@@ -272,7 +272,8 @@
 .card-agregar {
   border: 2px dashed rgba(77,15,96,0.22); background: transparent;
   align-items: center; justify-content: center; cursor: pointer;
-  min-height: 240px; gap: 14px; padding: 32px 22px;
+  align-self: stretch;   // ← cambia min-height: 240px por esto
+  gap: 14px; padding: 32px 22px;
   transition: border-color 0.3s, background 0.3s, transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s;
 
   &::before { display: none; }
