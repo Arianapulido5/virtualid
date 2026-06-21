@@ -6,12 +6,13 @@ import { SidebarAdminComponent } from '../../../shared/sidebar-admin/sidebar-adm
 import { environment } from '../../../../environments/environment';
 
 interface DiaSemana {
-  dia:           string;
-  valor:         number;
-  valorEntradas: number;
-  valorSalidas:  number;
-  esHoy:         boolean;
-  esFuturo:      boolean;
+  dia:            string;
+  valor:          number;
+  valorEntradas:  number;
+  valorSalidas:   number;
+  valorDenegados: number;
+  esHoy:          boolean;
+  esFuturo:       boolean;
 }
 
 interface PuntoActivo {
@@ -22,6 +23,7 @@ interface PuntoActivo {
 interface RegistroHoy {
   creado_en:       string;
   tipo_movimiento: string;
+  exitoso:         boolean;
 }
 
 interface ReportesData {
@@ -29,7 +31,7 @@ interface ReportesData {
   total_denegados: number;
   total_salidas:   number;
   usuarios_unicos: number;
-  por_dia:         { fecha: string; total: number }[];
+  por_dia:         { fecha: string; entradas: number; salidas: number; denegados: number }[];
   registros_hoy:   RegistroHoy[];
   puntos_activos:  PuntoActivo[];
 }
@@ -49,12 +51,18 @@ export class Reportes implements OnInit {
   fechaFin       = '';
   errorFecha     = '';
 
+  fechaSeleccionada: Date = new Date();
+  semanaOffset           = 0;
+  mesOffset              = 0;
+
   totalAccesos   = 0;
   totalDenegados = 0;
   totalSalidas   = 0;
   usuariosUnicos = 0;
   diasSemana:    DiaSemana[]   = [];
   puntosActivos: PuntoActivo[] = [];
+
+  filtroActivo: 'total' | 'accesos' | 'salidas' | 'denegados' = 'total';
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
@@ -66,11 +74,79 @@ export class Reportes implements OnInit {
     return new HttpHeaders({ Authorization: `Bearer ${localStorage.getItem('token') ?? ''}` });
   }
 
+  private toLocalDateStr(d: Date): string {
+    const y   = d.getFullYear();
+    const m   = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  get esFechaHoy(): boolean {
+    return this.fechaSeleccionada.toDateString() === new Date().toDateString();
+  }
+
+  get esSemanaActual(): boolean {
+    return this.semanaOffset === 0;
+  }
+
+  get esMesActual(): boolean {
+    return this.mesOffset === 0;
+  }
+
+  get totalMovimientos(): number {
+    return this.totalAccesos + this.totalSalidas;
+  }
+
+  seleccionarFiltro(f: 'total' | 'accesos' | 'salidas' | 'denegados'): void {
+    this.filtroActivo = f;
+  }
+
+  diaAnterior(): void {
+    const nueva = new Date(this.fechaSeleccionada);
+    nueva.setDate(nueva.getDate() - 1);
+    this.fechaSeleccionada = nueva;
+    this.cargar();
+  }
+
+  diaSiguiente(): void {
+    if (this.esFechaHoy) return;
+    const nueva = new Date(this.fechaSeleccionada);
+    nueva.setDate(nueva.getDate() + 1);
+    this.fechaSeleccionada = nueva;
+    this.cargar();
+  }
+
+  semanaAnterior(): void {
+    this.semanaOffset--;
+    this.cargar();
+  }
+
+  semanaSiguiente(): void {
+    if (this.esSemanaActual) return;
+    this.semanaOffset++;
+    this.cargar();
+  }
+
+  mesAnterior(): void {
+    this.mesOffset--;
+    this.cargar();
+  }
+
+  mesSiguiente(): void {
+    if (this.esMesActual) return;
+    this.mesOffset++;
+    this.cargar();
+  }
+
   cambiarPeriodo(p: string): void {
-    this.periodo     = p;
-    this.fechaInicio = '';
-    this.fechaFin    = '';
-    this.errorFecha  = '';
+    this.periodo           = p;
+    this.fechaInicio       = '';
+    this.fechaFin          = '';
+    this.errorFecha        = '';
+    this.fechaSeleccionada = new Date();
+    this.semanaOffset      = 0;
+    this.mesOffset         = 0;
+    this.filtroActivo      = 'total';
 
     if (p === 'personalizado') {
       this.cargando = false;
@@ -96,13 +172,33 @@ export class Reportes implements OnInit {
     this.cargar();
   }
 
+  private getFechasMes(): { inicio: string; fin: string } {
+    const hoy   = new Date();
+    const anio  = hoy.getFullYear();
+    const mes   = hoy.getMonth() + this.mesOffset;
+    const inicio = new Date(anio, mes, 1);
+    const fin    = new Date(anio, mes + 1, 0);
+    return {
+      inicio: this.toLocalDateStr(inicio),
+      fin:    this.toLocalDateStr(fin)
+    };
+  }
+
   cargar(): void {
     this.cargando = true;
     this.cdr.detectChanges();
 
     let url = `${environment.apiUrl}/admin/reportes?periodo=${this.periodo}`;
+
     if (this.periodo === 'personalizado' && this.fechaInicio && this.fechaFin) {
       url = `${environment.apiUrl}/admin/reportes?fecha_inicio=${this.fechaInicio}&fecha_fin=${this.fechaFin}`;
+    } else if (this.periodo === 'hoy') {
+      url += `&fecha=${this.toLocalDateStr(this.fechaSeleccionada)}`;
+    } else if (this.periodo === 'semana' && this.semanaOffset !== 0) {
+      url += `&semana_offset=${this.semanaOffset}`;
+    } else if (this.periodo === 'mes') {
+      const { inicio, fin } = this.getFechasMes();
+      url = `${environment.apiUrl}/admin/reportes?fecha_inicio=${inicio}&fecha_fin=${fin}`;
     }
 
     this.http.get<ReportesData>(url, { headers: this.headers() }).subscribe({
@@ -131,7 +227,10 @@ export class Reportes implements OnInit {
   }
 
   get maxValor(): number {
-    return Math.max(...this.diasSemana.map(d => d.valor), 1);
+    if (this.filtroActivo === 'accesos')   return Math.max(...this.diasSemana.map(d => d.valorEntradas),  10);
+    if (this.filtroActivo === 'salidas')   return Math.max(...this.diasSemana.map(d => d.valorSalidas),   10);
+    if (this.filtroActivo === 'denegados') return Math.max(...this.diasSemana.map(d => d.valorDenegados), 10);
+    return Math.max(...this.diasSemana.map(d => d.valor), 10);
   }
 
   get porcentajeDenegados(): string {
@@ -140,47 +239,100 @@ export class Reportes implements OnInit {
   }
 
   get etiquetaPeriodo(): string {
-    if (this.periodo === 'hoy')    return 'hoy';
-    if (this.periodo === 'semana') return 'esta semana';
-    if (this.periodo === 'mes')    return 'este mes';
+    if (this.periodo === 'hoy')    return this.esFechaHoy ? 'Hoy' : this.toLocalDateStr(this.fechaSeleccionada);
+    if (this.periodo === 'semana') return this.esSemanaActual ? 'Esta semana' : this.tituloGrafica;
+    if (this.periodo === 'mes')    return this.tituloGrafica;
     if (this.periodo === 'personalizado' && this.fechaInicio && this.fechaFin)
       return `${this.fechaInicio} → ${this.fechaFin}`;
     return '';
   }
 
   get tituloGrafica(): string {
-    return this.periodo === 'hoy' ? 'Accesos por hora' : 'Accesos por día';
+    if (this.periodo === 'hoy') {
+      const opciones: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+      const texto    = this.fechaSeleccionada.toLocaleDateString('es-MX', opciones);
+      const textoCap = texto.charAt(0).toUpperCase() + texto.slice(1);
+      return this.esFechaHoy ? `Hoy, ${texto}` : textoCap;
+    }
+    if (this.periodo === 'semana') {
+      const hoy        = new Date();
+      const inicioSemana = new Date(hoy);
+      inicioSemana.setDate(hoy.getDate() - hoy.getDay() + (this.semanaOffset * 7));
+      const finSemana  = new Date(inicioSemana);
+      finSemana.setDate(inicioSemana.getDate() + 6);
+      const ops: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' };
+      const ini  = inicioSemana.toLocaleDateString('es-MX', ops);
+      const fin  = finSemana.toLocaleDateString('es-MX', ops);
+      const anio = finSemana.getFullYear();
+      return this.esSemanaActual ? `Esta semana, ${ini} – ${fin} ${anio}` : `${ini} – ${fin} ${anio}`;
+    }
+    if (this.periodo === 'mes') {
+      const hoy  = new Date();
+      const fecha = new Date(hoy.getFullYear(), hoy.getMonth() + this.mesOffset, 1);
+      const ops: Intl.DateTimeFormatOptions = { month: 'long', year: 'numeric' };
+      const texto = fecha.toLocaleDateString('es-MX', ops);
+      return texto.charAt(0).toUpperCase() + texto.slice(1);
+    }
+    return 'Accesos por día';
   }
 
   private construirDias(
-    porDia:       { fecha: string; total: number }[],
+    porDia:       { fecha: string; entradas: number; salidas: number; denegados: number }[],
     registrosHoy: RegistroHoy[]
   ): DiaSemana[] {
     const hoy    = new Date();
     const result: DiaSemana[] = [];
 
     if (this.periodo === 'hoy') {
+      const esHoyReal  = this.esFechaHoy;
       const horaActual = hoy.getHours();
 
-      // Contamos por hora LOCAL a partir del timestamp real, separando
-      // entradas y salidas (evita desfases de timezone del backend).
-      const entradasPorHora = new Array(24).fill(0);
-      const salidasPorHora  = new Array(24).fill(0);
+      const entradasPorHora  = new Array(24).fill(0);
+      const salidasPorHora   = new Array(24).fill(0);
+      const denegadosPorHora = new Array(24).fill(0);
+
       for (const r of registrosHoy) {
         const h = new Date(r.creado_en).getHours();
         if (h < 0 || h >= 24) continue;
         if (r.tipo_movimiento === 'salida') salidasPorHora[h]++;
         else entradasPorHora[h]++;
+        if (r.exitoso === false) denegadosPorHora[h]++;
       }
 
       for (let h = 0; h < 24; h++) {
         result.push({
-          dia:           h.toString().padStart(2, '0') + 'h',
-          valor:         entradasPorHora[h] + salidasPorHora[h],
-          valorEntradas: entradasPorHora[h],
-          valorSalidas:  salidasPorHora[h],
-          esHoy:         h === horaActual,
-          esFuturo:      h > horaActual
+          dia:            h.toString().padStart(2, '0') + 'h',
+          valor:          entradasPorHora[h] + salidasPorHora[h],
+          valorEntradas:  entradasPorHora[h],
+          valorSalidas:   salidasPorHora[h],
+          valorDenegados: denegadosPorHora[h],
+          esHoy:          esHoyReal && h === horaActual,
+          esFuturo:       esHoyReal && h > horaActual
+        });
+      }
+      return result;
+    }
+
+    if (this.periodo === 'mes') {
+      const anio   = hoy.getFullYear();
+      const mes    = hoy.getMonth() + this.mesOffset;
+      const inicio = new Date(anio, mes, 1);
+      const diasEnMes = new Date(anio, mes + 1, 0).getDate();
+
+      for (let i = 0; i < diasEnMes; i++) {
+        const d        = new Date(anio, mes, i + 1);
+        const fechaStr = this.toLocalDateStr(d);
+        const encontrado = porDia.find(p =>
+          new Date(p.fecha).toISOString().split('T')[0] === fechaStr
+        );
+        result.push({
+          dia:            (i + 1).toString(),
+          valor:          encontrado ? (encontrado.entradas + encontrado.salidas) : 0,
+          valorEntradas:  encontrado ? encontrado.entradas  : 0,
+          valorSalidas:   encontrado ? encontrado.salidas   : 0,
+          valorDenegados: encontrado ? encontrado.denegados : 0,
+          esHoy:          d.toDateString() === hoy.toDateString(),
+          esFuturo:       d > hoy
         });
       }
       return result;
@@ -200,34 +352,39 @@ export class Reportes implements OnInit {
           new Date(p.fecha).toISOString().split('T')[0] === fechaStr
         );
         result.push({
-          dia:           d.getDate().toString(),
-          valor:         encontrado ? encontrado.total : 0,
-          valorEntradas: encontrado ? encontrado.total : 0,
-          valorSalidas:  0,
-          esHoy:         d.toDateString() === hoy.toDateString(),
-          esFuturo:      false
+          dia:            d.getDate().toString(),
+          valor:          encontrado ? (encontrado.entradas + encontrado.salidas) : 0,
+          valorEntradas:  encontrado ? encontrado.entradas  : 0,
+          valorSalidas:   encontrado ? encontrado.salidas   : 0,
+          valorDenegados: encontrado ? encontrado.denegados : 0,
+          esHoy:          d.toDateString() === hoy.toDateString(),
+          esFuturo:       false
         });
       }
       return result;
     }
 
-    const dias = this.periodo === 'mes' ? 30 : 7;
-    for (let i = dias - 1; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(hoy.getDate() - i);
+    // semana con offset
+    const baseDate = new Date(hoy);
+    if (this.periodo === 'semana' && this.semanaOffset !== 0) {
+      baseDate.setDate(hoy.getDate() + (this.semanaOffset * 7));
+    }
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(baseDate);
+      d.setDate(baseDate.getDate() - i);
       const fechaStr   = d.toISOString().split('T')[0];
       const encontrado = porDia.find(p =>
         new Date(p.fecha).toISOString().split('T')[0] === fechaStr
       );
       result.push({
-        dia:           this.periodo === 'mes'
-                          ? d.getDate().toString()
-                          : ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()],
-        valor:         encontrado ? encontrado.total : 0,
-        valorEntradas: encontrado ? encontrado.total : 0,
-        valorSalidas:  0,
-        esHoy:         i === 0,
-        esFuturo:      false
+        dia:            ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()],
+        valor:          encontrado ? (encontrado.entradas + encontrado.salidas) : 0,
+        valorEntradas:  encontrado ? encontrado.entradas  : 0,
+        valorSalidas:   encontrado ? encontrado.salidas   : 0,
+        valorDenegados: encontrado ? encontrado.denegados : 0,
+        esHoy:          d.toDateString() === hoy.toDateString(),
+        esFuturo:       false
       });
     }
     return result;

@@ -36,58 +36,120 @@
       <ng-container *ngIf="!cargando">
 
         <div class="stats-grid">
-          <div class="stat-card">
-            <span class="stat-label">TOTAL ACCESOS</span>
+
+          <div class="stat-card filtrable" [class.selected]="filtroActivo === 'total'"
+               (click)="seleccionarFiltro('total')">
+            <span class="stat-label">TOTAL</span>
+            <span class="stat-value">{{ totalMovimientos | number }}</span>
+            <span class="stat-sub">{{ etiquetaPeriodo }}</span>
+          </div>
+
+          <div class="stat-card filtrable" [class.selected]="filtroActivo === 'accesos'"
+               (click)="seleccionarFiltro('accesos')">
+            <span class="stat-label">ACCESOS</span>
             <span class="stat-value">{{ totalAccesos | number }}</span>
             <span class="stat-sub">{{ etiquetaPeriodo }}</span>
           </div>
-          <div class="stat-card">
+
+          <div class="stat-card filtrable" [class.selected]="filtroActivo === 'salidas'"
+               (click)="seleccionarFiltro('salidas')">
             <span class="stat-label">SALIDAS</span>
             <span class="stat-value">{{ totalSalidas | number }}</span>
             <span class="stat-sub">{{ etiquetaPeriodo }}</span>
           </div>
-          <div class="stat-card">
+
+          <div class="stat-card filtrable" [class.selected]="filtroActivo === 'denegados'"
+               (click)="seleccionarFiltro('denegados')">
             <span class="stat-label">DENEGADOS</span>
             <span class="stat-value">{{ totalDenegados | number }}</span>
-            <span class="stat-sub danger">{{ porcentajeDenegados }} del total</span>
+            <span class="stat-sub danger">{{ etiquetaPeriodo }}</span>
           </div>
+
           <div class="stat-card">
             <span class="stat-label">USUARIOS ÚNICOS</span>
             <span class="stat-value">{{ usuariosUnicos | number }}</span>
             <span class="stat-sub">con al menos 1 acceso</span>
           </div>
+
         </div>
 
         <div class="bottom-grid">
 
           <div class="card chart-card">
+
+           <div class="chart-header" *ngIf="periodo === 'hoy'; else semanaONormal">
+              <button class="nav-dia-btn" (click)="diaAnterior()" title="Día anterior">‹</button>
+              <h3 class="card-title">{{ tituloGrafica }}</h3>
+              <button class="nav-dia-btn" (click)="diaSiguiente()" [disabled]="esFechaHoy" title="Día siguiente">›</button>
+            </div>
+
+            <ng-template #semanaONormal>
+              <div class="chart-header" *ngIf="periodo === 'semana'; else mesONormal">
+                <button class="nav-dia-btn" (click)="semanaAnterior()" title="Semana anterior">‹</button>
+                <h3 class="card-title">{{ tituloGrafica }}</h3>
+                <button class="nav-dia-btn" (click)="semanaSiguiente()" [disabled]="esSemanaActual" title="Semana siguiente">›</button>
+              </div>
+            </ng-template>
+
+            <ng-template #mesONormal>
+              <div class="chart-header" *ngIf="periodo === 'mes'; else tituloNormal">
+                <button class="nav-dia-btn" (click)="mesAnterior()" title="Mes anterior">‹</button>
+                <h3 class="card-title">{{ tituloGrafica }}</h3>
+                <button class="nav-dia-btn" (click)="mesSiguiente()" [disabled]="esMesActual" title="Mes siguiente">›</button>
+              </div>
+            </ng-template>
+
+            <ng-template #tituloNormal>
+              <h3 class="card-title">{{ tituloGrafica }}</h3>
+            </ng-template>
+
+          <ng-template #tituloNormal>
             <h3 class="card-title">{{ tituloGrafica }}</h3>
-            <div class="chart-area" *ngIf="totalAccesos > 0">
+          </ng-template>
+
+            <div class="chart-area" *ngIf="totalMovimientos > 0 || (filtroActivo === 'denegados' && totalDenegados > 0)">
               <div class="bars-container">
                 <div class="bar-group" *ngFor="let d of diasSemana">
                   <div class="bar-wrap">
                     <div class="bar-stack">
+
+                      <!-- DENEGADOS: rojo — visible solo en "denegados" -->
+                      <div
+                        class="bar-segment denegado"
+                        *ngIf="d.valorDenegados > 0 && filtroActivo === 'denegados'"
+                        [style.height.%]="(d.valorDenegados / maxValor) * 100"
+                        [title]="d.valorDenegados + ' denegados'"
+                      ></div>
+
+                      <!-- SALIDAS: azul — visible en "total" y "salidas" -->
                       <div
                         class="bar-segment salida"
-                        *ngIf="d.valorSalidas > 0"
+                        *ngIf="d.valorSalidas > 0 && (filtroActivo === 'total' || filtroActivo === 'salidas')"
                         [style.height.%]="(d.valorSalidas / maxValor) * 100"
                         [title]="d.valorSalidas + ' salidas'"
                       ></div>
+
+                      <!-- ENTRADAS: morado — visible en "total" y "accesos" -->
                       <div
                         class="bar-segment entrada"
+                        *ngIf="d.valorEntradas > 0 && (filtroActivo === 'total' || filtroActivo === 'accesos')"
                         [class.today]="d.esHoy && periodo !== 'hoy'"
                         [style.height.%]="(d.valorEntradas / maxValor) * 100"
                         [title]="d.valorEntradas + (periodo === 'hoy' ? ' entradas' : ' accesos')"
                       ></div>
+
                     </div>
                   </div>
                   <span class="bar-label">{{ d.dia }}</span>
                 </div>
               </div>
             </div>
-            <div class="empty-state" *ngIf="totalAccesos === 0">
+
+            <div class="empty-state"
+                 *ngIf="totalMovimientos === 0 && !(filtroActivo === 'denegados' && totalDenegados > 0)">
               Sin accesos registrados en este periodo.
             </div>
+
           </div>
 
           <div class="card puntos-card">
