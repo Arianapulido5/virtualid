@@ -6,10 +6,12 @@ import { SidebarAdminComponent } from '../../../shared/sidebar-admin/sidebar-adm
 import { environment } from '../../../../environments/environment';
 
 interface DiaSemana {
-  dia:      string;
-  valor:    number;
-  esHoy:    boolean;
-  esFuturo: boolean;
+  dia:           string;
+  valor:         number;
+  valorEntradas: number;
+  valorSalidas:  number;
+  esHoy:         boolean;
+  esFuturo:      boolean;
 }
 
 interface PuntoActivo {
@@ -17,11 +19,18 @@ interface PuntoActivo {
   valor:  number;
 }
 
+interface RegistroHoy {
+  creado_en:       string;
+  tipo_movimiento: string;
+}
+
 interface ReportesData {
   total_accesos:   number;
   total_denegados: number;
+  total_salidas:   number;
   usuarios_unicos: number;
   por_dia:         { fecha: string; total: number }[];
+  registros_hoy:   RegistroHoy[];
   puntos_activos:  PuntoActivo[];
 }
 
@@ -35,13 +44,14 @@ interface ReportesData {
 export class Reportes implements OnInit {
 
   cargando       = true;
-  periodo        = 'semana';
+  periodo        = 'hoy';
   fechaInicio    = '';
   fechaFin       = '';
   errorFecha     = '';
 
   totalAccesos   = 0;
   totalDenegados = 0;
+  totalSalidas   = 0;
   usuariosUnicos = 0;
   diasSemana:    DiaSemana[]   = [];
   puntosActivos: PuntoActivo[] = [];
@@ -99,9 +109,10 @@ export class Reportes implements OnInit {
       next: (data) => {
         this.totalAccesos   = data?.total_accesos   ?? 0;
         this.totalDenegados = data?.total_denegados ?? 0;
+        this.totalSalidas   = data?.total_salidas   ?? 0;
         this.usuariosUnicos = data?.usuarios_unicos ?? 0;
         this.puntosActivos  = data?.puntos_activos  ?? [];
-        this.diasSemana     = this.construirDias(data?.por_dia ?? []);
+        this.diasSemana     = this.construirDias(data?.por_dia ?? [], data?.registros_hoy ?? []);
         this.cargando       = false;
         this.cdr.detectChanges();
       },
@@ -109,9 +120,10 @@ export class Reportes implements OnInit {
         console.error('Error cargando reportes:', err);
         this.totalAccesos   = 0;
         this.totalDenegados = 0;
+        this.totalSalidas   = 0;
         this.usuariosUnicos = 0;
         this.puntosActivos  = [];
-        this.diasSemana     = this.construirDias([]);
+        this.diasSemana     = this.construirDias([], []);
         this.cargando       = false;
         this.cdr.detectChanges();
       }
@@ -128,6 +140,7 @@ export class Reportes implements OnInit {
   }
 
   get etiquetaPeriodo(): string {
+    if (this.periodo === 'hoy')    return 'hoy';
     if (this.periodo === 'semana') return 'esta semana';
     if (this.periodo === 'mes')    return 'este mes';
     if (this.periodo === 'personalizado' && this.fechaInicio && this.fechaFin)
@@ -135,9 +148,43 @@ export class Reportes implements OnInit {
     return '';
   }
 
-  private construirDias(porDia: { fecha: string; total: number }[]): DiaSemana[] {
+  get tituloGrafica(): string {
+    return this.periodo === 'hoy' ? 'Accesos por hora' : 'Accesos por día';
+  }
+
+  private construirDias(
+    porDia:       { fecha: string; total: number }[],
+    registrosHoy: RegistroHoy[]
+  ): DiaSemana[] {
     const hoy    = new Date();
     const result: DiaSemana[] = [];
+
+    if (this.periodo === 'hoy') {
+      const horaActual = hoy.getHours();
+
+      // Contamos por hora LOCAL a partir del timestamp real, separando
+      // entradas y salidas (evita desfases de timezone del backend).
+      const entradasPorHora = new Array(24).fill(0);
+      const salidasPorHora  = new Array(24).fill(0);
+      for (const r of registrosHoy) {
+        const h = new Date(r.creado_en).getHours();
+        if (h < 0 || h >= 24) continue;
+        if (r.tipo_movimiento === 'salida') salidasPorHora[h]++;
+        else entradasPorHora[h]++;
+      }
+
+      for (let h = 0; h < 24; h++) {
+        result.push({
+          dia:           h.toString().padStart(2, '0') + 'h',
+          valor:         entradasPorHora[h] + salidasPorHora[h],
+          valorEntradas: entradasPorHora[h],
+          valorSalidas:  salidasPorHora[h],
+          esHoy:         h === horaActual,
+          esFuturo:      h > horaActual
+        });
+      }
+      return result;
+    }
 
     if (this.periodo === 'personalizado' && this.fechaInicio && this.fechaFin) {
       const inicio = new Date(this.fechaInicio);
@@ -153,10 +200,12 @@ export class Reportes implements OnInit {
           new Date(p.fecha).toISOString().split('T')[0] === fechaStr
         );
         result.push({
-          dia:      d.getDate().toString(),
-          valor:    encontrado ? encontrado.total : 0,
-          esHoy:    d.toDateString() === hoy.toDateString(),
-          esFuturo: false
+          dia:           d.getDate().toString(),
+          valor:         encontrado ? encontrado.total : 0,
+          valorEntradas: encontrado ? encontrado.total : 0,
+          valorSalidas:  0,
+          esHoy:         d.toDateString() === hoy.toDateString(),
+          esFuturo:      false
         });
       }
       return result;
@@ -171,12 +220,14 @@ export class Reportes implements OnInit {
         new Date(p.fecha).toISOString().split('T')[0] === fechaStr
       );
       result.push({
-        dia:      this.periodo === 'mes'
-                    ? d.getDate().toString()
-                    : ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()],
-        valor:    encontrado ? encontrado.total : 0,
-        esHoy:    i === 0,
-        esFuturo: false
+        dia:           this.periodo === 'mes'
+                          ? d.getDate().toString()
+                          : ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()],
+        valor:         encontrado ? encontrado.total : 0,
+        valorEntradas: encontrado ? encontrado.total : 0,
+        valorSalidas:  0,
+        esHoy:         i === 0,
+        esFuturo:      false
       });
     }
     return result;

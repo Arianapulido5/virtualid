@@ -232,7 +232,7 @@
 //  STATS GRID
 // ─────────────────────────────────────────────
 .stats-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
 }
 
 .stat-card {
@@ -243,7 +243,7 @@
   transition: box-shadow 0.25s ease, transform 0.25s cubic-bezier(.34,1.2,.64,1);
   animation: statCardIn 0.55s cubic-bezier(.34,1.2,.64,1) both;
 
-  @for $i from 1 through 3 { &:nth-child(#{$i}) { animation-delay: #{0.09 * $i}s; } }
+  @for $i from 1 through 4 { &:nth-child(#{$i}) { animation-delay: #{0.09 * $i}s; } }
 
   // Acento izquierdo
   &::before {
@@ -349,20 +349,22 @@
 
 .bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; }
 
-.bar {
-  width: 100%; border-radius: 8px 8px 0 0;
-  background: linear-gradient(180deg, var(--purple-m) 0%, var(--purple) 100%);
-  min-height: 4px; cursor: pointer;
-  transform-origin: bottom;
-  position: relative; overflow: hidden;
-  box-shadow: 0 -2px 8px rgba(77,15,96,0.2);
+.bar-stack {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  border-radius: 8px 8px 0 0; overflow: hidden;
+}
+
+.bar-segment {
+  width: 100%; min-height: 0;
+  cursor: pointer; position: relative; overflow: hidden;
   animation: barGrow 0.65s cubic-bezier(.34,1.2,.64,1) both;
+  transform-origin: bottom;
 
   @for $i from 1 through 30 {
     .bar-group:nth-child(#{$i}) & { animation-delay: #{0.04 * $i + 0.35}s; }
   }
 
-  // Reflejo superior
   &::after {
     content: ''; position: absolute; top: 0; left: -80%;
     width: 55%; height: 100%;
@@ -372,14 +374,25 @@
     pointer-events: none;
   }
 
-  &.today {
-    background: linear-gradient(180deg, var(--blue-m) 0%, var(--blue) 100%);
-    box-shadow: 0 -2px 8px rgba(50,72,140,0.3);
-  }
-
   &:hover {
     opacity: 0.85;
     &::after { left: 130%; }
+  }
+
+  &.entrada {
+    background: linear-gradient(180deg, var(--purple-m) 0%, var(--purple) 100%);
+    box-shadow: 0 -2px 8px rgba(77,15,96,0.2);
+    border-radius: 8px 8px 0 0;
+
+    &.today {
+      background: linear-gradient(180deg, var(--blue-m) 0%, var(--blue) 100%);
+      box-shadow: 0 -2px 8px rgba(50,72,140,0.3);
+    }
+  }
+
+  &.salida {
+    background: linear-gradient(180deg, var(--blue) 0%, var(--blue-m) 100%);
+    box-shadow: 0 2px 8px rgba(50,72,140,0.25);
   }
 }
 

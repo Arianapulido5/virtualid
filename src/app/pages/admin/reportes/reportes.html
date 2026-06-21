@@ -8,6 +8,7 @@
       <div class="page-header">
         <h1 class="page-title">Reportes</h1>
         <div class="periodo-btns">
+          <button class="periodo-btn" [class.active]="periodo === 'hoy'"           (click)="cambiarPeriodo('hoy')">Hoy</button>
           <button class="periodo-btn" [class.active]="periodo === 'semana'"        (click)="cambiarPeriodo('semana')">Esta semana</button>
           <button class="periodo-btn" [class.active]="periodo === 'mes'"           (click)="cambiarPeriodo('mes')">Este mes</button>
           <button class="periodo-btn" [class.active]="periodo === 'personalizado'" (click)="cambiarPeriodo('personalizado')">Personalizado</button>
@@ -41,6 +42,11 @@
             <span class="stat-sub">{{ etiquetaPeriodo }}</span>
           </div>
           <div class="stat-card">
+            <span class="stat-label">SALIDAS</span>
+            <span class="stat-value">{{ totalSalidas | number }}</span>
+            <span class="stat-sub">{{ etiquetaPeriodo }}</span>
+          </div>
+          <div class="stat-card">
             <span class="stat-label">DENEGADOS</span>
             <span class="stat-value">{{ totalDenegados | number }}</span>
             <span class="stat-sub danger">{{ porcentajeDenegados }} del total</span>
@@ -55,17 +61,25 @@
         <div class="bottom-grid">
 
           <div class="card chart-card">
-            <h3 class="card-title">Accesos por día</h3>
+            <h3 class="card-title">{{ tituloGrafica }}</h3>
             <div class="chart-area" *ngIf="totalAccesos > 0">
               <div class="bars-container">
                 <div class="bar-group" *ngFor="let d of diasSemana">
                   <div class="bar-wrap">
-                    <div
-                      class="bar"
-                      [class.today]="d.esHoy"
-                      [style.height.%]="(d.valor / maxValor) * 100"
-                      [title]="d.valor + ' accesos'"
-                    ></div>
+                    <div class="bar-stack">
+                      <div
+                        class="bar-segment salida"
+                        *ngIf="d.valorSalidas > 0"
+                        [style.height.%]="(d.valorSalidas / maxValor) * 100"
+                        [title]="d.valorSalidas + ' salidas'"
+                      ></div>
+                      <div
+                        class="bar-segment entrada"
+                        [class.today]="d.esHoy && periodo !== 'hoy'"
+                        [style.height.%]="(d.valorEntradas / maxValor) * 100"
+                        [title]="d.valorEntradas + (periodo === 'hoy' ? ' entradas' : ' accesos')"
+                      ></div>
+                    </div>
                   </div>
                   <span class="bar-label">{{ d.dia }}</span>
                 </div>

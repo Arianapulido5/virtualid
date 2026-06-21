@@ -18,17 +18,26 @@
       <ng-container *ngIf="!cargando">
 
         <div class="stats-grid">
-          <div class="stat-card">
-            <span class="stat-label">ABIERTOS</span>
-            <span class="stat-value warning">{{ abiertos }}</span>
-            <span class="stat-sub">tickets sin resolver</span>
+          <div class="stat-card"
+            (click)="filtroActivo = 'Todos'"
+            [class.stat-card--active]="filtroActivo === 'Todos'"
+            style="cursor: pointer">
+            <span class="stat-label">TODOS</span>
+            <span class="stat-value">{{ total }}</span>
+            <span class="stat-sub">tickets totales</span>
           </div>
-          <div class="stat-card">
+          <div class="stat-card"
+            (click)="filtroActivo = 'En proceso'"
+            [class.stat-card--active]="filtroActivo === 'En proceso'"
+            style="cursor: pointer">
             <span class="stat-label">EN PROCESO</span>
             <span class="stat-value blue">{{ enProceso }}</span>
             <span class="stat-sub">en atención activa</span>
           </div>
-          <div class="stat-card">
+          <div class="stat-card"
+            (click)="filtroActivo = 'Resueltos'"
+            [class.stat-card--active]="filtroActivo === 'Resueltos'"
+            style="cursor: pointer">
             <span class="stat-label">RESUELTOS</span>
             <span class="stat-value success">{{ resueltos }}</span>
             <span class="stat-sub success">total resueltos</span>

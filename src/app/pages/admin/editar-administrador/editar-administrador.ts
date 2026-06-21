@@ -29,13 +29,13 @@ export class EditarAdministrador implements OnInit {
   confirmar   = '';
 
   // ── Dirección ────────────────────────────────────────────────────────────
-  codigo_postal    = '';
-  estado           = '';
-  ciudad           = '';
-  municipio        = '';
-  colonia          = '';
-  direccion        = '';
-  cargandoCP       = false;
+  codigo_postal = '';
+  estado        = '';
+  ciudad        = '';
+  municipio     = '';
+  colonia       = '';
+  direccion     = '';
+  cargandoCP    = false;
 
   private _estadoId    = '';
   private _municipioId = '';
@@ -44,9 +44,6 @@ export class EditarAdministrador implements OnInit {
   coloniasDelMunicipio: string[] = [];
   private _mapaCiudadMunicipios: Map<string, { id: string; nombre: string }[]> = new Map();
   private _mapaColonias: Map<string, string[]> = new Map();
-
-  // Valores originales del servidor, para no pisarlos al cargar listas SEPOMEX
-  private _valorServidor = { estado: '', ciudad: '', municipio: '', colonia: '' };
 
   form = {
     nombre:            '',
@@ -137,48 +134,54 @@ export class EditarAdministrador implements OnInit {
         this.form.apellido_materno = data.apellido_materno ?? '';
         this.form.correo           = data.correo           ?? '';
 
-        // Guardar valores del servidor tal cual — estos son los que se van a mostrar y guardar
+        this.codigo_postal = data.codigo_postal ?? '';
+        this.direccion     = data.direccion     ?? '';
+
+        // ── Lo guardado en BD es la única fuente de verdad para lo que se
+        // ve en pantalla. Esto NO depende de Sepomex en absoluto: si hay
+        // un valor guardado, se mete como única opción del select y se
+        // selecciona de inmediato, de forma síncrona.
         this.estado    = data.estado    ?? '';
         this.ciudad    = data.ciudad    ?? '';
         this.municipio = data.municipio ?? '';
         this.colonia   = data.colonia   ?? '';
-        this.direccion = data.direccion ?? '';
-        this.codigo_postal = data.codigo_postal ?? '';
 
-        // Guardar copia para no pisar al cargar listas SEPOMEX
-        this._valorServidor = {
-          estado:    this.estado,
-          ciudad:    this.ciudad,
-          municipio: this.municipio,
-          colonia:   this.colonia,
-        };
+        this.ciudadesDelEstado    = this.ciudad    ? [this.ciudad]    : [];
+        this.municipiosDelCiudad  = this.municipio ? [this.municipio] : [];
+        this.coloniasDelMunicipio = this.colonia   ? [this.colonia]   : [];
 
-        // Si hay CP, cargar solo las listas de selects sin tocar los valores
-        if (this.codigo_postal.length === 5) {
-          this.cargandoCP = true;
-          this.cdr.detectChanges();
-          this._cargarListasSoloCP(this.codigo_postal);
-        }
+        this.cargandoDatos = false;
+        this.cdr.detectChanges();
 
         this.http.get<any>(`${this.apiBase}/admin/mi-institucion`, { headers: this.headers }).subscribe({
           next: (inst) => {
-            this.dominio       = inst.dominio_correo ?? '';
-            this.cargandoDatos = false;
+            this.dominio = inst.dominio_correo ?? '';
             this.cdr.detectChanges();
           },
-          error: () => { this.cargandoDatos = false; this.cdr.detectChanges(); }
+          error: () => { this.cdr.detectChanges(); }
         });
+
+        // Sepomex es solo un "extra": intenta agregar más opciones a los
+        // selects (otras colonias del mismo CP, etc.) pero NUNCA puede
+        // borrar ni vaciar lo que ya se pintó arriba. Si falla, no pasa nada.
+        if (this.codigo_postal.length === 5) {
+          this._enriquecerListasConSepomex(this.codigo_postal);
+        }
       },
       error: () => { this.cargandoDatos = false; this.cdr.detectChanges(); }
     });
   }
 
-  // Carga solo las listas de selects sin modificar estado/ciudad/municipio/colonia
-  private async _cargarListasSoloCP(cp: string): Promise<void> {
+  // Intenta agregar opciones adicionales a los selects sin tocar los valores
+  // ya seleccionados (this.estado/ciudad/municipio/colonia). Es un best-effort:
+  // si Sepomex falla (404, CORS, timeout) simplemente no se agrega nada extra.
+  private async _enriquecerListasConSepomex(cp: string): Promise<void> {
+    this.cargandoCP = true;
+    this.cdr.detectChanges();
     try {
       const jsonCP = await this._fetchConRetry(`${SEPOMEX_BASE}/cp/${cp}.json`);
       const postcodes: any[] = jsonCP?.data?.postcodes ?? [];
-      if (!postcodes.length) throw new Error('Sin registros');
+      if (!postcodes.length) return;
 
       const primero         = postcodes[0];
       const estadoNorm      = this._normalizarEstado((primero.d_estado ?? '').trim());
@@ -193,21 +196,25 @@ export class EditarAdministrador implements OnInit {
       this._estadoId    = estadoId;
       this._municipioId = municipioId;
 
-      this.ciudadesDelEstado   = ciudadCP ? [ciudadCP] : [];
-      this.municipiosDelCiudad = municipioNombre ? [municipioNombre] : [];
-      this.coloniasDelMunicipio = coloniasCP;
-      this._mapaCiudadMunicipios.set(ciudadCP, [{ id: municipioId, nombre: municipioNombre }]);
-      this._mapaColonias.set(municipioId, coloniasCP);
+      this.ciudadesDelEstado = [...new Set([
+        ...(this.ciudad ? [this.ciudad] : []),
+        ...(ciudadCP ? [ciudadCP] : [])
+      ])];
+      this.municipiosDelCiudad = [...new Set([
+        ...(this.municipio ? [this.municipio] : []),
+        ...(municipioNombre ? [municipioNombre] : [])
+      ])];
+      this.coloniasDelMunicipio = [...new Set([
+        ...(this.colonia ? [this.colonia] : []),
+        ...coloniasCP
+      ])];
 
-      // Restaurar los valores del servidor (SEPOMEX no los pisa)
-      this.estado    = this._valorServidor.estado    || estadoNorm;
-      this.ciudad    = this._valorServidor.ciudad    || ciudadCP;
-      this.municipio = this._valorServidor.municipio || municipioNombre;
-      this.colonia   = this._valorServidor.colonia   || (coloniasCP[0] ?? '');
+      this._mapaCiudadMunicipios.set(ciudadCP, [{ id: municipioId, nombre: municipioNombre }]);
+      this._mapaColonias.set(municipioId, this.coloniasDelMunicipio);
 
       this.errores['codigo_postal'] = undefined;
     } catch {
-      this.errores['codigo_postal'] = 'No se encontró información para este CP.';
+      // No hacer nada: los valores guardados ya están pintados y se quedan así.
     } finally {
       this.cargandoCP = false;
       this.cdr.detectChanges();
@@ -394,7 +401,7 @@ export class EditarAdministrador implements OnInit {
       if (!val)               this.errores['correo'] = 'El correo es obligatorio.';
       else if (!re.test(val)) this.errores['correo'] = 'Ingresa un correo válido.';
       else if (this.dominio && !val.endsWith(this.dominio))
-        this.errores['correo'] = `Debe pertenecer al dominio ${this.dominio}.`;
+      this.errores['correo'] = `Debe pertenecer al dominio ${this.dominio}.`;
       else                    this.errores['correo'] = undefined;
     },
     contrasena_actual: () => {

@@ -99,8 +99,7 @@
   &:active:not(:disabled) { transform: translateY(0); }
 }
 
-.detalle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-
+.detalle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
 // ─── CARDS ───────────────────────────────────────────────────────────────────
 .card {
   background: var(--white); border-radius: 16px; padding: 22px 24px;

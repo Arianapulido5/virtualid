@@ -57,25 +57,28 @@ export class Soporte implements OnInit {
       });
   }
 
-  get abiertos():  number {
-    return this.tickets.filter(t => t.estado === 'Nuevo' || t.estado === 'Abierto').length;
-  }
+  get total():     number { return this.tickets.length; }
   get enProceso(): number { return this.tickets.filter(t => t.estado === 'En proceso').length; }
   get resueltos(): number { return this.tickets.filter(t => t.estado === 'Resuelto').length; }
 
-  get ticketsFiltrados(): TicketApi[] {
-    let lista = [...this.tickets];
-    if (this.filtroActivo === 'En proceso') lista = lista.filter(t => t.estado === 'En proceso');
-    else if (this.filtroActivo === 'Resueltos') lista = lista.filter(t => t.estado === 'Resuelto');
-    if (this.busqueda.trim()) {
-      const q = this.busqueda.toLowerCase();
-      lista = lista.filter(t =>
-        `${t.nombre} ${t.apellido_paterno}`.toLowerCase().includes(q) ||
-        t.asunto.toLowerCase().includes(q)
-      );
-    }
-    return lista;
+get ticketsFiltrados(): TicketApi[] {
+  let lista = [...this.tickets];
+
+  // Primero: búsqueda sobre TODOS los tickets
+  if (this.busqueda.trim()) {
+    const q = this.busqueda.toLowerCase();
+    lista = lista.filter(t =>
+      `${t.nombre} ${t.apellido_paterno}`.toLowerCase().includes(q) ||
+      t.asunto.toLowerCase().includes(q)
+    );
   }
+
+  // Después: filtro de pestaña/stat card
+  if (this.filtroActivo === 'En proceso') lista = lista.filter(t => t.estado === 'En proceso');
+  else if (this.filtroActivo === 'Resueltos') lista = lista.filter(t => t.estado === 'Resuelto');
+
+  return lista;
+}
 
   scrollAlFinal(): void {
     setTimeout(() => {

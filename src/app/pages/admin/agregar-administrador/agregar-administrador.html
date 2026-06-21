@@ -16,7 +16,6 @@
   <main class="main-content">
     <div class="page-body">
 
-      <!-- FLECHA REGRESO -->
       <a class="back-link" routerLink="/admin/administradores">
         <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="2.5"
@@ -26,7 +25,6 @@
         </svg>
       </a>
 
-      <!-- CARGANDO DATOS -->
       <div *ngIf="cargandoDatos" class="estado-txt">Cargando datos...</div>
 
       <ng-container *ngIf="!cargandoDatos">
@@ -79,7 +77,70 @@
             <span class="field-error" *ngIf="errores['correo']">{{ errores['correo'] }}</span>
           </div>
 
-          <!-- SEPARADOR -->
+          <!-- SEPARADOR DIRECCIÓN -->
+          <p class="section-label">Información personal <span class="section-sub">(opcional)</span></p>
+
+          <!-- CP + ESTADO -->
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">Código Postal</label>
+              <div class="input-wrapper">
+                <input class="field-input" type="text" placeholder="5 dígitos" maxlength="5"
+                  [(ngModel)]="codigo_postal" (ngModelChange)="validarCodigoPostal()"
+                  [class.input-error]="errores['codigo_postal']" />
+                <span *ngIf="cargandoCP" class="spinner"
+                  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;border-width:2px;border-color:rgba(77,15,96,0.2);border-top-color:#4D0F60;border-style:solid;border-radius:50%;animation:spin 0.7s linear infinite;"></span>
+              </div>
+              <span class="field-error" *ngIf="errores['codigo_postal']">{{ errores['codigo_postal'] }}</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Estado</label>
+              <select class="field-input" [(ngModel)]="estado">
+                <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+                <option *ngIf="estado && !estadosMexico.includes(estado)" [value]="estado">{{ estado }}</option>
+                <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- CIUDAD + MUNICIPIO -->
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">Ciudad</label>
+              <select class="field-input" [(ngModel)]="ciudad" (ngModelChange)="onCiudadChange()">
+                <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+                <option *ngIf="ciudad && !ciudadesDelEstado.includes(ciudad)" [value]="ciudad">{{ ciudad }}</option>
+                <option *ngFor="let c of ciudadesDelEstado" [value]="c">{{ c }}</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Municipio</label>
+              <select class="field-input" [(ngModel)]="municipio" (ngModelChange)="onMunicipioChange()">
+                <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+                <option *ngIf="municipio && !municipiosDelCiudad.includes(municipio)" [value]="municipio">{{ municipio }}</option>
+                <option *ngFor="let m of municipiosDelCiudad" [value]="m">{{ m }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- COLONIA -->
+          <div class="field">
+            <label class="field-label">Colonia</label>
+            <select class="field-input" [(ngModel)]="colonia">
+              <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+              <option *ngIf="colonia && !coloniasDelMunicipio.includes(colonia)" [value]="colonia">{{ colonia }}</option>
+              <option *ngFor="let c of coloniasDelMunicipio" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+
+          <!-- DIRECCIÓN -->
+          <div class="field">
+            <label class="field-label">Dirección</label>
+            <input class="field-input" type="text" placeholder="Calle, número"
+              [(ngModel)]="direccion" />
+          </div>
+
+          <!-- SEPARADOR CONTRASEÑA -->
           <p class="section-label">
             Contraseña
             <span class="section-sub">El administrador podrá cambiarla desde su perfil</span>
@@ -149,10 +210,8 @@
             </div>
           </div>
 
-          <!-- ERROR GENERAL -->
           <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
 
-          <!-- ACCIONES -->
           <div class="form-actions">
             <button class="btn-cancelar" (click)="cancelar()">Cancelar</button>
             <button class="btn-guardar" [disabled]="cargando" (click)="guardar()">

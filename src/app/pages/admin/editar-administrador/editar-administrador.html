@@ -97,6 +97,9 @@
               <label class="field-label">Estado</label>
               <select class="field-input" [(ngModel)]="estado">
                 <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+                <!-- Si el valor guardado no coincide con ningún estado del catálogo fijo,
+                     se agrega como opción extra para que no se vea vacío -->
+                <option *ngIf="estado && !estadosMexico.includes(estado)" [value]="estado">{{ estado }}</option>
                 <option *ngFor="let e of estadosMexico" [value]="e">{{ e }}</option>
               </select>
             </div>
@@ -108,6 +111,7 @@
               <label class="field-label">Ciudad</label>
               <select class="field-input" [(ngModel)]="ciudad" (ngModelChange)="onCiudadChange()">
                 <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+                <option *ngIf="ciudad && !ciudadesDelEstado.includes(ciudad)" [value]="ciudad">{{ ciudad }}</option>
                 <option *ngFor="let c of ciudadesDelEstado" [value]="c">{{ c }}</option>
               </select>
             </div>
@@ -115,6 +119,7 @@
               <label class="field-label">Municipio</label>
               <select class="field-input" [(ngModel)]="municipio" (ngModelChange)="onMunicipioChange()">
                 <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+                <option *ngIf="municipio && !municipiosDelCiudad.includes(municipio)" [value]="municipio">{{ municipio }}</option>
                 <option *ngFor="let m of municipiosDelCiudad" [value]="m">{{ m }}</option>
               </select>
             </div>
@@ -125,6 +130,7 @@
             <label class="field-label">Colonia</label>
             <select class="field-input" [(ngModel)]="colonia">
               <option value="">{{ cargandoCP ? 'Cargando...' : 'Selecciona' }}</option>
+              <option *ngIf="colonia && !coloniasDelMunicipio.includes(colonia)" [value]="colonia">{{ colonia }}</option>
               <option *ngFor="let c of coloniasDelMunicipio" [value]="c">{{ c }}</option>
             </select>
           </div>
