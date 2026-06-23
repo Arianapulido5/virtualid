@@ -328,9 +328,12 @@ export class Reportes implements OnInit {
         const d = new Date(domingo);
         d.setDate(domingo.getDate() + i);
         const fechaStr   = this.toLocalDateStr(d);
-        const encontrado = porDia.find(p =>
-          new Date(p.fecha).toISOString().split('T')[0] === fechaStr
-        );
+        const encontrado = porDia.find(p => {
+        const fStr = typeof p.fecha === 'string'
+            ? p.fecha.toString().split('T')[0]
+            : this.toLocalDateStr(new Date(p.fecha));
+          return fStr === fechaStr;
+        });
         result.push({
           dia:            ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()],
           valor:          encontrado ? (encontrado.entradas + encontrado.salidas) : 0,
@@ -352,9 +355,12 @@ export class Reportes implements OnInit {
       for (let i = 0; i < diasEnMes; i++) {
         const d        = new Date(anio, mes, i + 1);
         const fechaStr = this.toLocalDateStr(d);
-        const encontrado = porDia.find(p =>
-          new Date(p.fecha).toISOString().split('T')[0] === fechaStr
-        );
+        const encontrado = porDia.find(p => {
+        const fStr = typeof p.fecha === 'string'
+          ? p.fecha.toString().split('T')[0]
+          : this.toLocalDateStr(new Date(p.fecha));
+        return fStr === fechaStr;
+      });
         result.push({
           dia:            (i + 1).toString(),
           valor:          encontrado ? (encontrado.entradas + encontrado.salidas) : 0,
@@ -378,9 +384,13 @@ export class Reportes implements OnInit {
         const d = new Date(inicio);
         d.setDate(inicio.getDate() + i);
         const fechaStr   = d.toISOString().split('T')[0];
-        const encontrado = porDia.find(p =>
-          new Date(p.fecha).toISOString().split('T')[0] === fechaStr
-        );
+        const encontrado = porDia.find(p => {
+        const fStr = typeof p.fecha === 'string'
+          ? p.fecha.toString().split('T')[0]
+          : this.toLocalDateStr(new Date(p.fecha));
+        return fStr === fechaStr;
+      });
+
         result.push({
           dia:            d.getDate().toString(),
           valor:          encontrado ? (encontrado.entradas + encontrado.salidas) : 0,
