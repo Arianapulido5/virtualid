@@ -299,7 +299,8 @@ export class Reportes implements OnInit {
       const denegadosPorHora = new Array(24).fill(0);
 
       for (const r of registrosHoy) {
-        const h = new Date(r.creado_en).getHours();
+        const fechaMX = new Date(r.creado_en).toLocaleString('en-US', { timeZone: 'America/Mexico_City' });
+        const h = new Date(fechaMX).getHours();
         if (h < 0 || h >= 24) continue;
         if (r.tipo_movimiento === 'salida') salidasPorHora[h]++;
         else entradasPorHora[h]++;
