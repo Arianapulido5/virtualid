@@ -155,8 +155,9 @@
           <div class="card puntos-card">
             <h3 class="card-title">Puntos más activos</h3>
             <div class="puntos-lista" *ngIf="puntosActivos.length > 0">
-              <div class="punto-item" *ngFor="let p of puntosActivos">
-                <div class="punto-info">
+              <div class="punto-item" *ngFor="let p of puntosActivos"
+                  (click)="irAHistorialPunto(p)"
+                  style="cursor: pointer;">                <div class="punto-info">
                   <span class="punto-nombre">{{ p.nombre }}</span>
                   <div class="barra-wrap">
                     <div class="barra-fill"

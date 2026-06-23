@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { SidebarAdminComponent } from '../../../shared/sidebar-admin/sidebar-admin';
 import { environment } from '../../../../environments/environment';
 
@@ -18,6 +19,7 @@ interface DiaSemana {
 interface PuntoActivo {
   nombre: string;
   valor:  number;
+  id?:    number;
 }
 
 interface RegistroHoy {
@@ -64,8 +66,7 @@ export class Reportes implements OnInit {
 
   filtroActivo: 'total' | 'accesos' | 'salidas' | 'denegados' = 'total';
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
-
+constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router) {}
   ngOnInit(): void {
     this.cargar();
   }
@@ -246,11 +247,25 @@ export class Reportes implements OnInit {
   }
 
   get etiquetaPeriodo(): string {
-    if (this.periodo === 'hoy')    return this.esFechaHoy ? 'Hoy' : this.toLocalDateStr(this.fechaSeleccionada);
+    if (this.periodo === 'hoy') {
+      if (this.esFechaHoy) return 'Hoy';
+      const ops: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+      return this.fechaSeleccionada.toLocaleDateString('es-MX', ops);
+    }
     if (this.periodo === 'semana') return this.esSemanaActual ? 'Esta semana' : this.tituloGrafica;
     if (this.periodo === 'mes')    return this.tituloGrafica;
-    if (this.periodo === 'personalizado' && this.fechaInicio && this.fechaFin)
-      return `${this.fechaInicio} → ${this.fechaFin}`;
+    if (this.periodo === 'personalizado' && this.fechaInicio && this.fechaFin) {
+      const [iy, im, id] = this.fechaInicio.split('-').map(Number);
+      const [fy, fm, fd] = this.fechaFin.split('-').map(Number);
+      const dIni = new Date(iy, im - 1, id);
+      const dFin = new Date(fy, fm - 1, fd);
+      const mismoAnio = iy === fy;
+      const opsIni: Intl.DateTimeFormatOptions = mismoAnio
+        ? { day: 'numeric', month: 'long' }
+        : { day: 'numeric', month: 'long', year: 'numeric' };
+      const opsFin: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+      return `${dIni.toLocaleDateString('es-MX', opsIni)} – ${dFin.toLocaleDateString('es-MX', opsFin)}`;
+    }
     return '';
   }
 
@@ -375,15 +390,17 @@ export class Reportes implements OnInit {
     }
 
     if (this.periodo === 'personalizado' && this.fechaInicio && this.fechaFin) {
-      const inicio = new Date(this.fechaInicio);
-      const fin    = new Date(this.fechaFin);
+      const [iy, im, id] = this.fechaInicio.split('-').map(Number);
+      const [fy, fm, fd] = this.fechaFin.split('-').map(Number);
+      const inicio = new Date(iy, im - 1, id);
+      const fin    = new Date(fy, fm - 1, fd);
       const diff   = Math.round((fin.getTime() - inicio.getTime()) / 86400000);
       const dias   = Math.min(diff + 1, 60);
 
       for (let i = 0; i < dias; i++) {
         const d = new Date(inicio);
         d.setDate(inicio.getDate() + i);
-        const fechaStr   = d.toISOString().split('T')[0];
+        const fechaStr   = this.toLocalDateStr(d);        
         const encontrado = porDia.find(p => {
         const fStr = typeof p.fecha === 'string'
           ? p.fecha.toString().split('T')[0]
@@ -406,4 +423,9 @@ export class Reportes implements OnInit {
 
     return result;
   }
+
+  irAHistorialPunto(punto: PuntoActivo): void {
+  if (!punto.id) return;
+  this.router.navigate(['/admin/historial-accesos', punto.id]);
+}
 }
