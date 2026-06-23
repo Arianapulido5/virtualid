@@ -422,7 +422,23 @@
 // ─────────────────────────────────────────────
 //  PUNTOS ACTIVOS
 // ─────────────────────────────────────────────
-.puntos-lista { display: flex; flex-direction: column; gap: 16px; }
+// QUITA esto (que agregaste antes):
+.puntos-card {
+  align-self: flex-start;  // ← elimina esta línea
+}
+
+// Solo deja el max-height más grande:
+.puntos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 380px;   // ← este era el único cambio necesario
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
 
 .punto-item {
   display: flex; align-items: center;

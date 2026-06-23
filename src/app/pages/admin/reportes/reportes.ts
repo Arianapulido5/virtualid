@@ -173,15 +173,22 @@ export class Reportes implements OnInit {
   }
 
   private getFechasMes(): { inicio: string; fin: string } {
-    const hoy   = new Date();
-    const anio  = hoy.getFullYear();
-    const mes   = hoy.getMonth() + this.mesOffset;
+    const hoy    = new Date();
+    const anio   = hoy.getFullYear();
+    const mes    = hoy.getMonth() + this.mesOffset;
     const inicio = new Date(anio, mes, 1);
     const fin    = new Date(anio, mes + 1, 0);
     return {
       inicio: this.toLocalDateStr(inicio),
       fin:    this.toLocalDateStr(fin)
     };
+  }
+
+  private getDomingoSemana(): Date {
+    const hoy    = new Date();
+    const domingo = new Date(hoy);
+    domingo.setDate(hoy.getDate() - hoy.getDay() + (this.semanaOffset * 7));
+    return domingo;
   }
 
   cargar(): void {
@@ -194,7 +201,7 @@ export class Reportes implements OnInit {
       url = `${environment.apiUrl}/admin/reportes?fecha_inicio=${this.fechaInicio}&fecha_fin=${this.fechaFin}`;
     } else if (this.periodo === 'hoy') {
       url += `&fecha=${this.toLocalDateStr(this.fechaSeleccionada)}`;
-    } else if (this.periodo === 'semana' && this.semanaOffset !== 0) {
+    } else if (this.periodo === 'semana') {
       url += `&semana_offset=${this.semanaOffset}`;
     } else if (this.periodo === 'mes') {
       const { inicio, fin } = this.getFechasMes();
@@ -255,19 +262,19 @@ export class Reportes implements OnInit {
       return this.esFechaHoy ? `Hoy, ${texto}` : textoCap;
     }
     if (this.periodo === 'semana') {
-      const hoy        = new Date();
-      const inicioSemana = new Date(hoy);
-      inicioSemana.setDate(hoy.getDate() - hoy.getDay() + (this.semanaOffset * 7));
-      const finSemana  = new Date(inicioSemana);
-      finSemana.setDate(inicioSemana.getDate() + 6);
+      const domingo  = this.getDomingoSemana();
+      const sabado   = new Date(domingo);
+      sabado.setDate(domingo.getDate() + 6);
       const ops: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' };
-      const ini  = inicioSemana.toLocaleDateString('es-MX', ops);
-      const fin  = finSemana.toLocaleDateString('es-MX', ops);
-      const anio = finSemana.getFullYear();
-      return this.esSemanaActual ? `Esta semana, ${ini} – ${fin} ${anio}` : `${ini} – ${fin} ${anio}`;
+      const ini  = domingo.toLocaleDateString('es-MX', ops);
+      const fin  = sabado.toLocaleDateString('es-MX', ops);
+      const anio = sabado.getFullYear();
+      return this.esSemanaActual
+        ? `Esta semana, ${ini} – ${fin} ${anio}`
+        : `${ini} – ${fin} ${anio}`;
     }
     if (this.periodo === 'mes') {
-      const hoy  = new Date();
+      const hoy   = new Date();
       const fecha = new Date(hoy.getFullYear(), hoy.getMonth() + this.mesOffset, 1);
       const ops: Intl.DateTimeFormatOptions = { month: 'long', year: 'numeric' };
       const texto = fecha.toLocaleDateString('es-MX', ops);
@@ -313,10 +320,32 @@ export class Reportes implements OnInit {
       return result;
     }
 
+    if (this.periodo === 'semana') {
+      const domingo = this.getDomingoSemana();
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(domingo);
+        d.setDate(domingo.getDate() + i);
+        const fechaStr   = this.toLocalDateStr(d);
+        const encontrado = porDia.find(p =>
+          new Date(p.fecha).toISOString().split('T')[0] === fechaStr
+        );
+        result.push({
+          dia:            ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()],
+          valor:          encontrado ? (encontrado.entradas + encontrado.salidas) : 0,
+          valorEntradas:  encontrado ? encontrado.entradas  : 0,
+          valorSalidas:   encontrado ? encontrado.salidas   : 0,
+          valorDenegados: encontrado ? encontrado.denegados : 0,
+          esHoy:          d.toDateString() === hoy.toDateString(),
+          esFuturo:       d > hoy
+        });
+      }
+      return result;
+    }
+
     if (this.periodo === 'mes') {
-      const anio   = hoy.getFullYear();
-      const mes    = hoy.getMonth() + this.mesOffset;
-      const inicio = new Date(anio, mes, 1);
+      const anio      = hoy.getFullYear();
+      const mes       = hoy.getMonth() + this.mesOffset;
       const diasEnMes = new Date(anio, mes + 1, 0).getDate();
 
       for (let i = 0; i < diasEnMes; i++) {
@@ -364,29 +393,6 @@ export class Reportes implements OnInit {
       return result;
     }
 
-    // semana con offset
-    const baseDate = new Date(hoy);
-    if (this.periodo === 'semana' && this.semanaOffset !== 0) {
-      baseDate.setDate(hoy.getDate() + (this.semanaOffset * 7));
-    }
-
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(baseDate);
-      d.setDate(baseDate.getDate() - i);
-      const fechaStr   = d.toISOString().split('T')[0];
-      const encontrado = porDia.find(p =>
-        new Date(p.fecha).toISOString().split('T')[0] === fechaStr
-      );
-      result.push({
-        dia:            ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()],
-        valor:          encontrado ? (encontrado.entradas + encontrado.salidas) : 0,
-        valorEntradas:  encontrado ? encontrado.entradas  : 0,
-        valorSalidas:   encontrado ? encontrado.salidas   : 0,
-        valorDenegados: encontrado ? encontrado.denegados : 0,
-        esHoy:          d.toDateString() === hoy.toDateString(),
-        esFuturo:       false
-      });
-    }
     return result;
   }
 }
