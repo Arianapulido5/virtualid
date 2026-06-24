@@ -35,7 +35,7 @@ export class HistorialUsuario implements OnInit {
   filtroPunto       = 'todos';
   filtroTipo        = 'todos';
   filtroResultado   = 'todos';
-  filtroPeriodo     = 'todos';
+  filtroPeriodo     = 'hoy';
   filtroFechaInicio = '';
   filtroFechaFin    = '';
 
