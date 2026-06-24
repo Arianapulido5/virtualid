@@ -113,20 +113,39 @@ export class HistorialGlobal implements OnInit {
       });
   }
 
-  onFiltroChange(): void {
+  /**
+   * Solo para el select de PERIODO.
+   * Resetea fechas cuando cambia el periodo, nunca cuando cambian
+   * punto, tipo o resultado.
+   */
+  onPeriodoChange(): void {
+    this.filtroFechaInicio = '';
+    this.filtroFechaFin    = '';
+
     if (this.filtroPeriodo === 'fecha' || this.filtroPeriodo === 'rango') {
-      // Resetear fechas al cambiar a estos modos — esperar que el usuario las llene
-      this.filtroFechaInicio = '';
-      this.filtroFechaFin    = '';
-      // No cargar todavía, el usuario debe seleccionar fechas
+      // Esperar a que el usuario seleccione las fechas
+      this.cargando = false;
+      this.cdr.detectChanges();
     } else {
-      // Periodo simple (hoy/semana/mes/todos): limpiar fechas y cargar
-      this.filtroFechaInicio = '';
-      this.filtroFechaFin    = '';
+      // hoy / semana / mes / todos — cargar de inmediato
       this.cargar();
     }
   }
 
+  /**
+   * Para los selects de PUNTO, TIPO y RESULTADO.
+   * Recarga sin tocar el periodo ni las fechas.
+   */
+  onFiltroChange(): void {
+    // Si el periodo requiere fecha y no está completa, no cargar todavía
+    if (this.filtroPeriodo === 'fecha' && !this.filtroFechaInicio) return;
+    if (this.filtroPeriodo === 'rango' && (!this.filtroFechaInicio || !this.filtroFechaFin)) return;
+    this.cargar();
+  }
+
+  /**
+   * Para los inputs de fecha (día específico y rango).
+   */
   onFechaChange(): void {
     if (this.filtroPeriodo === 'fecha' && this.filtroFechaInicio) {
       this.cargar();
