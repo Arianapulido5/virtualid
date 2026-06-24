@@ -64,34 +64,41 @@
                 <th>DETALLE</th>
               </tr>
             </thead>
+            
             <tbody>
-              <tr
-                class="tabla-row clickeable"
-                *ngFor="let r of registros"
-                (click)="verDetalle(r)"
-              >
-                <td class="col-punto">
-                  <div class="punto-cell">
-                    <span class="punto-tipo-icon">{{ puntoIcon(r.punto_tipo) }}</span>
-                    <span>{{ r.punto_nombre }}</span>
-                  </div>
-                </td>
-                <td>
-                  <span class="movimiento-badge" [ngClass]="r.tipo_movimiento">
-                    {{ r.tipo_movimiento === 'entrada' ? '↓ Entrada' : '↑ Salida' }}
-                  </span>
-                </td>
-                <td class="col-fecha">{{ formatFecha(r.creado_en) }}</td>
-                <td>
-                  <span class="resultado-badge" [ngClass]="r.exitoso ? 'exitoso' : 'denegado'">
-                    {{ r.exitoso ? '✓ Exitoso' : '✕ Denegado' }}
-                  </span>
-                </td>
-                <td class="col-accion">
-                  <span class="ver-detalle-hint">Ver</span>
-                </td>
-              </tr>
-            </tbody>
+  <tr class="tabla-row clickeable" *ngFor="let r of registros" (click)="verDetalle(r)">
+
+    <td>
+      <div class="col-usuario">
+        <div class="user-avatar purple">{{ puntoIcon(r.punto_tipo) }}</div>
+        <div class="user-info">
+          <span class="user-nombre">{{ r.punto_nombre }}</span>
+          <span class="user-id">{{ r.punto_tipo }}</span>
+        </div>
+      </div>
+    </td>
+
+    <td>
+      <span class="movimiento-badge" [ngClass]="r.tipo_movimiento">
+        {{ r.tipo_movimiento === 'entrada' ? '↓ Entrada' : '↑ Salida' }}
+      </span>
+    </td>
+
+    <td class="col-fecha">{{ formatFecha(r.creado_en) }}</td>
+
+    <td>
+      <span class="resultado-badge" [ngClass]="r.exitoso ? 'exitoso' : 'denegado'">
+        {{ r.exitoso ? '✓ Exitoso' : '✕ Denegado' }}
+      </span>
+    </td>
+
+    <td>
+      <span class="ver-detalle-hint">Ver</span>
+    </td>
+
+  </tr>
+</tbody>
+
           </table>
           <div class="empty-state" *ngIf="registros.length === 0">
             No hay registros para los filtros seleccionados.

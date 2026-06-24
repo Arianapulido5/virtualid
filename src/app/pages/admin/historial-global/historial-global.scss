@@ -71,7 +71,7 @@
 // ─────────────────────────────────────────────
 .filtros-bar {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   background: var(--white);
   border-radius: 16px;
@@ -162,11 +162,12 @@
     font-size: 11px; font-weight: 700; color: var(--dark); letter-spacing: 0.5px;
 
     
-  &:nth-child(1) { width: 28%; padding-left: 88px; }
-  &:nth-child(2) { width: 22%; padding-left: 18px; }
-  &:nth-child(3) { width: 20%; padding-left: 25px; }
-  &:nth-child(4) { width: 18%; padding-left: 25px; }
-  &:nth-child(5) { width: 12%; padding-left: 18px; }
+&:nth-child(1) { width: 26%; padding-left: 88px; }
+&:nth-child(2) { width: 20%; padding-left: 1px; }
+&:nth-child(3) { width: 10%; padding-left: 1px; }
+&:nth-child(4) { width: 18%; padding-left: 25px; }
+&:nth-child(5) { width: 14%; padding-left: 18px; }
+&:nth-child(6) { width: 12%; padding-left: 18px; }
 }
   }
 
@@ -206,12 +207,18 @@
     }
   }
 
- 
-  td:nth-child(1) { padding-left: 30px; }
-  td:nth-child(2) { padding-left: 38px; }
-  td:nth-child(3) { padding-left: 18px; }
-  td:nth-child(4) { padding-left: 18px; }
-  td:nth-child(5) { padding-left: 35px; }
+td:nth-child(1) { padding-left: 30px; }
+td:nth-child(2) { padding-left: 8px; }
+td:nth-child(3) {
+  padding-left: 0;
+  
+  .tipo-badge {
+    margin-left: -15px; // ajusta el valor según necesites
+  }
+}
+td:nth-child(4) { padding-left: 28px; }
+td:nth-child(5) { padding-left: 15px; }
+td:nth-child(6) { padding-left: 35px; }
 
 }
 
@@ -311,6 +318,44 @@ td.col-usuario {
   font-family: 'Open Sans', sans-serif; font-size: 14px; color: #bbb;
   animation: fadeIn 0.4s ease both;
 }
+
+// ─────────────────────────────────────────────
+//  INPUT DATE (sin flecha de select)
+// ─────────────────────────────────────────────
+.filtro-date {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #e0e4ec;
+  border-radius: 12px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--black); background-color: var(--white);
+  outline: none; cursor: pointer;
+  box-sizing: border-box;
+  transition: border-color 0.25s, box-shadow 0.25s;
+
+  &:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 4px rgba(77,15,96,0.12);
+  }
+  &:not(:focus):hover { border-color: rgba(77,15,96,0.4); }
+}
+
+// ─────────────────────────────────────────────
+//  BADGE TIPO MOVIMIENTO
+// ─────────────────────────────────────────────
+.tipo-badge {
+  font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 50px; white-space: nowrap; display: inline-block;
+
+  &.entrada { color: #1565c0; background: rgba(21,101,192,0.1); }
+  &.salida  { color: #6a1b9a; background: rgba(106,27,154,0.1); }
+}
+
+// ─────────────────────────────────────────────
+//  COLUMNA TIPO en tabla
+// ─────────────────────────────────────────────
+.col-tipo { white-space: nowrap; }
 
 // ─────────────────────────────────────────────
 //  RESPONSIVE

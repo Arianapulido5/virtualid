@@ -7,12 +7,12 @@ import { SidebarAdminComponent } from '../../../shared/sidebar-admin/sidebar-adm
 import { environment } from '../../../../environments/environment';
 import { ActivatedRoute } from '@angular/router';
 
-
 interface Registro {
   id:                number;
   exitoso:           boolean;
   motivo_denegacion: string | null;
   creado_en:         string;
+  tipo_movimiento:   string;
   nombre:            string;
   apellido_paterno:  string;
   apellido_materno:  string;
@@ -38,30 +38,32 @@ export class HistorialGlobal implements OnInit {
 
   cargando = true;
 
-  filtroPunto     = 'todos';
-  filtroResultado = 'todos';
-  filtroPeriodo   = 'hoy';
-  filtroFecha     = '';
+  filtroPunto       = 'todos';
+  filtroResultado   = 'todos';
+  filtroTipo        = 'todos';
+  filtroPeriodo     = 'hoy';
+  filtroFechaInicio = '';
+  filtroFechaFin    = '';
 
   registros: Registro[]    = [];
   puntos:    PuntoFiltro[] = [];
 
-// Agrégalo al constructor:
-constructor(
-  private http: HttpClient,
-  private router: Router,
-  private route: ActivatedRoute,   // ← nuevo
-  private cdr: ChangeDetectorRef
-) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-  this.route.queryParams.subscribe(params => {
-    if (params['periodo'])    this.filtroPeriodo   = params['periodo'];
-    if (params['resultado'])  this.filtroResultado = params['resultado'];
-    if (params['punto_id'])   this.filtroPunto     = params['punto_id'];
-    this.cargar();
-  });
-}
+    this.route.queryParams.subscribe(params => {
+      if (params['periodo'])   this.filtroPeriodo   = params['periodo'];
+      if (params['resultado']) this.filtroResultado = params['resultado'];
+      if (params['punto_id'])  this.filtroPunto     = params['punto_id'];
+      if (params['tipo'])      this.filtroTipo      = params['tipo'];
+      this.cargar();
+    });
+  }
 
   private headers(): HttpHeaders {
     return new HttpHeaders({ Authorization: `Bearer ${localStorage.getItem('token') ?? ''}` });
@@ -72,13 +74,19 @@ constructor(
     this.cdr.detectChanges();
 
     const params: Record<string, string> = {};
-    if (this.filtroPeriodo === 'fecha' && this.filtroFecha) {
-      params['fecha'] = this.filtroFecha;
+
+    if (this.filtroPeriodo === 'rango') {
+      if (this.filtroFechaInicio) params['fecha_inicio'] = this.filtroFechaInicio;
+      if (this.filtroFechaFin)    params['fecha_fin']    = this.filtroFechaFin;
+    } else if (this.filtroPeriodo === 'fecha') {
+      if (this.filtroFechaInicio) params['fecha'] = this.filtroFechaInicio;
     } else if (this.filtroPeriodo !== 'todos') {
       params['periodo'] = this.filtroPeriodo;
     }
-    if (this.filtroPunto !== 'todos')     params['punto_id']  = this.filtroPunto;
+
+    if (this.filtroPunto     !== 'todos') params['punto_id']  = this.filtroPunto;
     if (this.filtroResultado !== 'todos') params['resultado'] = this.filtroResultado;
+    if (this.filtroTipo      !== 'todos') params['tipo']      = this.filtroTipo;
 
     const query = new URLSearchParams(params).toString();
     const url   = `${environment.apiUrl}/historial/admin${query ? '?' + query : ''}`;
@@ -96,11 +104,27 @@ constructor(
   }
 
   onFiltroChange(): void {
-    if (this.filtroPeriodo !== 'fecha') { this.filtroFecha = ''; this.cargar(); }
+    if (this.filtroPeriodo !== 'fecha' && this.filtroPeriodo !== 'rango') {
+      // Periodo simple (hoy/semana/mes/todos): resetear fechas y cargar
+      this.filtroFechaInicio = '';
+      this.filtroFechaFin    = '';
+      this.cargar();
+    } else if (this.filtroPeriodo === 'fecha' && this.filtroFechaInicio) {
+      // Hay fecha seleccionada: recargar con los filtros actuales
+      this.cargar();
+    } else if (this.filtroPeriodo === 'rango' && this.filtroFechaInicio && this.filtroFechaFin) {
+      // Rango completo: recargar con los filtros actuales
+      this.cargar();
+    }
+    // Si es fecha/rango sin fechas completas: esperar que el usuario las llene
   }
 
   onFechaChange(): void {
-    if (this.filtroFecha) this.cargar();
+    if (this.filtroPeriodo === 'fecha' && this.filtroFechaInicio) {
+      this.cargar();
+    } else if (this.filtroPeriodo === 'rango' && this.filtroFechaInicio && this.filtroFechaFin) {
+      this.cargar();
+    }
   }
 
   verDetalle(r: Registro): void { this.router.navigate(['/admin/acceso', r.id]); }
@@ -110,10 +134,10 @@ constructor(
 
   puntoIcon(tipo: string): string {
     const map: Record<string, string> = {
-      edificio: '', biblioteca: '', laboratorio: '',
-      cafeteria: '', deportiva: '', otro: ''
+      edificio: '🏢', biblioteca: '📚', laboratorio: '🔬',
+      cafeteria: '☕', deportiva: '⚽', otro: '📍'
     };
-    return map[tipo] ?? '';
+    return map[tipo] ?? '📍';
   }
 
   formatFecha(fecha: string): string {
