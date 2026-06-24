@@ -140,12 +140,36 @@ export class HistorialGlobal implements OnInit {
     return map[tipo] ?? '📍';
   }
 
-  formatFecha(fecha: string): string {
-    const d = new Date(fecha), hoy = new Date(), ayer = new Date();
-    ayer.setDate(hoy.getDate() - 1);
-    const hora = d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-    if (d.toDateString() === hoy.toDateString())  return `Hoy, ${hora}`;
-    if (d.toDateString() === ayer.toDateString()) return `Ayer, ${hora}`;
-    return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }) + `, ${hora}`;
-  }
+formatFecha(fecha: string): string {
+  const d    = new Date(fecha);
+  const now  = new Date();
+
+  // Fecha del registro en México
+  const fechaMX = new Date(d.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+  // Fecha de hoy en México
+  const hoyMX   = new Date(now.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+  // Fecha de ayer en México
+  const ayerMX  = new Date(now.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+  ayerMX.setDate(ayerMX.getDate() - 1);
+
+  const hora = d.toLocaleTimeString('es-MX', {
+    timeZone: 'America/Mexico_City',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  const mismodia = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth()    === b.getMonth()    &&
+    a.getDate()     === b.getDate();
+
+  if (mismodia(fechaMX, hoyMX))  return `Hoy, ${hora}`;
+  if (mismodia(fechaMX, ayerMX)) return `Ayer, ${hora}`;
+
+  return fechaMX.toLocaleDateString('es-MX', {
+    timeZone: 'America/Mexico_City',
+    day: '2-digit',
+    month: 'short'
+  }) + `, ${hora}`;
+}
 }
