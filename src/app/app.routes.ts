@@ -65,6 +65,7 @@ export const routes: Routes = [
       { path: 'puntos-acceso',         loadComponent: () => import('./pages/admin/puntos-acceso/puntos-acceso').then(m => m.PuntosAcceso) },
       { path: 'puntos-acceso/nuevo',   loadComponent: () => import('./pages/admin/agregar-punto-acceso/agregar-punto-acceso').then(m => m.AgregarPuntoAcceso) },
       { path: 'puntos-acceso/:id/historial', loadComponent: () => import('./pages/admin/historial-accesos/historial-accesos').then(m => m.HistorialAccesos) },
+      { path: 'historial-usuario/:id', loadComponent: () => import('./pages/admin/historial-usuario/historial-usuario').then(m => m.HistorialUsuario) },
       { path: 'historial-global',      loadComponent: () => import('./pages/admin/historial-global/historial-global').then(m => m.HistorialGlobal) },
       { path: 'acceso/:id',            loadComponent: () => import('./pages/admin/detalle-acceso/detalle-acceso').then(m => m.DetalleAcceso) },
       { path: 'reportes',              loadComponent: () => import('./pages/admin/reportes/reportes').then(m => m.Reportes) },

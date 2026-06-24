@@ -284,4 +284,8 @@ export class DetalleUsuario implements OnInit {
   getEstadoColor(estado: string): string {
     return ({ activa: '#2e7d32', pendiente: '#e65100', revocada: '#A93845' } as Record<string, string>)[estado] ?? '#4A4D56';
   }
+
+  verHistorial(): void {
+  this.router.navigate(['/admin/historial-usuario', this.usuario.id]);
+}
 }

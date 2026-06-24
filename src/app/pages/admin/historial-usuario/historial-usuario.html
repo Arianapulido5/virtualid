@@ -1,0 +1,104 @@
+<div class="admin-layout">
+  <app-sidebar-admin paginaActiva="usuarios" />
+  <main class="main-content">
+    <div class="page-body">
+
+      <!-- BACK -->
+      <a class="back-link" [routerLink]="backUrl">
+        <svg class="back-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </a>
+
+      <h1 class="page-title" *ngIf="!cargando">{{ nombreUsuario }}</h1>
+      <h1 class="page-title" *ngIf="cargando">Cargando...</h1>
+
+      <!-- FILTROS -->
+      <div class="filtros-bar">
+        <div class="filtro-grupo">
+          <label class="filtro-label">Punto de acceso</label>
+          <select class="filtro-select" [(ngModel)]="filtroPunto" (ngModelChange)="onFiltroChange()">
+            <option value="todos">Todos</option>
+            <option *ngFor="let p of puntos" [value]="p.id">{{ p.nombre }}</option>
+          </select>
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label">Resultado</label>
+          <select class="filtro-select" [(ngModel)]="filtroResultado" (ngModelChange)="onFiltroChange()">
+            <option value="todos">Todos</option>
+            <option value="exitoso">Exitoso</option>
+            <option value="denegado">Denegado</option>
+          </select>
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label">Periodo</label>
+          <select class="filtro-select" [(ngModel)]="filtroPeriodo" (ngModelChange)="onFiltroChange()">
+            <option value="todos">Todos</option>
+            <option value="hoy">Hoy</option>
+            <option value="semana">Esta semana</option>
+            <option value="mes">Este mes</option>
+            <option value="fecha">Día específico</option>
+          </select>
+        </div>
+        <div class="filtro-grupo" *ngIf="filtroPeriodo === 'fecha'">
+          <label class="filtro-label">Selecciona fecha</label>
+          <input type="date" class="filtro-select" [(ngModel)]="filtroFecha" (ngModelChange)="onFechaChange()" />
+        </div>
+      </div>
+
+      <div class="estado-txt" *ngIf="cargando">Cargando historial...</div>
+
+      <!-- TABLA -->
+      <div class="tabla-card" *ngIf="!cargando">
+        <div class="tabla-scroll">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>PUNTO DE ACCESO</th>
+                <th>MOVIMIENTO</th>
+                <th>FECHA Y HORA</th>
+                <th>RESULTADO</th>
+                <th>DETALLE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="tabla-row clickeable"
+                *ngFor="let r of registros"
+                (click)="verDetalle(r)"
+              >
+                <td class="col-punto">
+                  <div class="punto-cell">
+                    <span class="punto-tipo-icon">{{ puntoIcon(r.punto_tipo) }}</span>
+                    <span>{{ r.punto_nombre }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="movimiento-badge" [ngClass]="r.tipo_movimiento">
+                    {{ r.tipo_movimiento === 'entrada' ? '↓ Entrada' : '↑ Salida' }}
+                  </span>
+                </td>
+                <td class="col-fecha">{{ formatFecha(r.creado_en) }}</td>
+                <td>
+                  <span class="resultado-badge" [ngClass]="r.exitoso ? 'exitoso' : 'denegado'">
+                    {{ r.exitoso ? '✓ Exitoso' : '✕ Denegado' }}
+                  </span>
+                </td>
+                <td class="col-accion">
+                  <span class="ver-detalle-hint">Ver</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="empty-state" *ngIf="registros.length === 0">
+            No hay registros para los filtros seleccionados.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

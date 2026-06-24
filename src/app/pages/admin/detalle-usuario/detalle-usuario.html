@@ -51,7 +51,10 @@
       <!-- ACCIONES -->
       <div class="acciones-row">
         <button class="btn-bloquear" (click)="toggleBloqueo()" [disabled]="procesando">
-          {{ usuario.bloqueado ? '🔓 Desbloquear usuario' : '🔒 Bloquear usuario' }}
+          {{ usuario.bloqueado ? 'Desbloquear usuario' : 'Bloquear usuario' }}
+        </button>
+        <button class="btn-historial" (click)="verHistorial()" [disabled]="procesando">
+          Ver historial
         </button>
         <button class="btn-mensaje" (click)="abrirMensaje()" [disabled]="procesando">
           Enviar mensaje

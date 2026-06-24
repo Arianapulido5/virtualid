@@ -295,7 +295,7 @@ constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private ro
       const texto = fecha.toLocaleDateString('es-MX', ops);
       return texto.charAt(0).toUpperCase() + texto.slice(1);
     }
-    return 'Accesos por día';
+    return this.periodo === 'personalizado' ? 'Accesos personalizados' : 'Accesos por día';
   }
 
   private construirDias(
@@ -424,8 +424,8 @@ constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private ro
     return result;
   }
 
-  irAHistorialPunto(punto: PuntoActivo): void {
+irAHistorialPunto(punto: PuntoActivo): void {
   if (!punto.id) return;
-  this.router.navigate(['/admin/historial-accesos', punto.id]);
+  this.router.navigate(['/admin/puntos-acceso', punto.id, 'historial']);
 }
 }
