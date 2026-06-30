@@ -1,4 +1,3 @@
-// puntos-acceso.ts  — CORREGIDO
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -15,10 +14,18 @@ const TIPO_META: Record<string, { icon: string; colorClass: string }> = {
   otro:        { icon: '📍', colorClass: 'card-red'   },
 };
 
-export interface PuntoUI extends PuntoAcceso {
-  icon:       string;
-  colorClass: string;
-  estado:     string;
+const ESTADO_META: Record<string, { texto: string; clase: string }> = {
+  abierto:          { texto: 'Abierto',         clase: 'activo'      },
+  fuera_de_horario: { texto: 'Cerrado',          clase: 'inactivo'    },
+  cerrado_comida:   { texto: 'Cerrado (comida)', clase: 'restringido' },
+  desactivado:      { texto: 'Desactivado',      clase: 'inactivo'    },
+};
+
+interface PuntoUI extends PuntoAcceso {
+  icon:        string;
+  colorClass:  string;
+  estadoTexto: string;
+  estadoClase: string;
 }
 
 @Component({
@@ -56,15 +63,13 @@ export class PuntosAcceso implements OnInit {
 
   private toUI(p: PuntoAcceso): PuntoUI {
     const meta   = TIPO_META[p.tipo] ?? { icon: '📍', colorClass: 'card-blue' };
-    const estado = !p.activo
-      ? 'Inactivo'
-      : p.nivel_acceso === 'restringido' || p.nivel_acceso === 'exclusivo'
-        ? 'Restringido'
-        : 'Activo';
-    return { ...p, ...meta, estado };
-  }
-
-  estadoClass(estado: string): string {
-    return estado.toLowerCase();
+    const estado = ESTADO_META[p.estado_actual ?? 'desactivado']
+                ?? { texto: p.estado_actual, clase: 'inactivo' };
+    return {
+      ...p,
+      ...meta,
+      estadoTexto: estado.texto,
+      estadoClase: estado.clase,
+    };
   }
 }

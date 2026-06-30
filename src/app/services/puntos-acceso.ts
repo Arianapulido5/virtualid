@@ -19,9 +19,10 @@ export interface PuntoAccesoDTO {
 }
 
 export interface PuntoAcceso extends PuntoAccesoDTO {
-  id:        number;
-  activo:    boolean;
-  creado_en: string;
+  id:            number;
+  activo:        boolean;
+  creado_en:     string;
+  estado_actual: string; // ← esta línea
 }
 
 @Injectable({ providedIn: 'root' })

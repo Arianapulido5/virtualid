@@ -64,6 +64,7 @@ export const routes: Routes = [
       { path: 'credenciales/:id/validar', loadComponent: () => import('./pages/admin/validar-credencial/validar-credencial').then(m => m.ValidarCredencial) },
       { path: 'puntos-acceso',         loadComponent: () => import('./pages/admin/puntos-acceso/puntos-acceso').then(m => m.PuntosAcceso) },
       { path: 'puntos-acceso/nuevo',   loadComponent: () => import('./pages/admin/agregar-punto-acceso/agregar-punto-acceso').then(m => m.AgregarPuntoAcceso) },
+      { path: 'puntos-acceso/:id/editar', loadComponent: () => import('./pages/admin/editar-punto-acceso/editar-punto-acceso').then(m => m.EditarPuntoAcceso) },
       { path: 'puntos-acceso/:id/historial', loadComponent: () => import('./pages/admin/historial-accesos/historial-accesos').then(m => m.HistorialAccesos) },
       { path: 'historial-usuario/:id', loadComponent: () => import('./pages/admin/historial-usuario/historial-usuario').then(m => m.HistorialUsuario) },
       { path: 'historial-global',      loadComponent: () => import('./pages/admin/historial-global/historial-global').then(m => m.HistorialGlobal) },

@@ -1,0 +1,274 @@
+<div class="admin-layout" (click)="cerrarPickers()">
+
+  <app-sidebar-admin paginaActiva="puntos-acceso" />
+
+  <!-- MODAL ÉXITO -->
+  <div class="modal-overlay" *ngIf="exitoso">
+    <div class="modal-card">
+      <div class="modal-icon">✓</div>
+      <h3>¡Punto de acceso actualizado!</h3>
+      <p>Los cambios han sido guardados correctamente.</p>
+      <button class="btn-aceptar" (click)="volver()">Aceptar</button>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="page-body">
+
+      <!-- CARGANDO -->
+      <div *ngIf="cargando" class="estado-cargando">Cargando datos del punto…</div>
+
+      <ng-container *ngIf="!cargando">
+
+        <h1 class="page-title">Editar Punto de Acceso</h1>
+
+        <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+
+        <div class="contenido-grid">
+
+          <!-- FORMULARIO -->
+          <div class="card form-card" (click)="$event.stopPropagation()">
+            <h3 class="card-title">Datos del punto de acceso</h3>
+
+            <div class="field-group">
+              <label class="field-label">Nombre *</label>
+              <input class="field-input" type="text"
+                placeholder="Ej. Edificio A — Entrada Principal"
+                [(ngModel)]="form.nombre" />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Descripción / ubicación</label>
+              <input class="field-input" type="text"
+                placeholder="Ej. Planta baja, puerta norte"
+                [(ngModel)]="form.descripcion" />
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Tipo de espacio *</label>
+              <div class="tipos-grid">
+                <button class="tipo-btn" *ngFor="let t of tipos"
+                  [class.active]="form.tipo === t.value"
+                  (click)="form.tipo = t.value">
+                  <span>{{ t.icon }}</span> {{ t.label }}
+                </button>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Nivel de acceso *</label>
+              <div class="select-mejorado">
+                <select class="field-input" [(ngModel)]="form.nivelAcceso">
+                  <option value="abierto">Abierto — todos los usuarios con credencial activa</option>
+                  <option value="restringido">Restringido — solo personal autorizado</option>
+                  <option value="exclusivo">Exclusivo — requiere aprobación manual</option>
+                </select>
+                <span class="select-arrow">▾</span>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">¿Quiénes pueden acceder? *</label>
+              <div class="check-group">
+                <label class="check-item">
+                  <input type="checkbox" [(ngModel)]="form.permite_estudiantes" />
+                  <span>Estudiantes</span>
+                </label>
+                <label class="check-item">
+                  <input type="checkbox" [(ngModel)]="form.permite_empleados" />
+                  <span>Empleados</span>
+                </label>
+              </div>
+              <p *ngIf="!form.permite_estudiantes && !form.permite_empleados" class="campo-error">
+                Selecciona al menos un tipo de usuario.
+              </p>
+            </div>
+
+            <!-- HORARIO -->
+            <div class="field-group">
+              <label class="field-label">Horario de operación *</label>
+            </div>
+
+            <div class="field-group horario-row">
+              <div class="horario-col">
+                <label class="field-label">Hora de entrada *</label>
+                <div class="time-picker" (click)="$event.stopPropagation()">
+                  <button type="button" class="time-display" (click)="togglePicker('entrada', $event)">
+                    <span [class.placeholder]="!form.hora_entrada">
+                      {{ form.hora_entrada ? formatHora12(form.hora_entrada) : '--:-- -----' }}
+                    </span>
+                    <span class="time-icon">🕐</span>
+                  </button>
+                  <div class="time-dropdown" #dropdownRef *ngIf="pickerAbierto === 'entrada'"
+                    [style.top.px]="dropdownPos.top" [style.left.px]="dropdownPos.left">
+                    <div class="time-columns">
+                      <div class="time-col">
+                        <button type="button" class="time-option" *ngFor="let h of horas12"
+                          [class.selected]="temp['entrada'].h === h"
+                          (click)="setTempHora('entrada', h)">{{ h }}</button>
+                      </div>
+                      <div class="time-col">
+                        <button type="button" class="time-option" *ngFor="let m of minutos"
+                          [class.selected]="temp['entrada'].m === m"
+                          (click)="setTempMin('entrada', m)">{{ m }}</button>
+                      </div>
+                      <div class="time-col time-col-periodo">
+                        <button type="button" class="time-option periodo" *ngFor="let p of periodos"
+                          [class.selected]="temp['entrada'].p === p"
+                          (click)="setTempPeriodo('entrada', p)">{{ p }}</button>
+                      </div>
+                    </div>
+                    <button type="button" class="time-confirmar" (click)="confirmarHora('entrada')">Aceptar</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="horario-col">
+                <label class="field-label">Hora de salida *</label>
+                <div class="time-picker" (click)="$event.stopPropagation()">
+                  <button type="button" class="time-display" (click)="togglePicker('salida', $event)">
+                    <span [class.placeholder]="!form.hora_salida">
+                      {{ form.hora_salida ? formatHora12(form.hora_salida) : '--:-- -----' }}
+                    </span>
+                    <span class="time-icon">🕐</span>
+                  </button>
+                  <div class="time-dropdown" #dropdownRef *ngIf="pickerAbierto === 'salida'"
+                    [style.top.px]="dropdownPos.top" [style.left.px]="dropdownPos.left">
+                    <div class="time-columns">
+                      <div class="time-col">
+                        <button type="button" class="time-option" *ngFor="let h of horas12"
+                          [class.selected]="temp['salida'].h === h"
+                          (click)="setTempHora('salida', h)">{{ h }}</button>
+                      </div>
+                      <div class="time-col">
+                        <button type="button" class="time-option" *ngFor="let m of minutos"
+                          [class.selected]="temp['salida'].m === m"
+                          (click)="setTempMin('salida', m)">{{ m }}</button>
+                      </div>
+                      <div class="time-col time-col-periodo">
+                        <button type="button" class="time-option periodo" *ngFor="let p of periodos"
+                          [class.selected]="temp['salida'].p === p"
+                          (click)="setTempPeriodo('salida', p)">{{ p }}</button>
+                      </div>
+                    </div>
+                    <button type="button" class="time-confirmar" (click)="confirmarHora('salida')">Aceptar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-group horario-row">
+              <div class="horario-col">
+                <label class="field-label">Inicio de comida</label>
+                <div class="time-picker" (click)="$event.stopPropagation()">
+                  <button type="button" class="time-display" (click)="togglePicker('comida_inicio', $event)">
+                    <span [class.placeholder]="!form.comida_inicio">
+                      {{ form.comida_inicio ? formatHora12(form.comida_inicio) : '--:-- -----' }}
+                    </span>
+                    <span class="time-icon">🕐</span>
+                  </button>
+                  <div class="time-dropdown" #dropdownRef *ngIf="pickerAbierto === 'comida_inicio'"
+                    [style.top.px]="dropdownPos.top" [style.left.px]="dropdownPos.left">
+                    <div class="time-columns">
+                      <div class="time-col">
+                        <button type="button" class="time-option" *ngFor="let h of horas12"
+                          [class.selected]="temp['comida_inicio'].h === h"
+                          (click)="setTempHora('comida_inicio', h)">{{ h }}</button>
+                      </div>
+                      <div class="time-col">
+                        <button type="button" class="time-option" *ngFor="let m of minutos"
+                          [class.selected]="temp['comida_inicio'].m === m"
+                          (click)="setTempMin('comida_inicio', m)">{{ m }}</button>
+                      </div>
+                      <div class="time-col time-col-periodo">
+                        <button type="button" class="time-option periodo" *ngFor="let p of periodos"
+                          [class.selected]="temp['comida_inicio'].p === p"
+                          (click)="setTempPeriodo('comida_inicio', p)">{{ p }}</button>
+                      </div>
+                    </div>
+                    <button type="button" class="time-confirmar" (click)="confirmarHora('comida_inicio')">Aceptar</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="horario-col">
+                <label class="field-label">Fin de comida</label>
+                <div class="time-picker" (click)="$event.stopPropagation()">
+                  <button type="button" class="time-display" (click)="togglePicker('comida_fin', $event)">
+                    <span [class.placeholder]="!form.comida_fin">
+                      {{ form.comida_fin ? formatHora12(form.comida_fin) : '--:-- -----' }}
+                    </span>
+                    <span class="time-icon">🕐</span>
+                  </button>
+                  <div class="time-dropdown" #dropdownRef *ngIf="pickerAbierto === 'comida_fin'"
+                    [style.top.px]="dropdownPos.top" [style.left.px]="dropdownPos.left">
+                    <div class="time-columns">
+                      <div class="time-col">
+                        <button type="button" class="time-option" *ngFor="let h of horas12"
+                          [class.selected]="temp['comida_fin'].h === h"
+                          (click)="setTempHora('comida_fin', h)">{{ h }}</button>
+                      </div>
+                      <div class="time-col">
+                        <button type="button" class="time-option" *ngFor="let m of minutos"
+                          [class.selected]="temp['comida_fin'].m === m"
+                          (click)="setTempMin('comida_fin', m)">{{ m }}</button>
+                      </div>
+                      <div class="time-col time-col-periodo">
+                        <button type="button" class="time-option periodo" *ngFor="let p of periodos"
+                          [class.selected]="temp['comida_fin'].p === p"
+                          (click)="setTempPeriodo('comida_fin', p)">{{ p }}</button>
+                      </div>
+                    </div>
+                    <button type="button" class="time-confirmar" (click)="confirmarHora('comida_fin')">Aceptar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p *ngIf="errorHorario()" class="campo-error">{{ errorHorario() }}</p>
+
+            <div class="form-actions">
+              <button class="btn-cancelar" (click)="volver()" [disabled]="guardando">Cancelar</button>
+              <button class="btn-guardar" [disabled]="!formularioValido() || guardando" (click)="guardar()">
+                {{ guardando ? 'Guardando…' : 'Guardar cambios' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- VISTA PREVIA -->
+          <div class="card preview-card" (click)="$event.stopPropagation()">
+            <h3 class="card-title">Vista previa de la tarjeta</h3>
+            <div class="preview-tarjeta" [ngClass]="colorPreview()">
+              <span class="preview-icon">{{ iconoActivo() }}</span>
+              <div class="preview-info">
+                <span class="preview-nombre">{{ form.nombre || 'Nombre del punto' }}</span>
+                <span class="preview-desc">{{ form.descripcion || 'Descripción / ubicación' }}</span>
+              </div>
+            </div>
+            <div class="preview-meta">
+              <span class="meta-item">
+                <strong>Nivel:</strong> {{ form.nivelAcceso | titlecase }}
+              </span>
+              <span class="meta-item">
+                <strong>Acceso:</strong>
+                {{ form.permite_estudiantes && form.permite_empleados ? 'Todos'
+                   : form.permite_estudiantes ? 'Solo estudiantes'
+                   : form.permite_empleados  ? 'Solo empleados' : '—' }}
+              </span>
+              <span class="meta-item" *ngIf="form.hora_entrada && form.hora_salida">
+                <strong>Horario:</strong> {{ formatHora12(form.hora_entrada) }} – {{ formatHora12(form.hora_salida) }}
+              </span>
+              <span class="meta-item" *ngIf="form.comida_inicio && form.comida_fin">
+                <strong>Comida:</strong> {{ formatHora12(form.comida_inicio) }} – {{ formatHora12(form.comida_fin) }}
+              </span>
+              <span class="meta-item estado-badge" [ngClass]="estadoPreview().clase">
+                <strong>Estado actual:</strong> {{ estadoPreview().texto }}
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+    </div>
+  </main>
+</div>

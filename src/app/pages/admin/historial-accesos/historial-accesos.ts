@@ -35,6 +35,10 @@ interface PuntoInfo {
   activo:        boolean;
   accesos_hoy:   number;
   denegados_hoy: number;
+  estado_actual: string;        // ← agregar
+  hora_entrada:  string | null; // ← agregar
+  hora_salida:   string | null; // ← agregar
+  horario_activo: boolean;      // ← agregar
 }
 
 @Component({
@@ -71,10 +75,11 @@ export class HistorialAccesos implements OnInit, OnDestroy {
     }, 350);
   }
 
-  punto: PuntoInfo = {
-    id: 0, nombre: '', descripcion: '', tipo: '',
-    activo: true, accesos_hoy: 0, denegados_hoy: 0
-  };
+punto: PuntoInfo = {
+  id: 0, nombre: '', descripcion: '', tipo: '',
+  activo: true, accesos_hoy: 0, denegados_hoy: 0,
+  estado_actual: 'abierto', hora_entrada: null, hora_salida: null, horario_activo: false
+};
 
   registros:  Registro[]  = [];
   paginacion: Paginacion  = {
@@ -294,4 +299,22 @@ export class HistorialAccesos implements OnInit, OnDestroy {
   esAdvertencia(r: Registro): boolean {
     return !r.exitoso;
   }
+
+estadoBanner(): { texto: string; clase: string } {
+  if (!this.punto.activo) return { texto: 'Desactivado', clase: 'banner-estado-inactivo' };
+  switch (this.punto.estado_actual) {
+    case 'fuera_de_horario': return { texto: 'Cerrado (fuera de horario)', clase: 'banner-estado-cerrado'  };
+    case 'cerrado_comida':   return { texto: 'Cerrado (hora de comida)',   clase: 'banner-estado-comida'   };
+    case 'sin_horario':      return { texto: 'Sin horario definido',       clase: 'banner-estado-inactivo' };
+    default:                 return { texto: 'Abierto',                    clase: 'banner-estado-abierto'  };
+  }
+}
+
+formatHora12Banner(hora: string | null): string {
+  if (!hora) return '';
+  const [hh, mm] = hora.substring(0, 5).split(':').map(Number);
+  const p  = hh >= 12 ? 'p. m.' : 'a. m.';
+  const h12 = hh % 12 === 0 ? 12 : hh % 12;
+  return `${h12.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')} ${p}`;
+}
 }

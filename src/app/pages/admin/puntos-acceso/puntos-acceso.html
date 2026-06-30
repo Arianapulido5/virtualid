@@ -52,12 +52,12 @@
                    : 'Solo empleados' }}
               </span>
             </div>
-            <div class="stat-row">
-              <span class="stat-label">Estado</span>
-              <span class="estado-badge" [ngClass]="estadoClass(p.estado)">
-                ● {{ p.estado }}
-              </span>
-            </div>
+           <div class="stat-row">
+            <span class="stat-label">Estado</span>
+            <span class="estado-badge" [ngClass]="p.estadoClase">
+              ● {{ p.estadoTexto }}
+            </span>
+          </div>
           </div>
 
           <button

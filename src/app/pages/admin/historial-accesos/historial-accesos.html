@@ -41,36 +41,47 @@
         </svg>
       </a>
 
-      <!-- FILA 2: título + botón eliminar en la misma línea -->
       <div class="titulo-row">
         <h1 class="page-title">{{ punto.nombre }} Historial</h1>
-        <button
-          class="btn-eliminar-punto"
-          (click)="pedirEliminarPunto()"
-          [disabled]="procesando">
-           Eliminar punto de acceso
-        </button>
+        <div class="titulo-acciones">
+          <button
+            class="btn-editar-punto"
+            [routerLink]="['/admin/puntos-acceso', puntoId, 'editar']">
+            Editar punto
+          </button>
+          <button
+            class="btn-eliminar-punto"
+            (click)="pedirEliminarPunto()"
+            [disabled]="procesando">
+            Eliminar punto de acceso
+          </button>
+        </div>
       </div>
 
-      <!-- BANNER AZUL — completamente sin tocar -->
-      <div class="punto-banner">
-        <div class="banner-icon">🏛</div>
-        <div class="banner-info">
-          <span class="banner-nombre">{{ punto.nombre }} — {{ punto.descripcion }}</span>
-          <span class="banner-meta">{{ punto.tipo }}</span>
-          <span class="banner-estado">● {{ punto.activo ? 'Activo' : 'Inactivo' }}</span>
-        </div>
-        <div class="banner-stats">
-          <div class="stat-item">
-            <span class="stat-num blue">{{ punto.accesos_hoy }}</span>
-            <span class="stat-label">accesos hoy</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-num red">{{ punto.denegados_hoy }}</span>
-            <span class="stat-label">denegados hoy</span>
-          </div>
-        </div>
-      </div>
+     <!-- BANNER AZUL -->
+<div class="punto-banner">
+  <div class="banner-icon">🏛</div>
+  <div class="banner-info">
+    <span class="banner-nombre">{{ punto.nombre }} — {{ punto.descripcion }}</span>
+    <span class="banner-meta">{{ punto.tipo }}</span>
+    <span class="banner-estado" [ngClass]="estadoBanner().clase">
+      ● {{ estadoBanner().texto }}
+    </span>
+    <span class="banner-horario" *ngIf="punto.horario_activo && punto.hora_entrada && punto.hora_salida">
+      🕐 {{ formatHora12Banner(punto.hora_entrada) }} – {{ formatHora12Banner(punto.hora_salida) }}
+    </span>
+  </div>
+  <div class="banner-stats">
+    <div class="stat-item">
+      <span class="stat-num blue">{{ punto.accesos_hoy }}</span>
+      <span class="stat-label">accesos hoy</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num red">{{ punto.denegados_hoy }}</span>
+      <span class="stat-label">denegados hoy</span>
+    </div>
+  </div>
+</div>
 
       <!-- FILTROS -->
       <div class="filtros-bar">
