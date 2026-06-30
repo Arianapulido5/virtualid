@@ -82,16 +82,33 @@
 // ─────────────────────────────────────────────
 .admin-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--bg);
+  overflow: hidden;
 }
 
 .main-content {
   margin-left: 210px;
   margin-top: 52px;
-  flex: 1; overflow-y: auto;
-  min-height: calc(100vh - 52px);
+  flex: 1;
+  height: calc(100vh - 52px);
+  max-height: calc(100vh - 52px);
+  overflow-y: scroll;
+  overflow-x: hidden;
   animation: fadeIn 0.4s ease both;
+
+  // Scrollbar invisible (Firefox)
+  scrollbar-width: none;
+  // Scrollbar invisible (IE/Edge legacy)
+  -ms-overflow-style: none;
+
+  // Scrollbar invisible (Chrome/Safari/Opera)
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+    background: transparent;
+  }
 }
 
 .page-body {
@@ -443,6 +460,187 @@
 
   &:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(77,15,96,0.42); }
   &:active { transform: translateY(0); }
+}
+
+// ─────────────────────────────────────────────
+//  HORARIOS
+// ─────────────────────────────────────────────
+.horario-toggle {
+  font-weight: 700;
+}
+
+.horario-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.horario-col {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.campo-hint {
+  font-size: 11px;
+  color: #9aa0ab;
+  margin: -4px 0 0;
+}
+
+.estado-badge {
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+// ─────────────────────────────────────────────
+//  SELECT MEJORADO (Nivel de acceso)
+// ─────────────────────────────────────────────
+.select-mejorado {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  select.field-input {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 36px;
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 14px;
+    pointer-events: none;
+    color: var(--purple);
+    font-size: 13px;
+    transition: transform 0.2s;
+  }
+
+  select.field-input:focus ~ .select-arrow {
+    transform: rotate(180deg);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  TIME PICKER CUSTOM (hora / minuto / periodo)
+// ─────────────────────────────────────────────
+.time-picker {
+  position: relative;
+}
+
+.time-display {
+  width: 100%;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px;
+  border: 1.5px solid #e0e4ec;
+  border-radius: 10px;
+  background: var(--white);
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px; color: var(--black);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+
+  span.placeholder { color: #bbb; letter-spacing: 1px; }
+
+  &:hover { border-color: rgba(77,15,96,0.35); }
+}
+
+.time-icon {
+  font-size: 14px;
+  opacity: 0.55;
+}
+
+.time-dropdown {
+  width: 230px;
+  background: var(--white);
+  border: 1.5px solid rgba(77,15,96,0.15);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(77,15,96,0.2);
+  z-index: 9999;
+  padding: 10px;
+  animation: fadeInUp 0.18s ease both;
+}
+
+.time-columns {
+  display: flex;
+  gap: 6px;
+  height: 180px;
+}
+
+.time-col {
+  flex: 1;
+  overflow-y: scroll;
+  display: flex; flex-direction: column; gap: 3px;
+
+  // Scrollbar invisible (Firefox)
+  scrollbar-width: none;
+  // Scrollbar invisible (IE/Edge legacy)
+  -ms-overflow-style: none;
+
+  // Scrollbar invisible (Chrome/Safari/Opera)
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+    background: transparent;
+  }
+}
+
+.time-col-periodo {
+  overflow-y: visible;
+  flex: 0 0 56px;
+}
+
+.time-option {
+  border: none;
+  background: rgba(77,15,96,0.04);
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px; font-weight: 600; color: var(--dark);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+
+  &:hover {
+    background: rgba(77,15,96,0.1);
+    color: var(--purple);
+  }
+
+  &.selected {
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    color: var(--white);
+    font-weight: 700;
+    box-shadow: 0 3px 10px rgba(77,15,96,0.3);
+  }
+}
+
+.periodo.selected {
+  background: linear-gradient(135deg, var(--purple-m), var(--blue));
+}
+
+.time-confirmar {
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  color: var(--white);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(77,15,96,0.35);
+  }
 }
 
 // ─────────────────────────────────────────────

@@ -4,12 +4,18 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface PuntoAccesoDTO {
-  nombre:              string;
-  descripcion?:        string;
-  tipo:                string;
-  nivel_acceso:        string;
+  nombre: string;
+  descripcion?: string;
+  tipo: string;
+  nivel_acceso: string;
   permite_estudiantes: boolean;
-  permite_empleados:   boolean;
+  permite_empleados: boolean;
+  activo?: boolean;
+  horario_activo: boolean;
+  hora_entrada?: string;  
+  hora_salida?: string;    
+  comida_inicio?: string; 
+  comida_fin?: string;  
 }
 
 export interface PuntoAcceso extends PuntoAccesoDTO {
