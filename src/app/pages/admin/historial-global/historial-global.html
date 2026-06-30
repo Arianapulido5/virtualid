@@ -37,7 +37,6 @@
 
         <div class="filtro-grupo">
           <label class="filtro-label">Periodo</label>
-          <!-- onPeriodoChange() — único que resetea fechas -->
           <select class="filtro-select" [(ngModel)]="filtroPeriodo" (ngModelChange)="onPeriodoChange()">
             <option value="todos">Todos</option>
             <option value="hoy">Hoy</option>
@@ -97,6 +96,7 @@
                 <th>TIPO</th>
                 <th>FECHA Y HORA</th>
                 <th>RESULTADO</th>
+                <th>ESTADO</th>
                 <th>DETALLE</th>
               </tr>
             </thead>
@@ -129,6 +129,12 @@
                   <span class="resultado-badge" [ngClass]="r.exitoso ? 'exitoso' : 'denegado'">
                     {{ r.exitoso ? '✓ Exitoso' : '✗ Denegado' }}
                   </span>
+                </td>
+                <td class="col-estado">
+                  <div class="estado-puntualidad" [ngClass]="puntualidad(r).clase">
+                    <span class="estado-texto">{{ puntualidad(r).texto }}</span>
+                    <span class="estado-detalle" *ngIf="puntualidad(r).detalle">{{ puntualidad(r).detalle }}</span>
+                  </div>
                 </td>
                 <td class="col-accion">
                   <span class="ver-detalle-hint">Ver</span>

@@ -20,11 +20,21 @@ interface Registro {
   punto_id:          number;
   punto_nombre:      string;
   punto_tipo:        string;
+  horario_activo:    boolean;
+  hora_entrada:      string | null;
+  comida_inicio:     string | null;
+  comida_fin:        string | null;
 }
 
 interface PuntoFiltro {
   id:     number;
   nombre: string;
+}
+
+interface EstadoPuntualidad {
+  texto:   string;
+  detalle: string;
+  clase:   string;
 }
 
 @Component({
@@ -72,7 +82,6 @@ export class HistorialGlobal implements OnInit {
   /** Devuelve la fecha de hoy en zona Mexico_City como YYYY-MM-DD */
   private fechaHoyMX(): string {
     return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
-    // en-CA usa formato YYYY-MM-DD nativamente
   }
 
   cargar(): void {
@@ -87,8 +96,6 @@ export class HistorialGlobal implements OnInit {
     } else if (this.filtroPeriodo === 'fecha') {
       if (this.filtroFechaInicio) params['fecha'] = this.filtroFechaInicio;
     } else if (this.filtroPeriodo === 'hoy') {
-      // Mandamos la fecha de hoy en México explícitamente para evitar
-      // que el backend use NOW() UTC que puede ser un día distinto
       params['fecha'] = this.fechaHoyMX();
     } else if (this.filtroPeriodo !== 'todos') {
       params['periodo'] = this.filtroPeriodo;
@@ -113,39 +120,24 @@ export class HistorialGlobal implements OnInit {
       });
   }
 
-  /**
-   * Solo para el select de PERIODO.
-   * Resetea fechas cuando cambia el periodo, nunca cuando cambian
-   * punto, tipo o resultado.
-   */
   onPeriodoChange(): void {
     this.filtroFechaInicio = '';
     this.filtroFechaFin    = '';
 
     if (this.filtroPeriodo === 'fecha' || this.filtroPeriodo === 'rango') {
-      // Esperar a que el usuario seleccione las fechas
       this.cargando = false;
       this.cdr.detectChanges();
     } else {
-      // hoy / semana / mes / todos — cargar de inmediato
       this.cargar();
     }
   }
 
-  /**
-   * Para los selects de PUNTO, TIPO y RESULTADO.
-   * Recarga sin tocar el periodo ni las fechas.
-   */
   onFiltroChange(): void {
-    // Si el periodo requiere fecha y no está completa, no cargar todavía
     if (this.filtroPeriodo === 'fecha' && !this.filtroFechaInicio) return;
     if (this.filtroPeriodo === 'rango' && (!this.filtroFechaInicio || !this.filtroFechaFin)) return;
     this.cargar();
   }
 
-  /**
-   * Para los inputs de fecha (día específico y rango).
-   */
   onFechaChange(): void {
     if (this.filtroPeriodo === 'fecha' && this.filtroFechaInicio) {
       this.cargar();
@@ -195,5 +187,64 @@ export class HistorialGlobal implements OnInit {
       day: '2-digit',
       month: 'short'
     }) + `, ${hora}`;
+  }
+
+  /** Hora corta del registro en formato "08:03 a.m." (zona México) */
+  private horaCorta(fecha: string): string {
+    return new Date(fecha).toLocaleTimeString('es-MX', {
+      timeZone: 'America/Mexico_City',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  /** Convierte "HH:mm:ss" o "HH:mm" a minutos desde medianoche */
+  private aMinutos(hora: string): number {
+    const [h, m] = hora.substring(0, 5).split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  /**
+   * Calcula el estado de puntualidad de un registro:
+   * - salida          → "Salió" + hora a la que salió
+   * - entrada normal  → "Puntual" + hora, o "Retraso" + minutos (vs hora_entrada)
+   * - entrada después de comida_inicio → mismo cálculo pero vs comida_fin
+   */
+  puntualidad(r: Registro): EstadoPuntualidad {
+    const horaFmt = this.horaCorta(r.creado_en);
+
+    // ── SALIDA (incluye salida a comer) ──
+    if (r.tipo_movimiento === 'salida') {
+      return { texto: 'Salió', detalle: horaFmt, clase: 'salida' };
+    }
+
+    // ── ENTRADA ──
+    if (!r.horario_activo || !r.hora_entrada) {
+      return { texto: 'Sin horario', detalle: '', clase: 'neutro' };
+    }
+
+    const horaRealMin = this.aMinutos(
+      new Date(r.creado_en).toLocaleTimeString('en-GB', {
+        timeZone: 'America/Mexico_City',
+        hour: '2-digit', minute: '2-digit', hour12: false
+      })
+    );
+
+    const minEntrada      = this.aMinutos(r.hora_entrada);
+    const minComidaInicio = r.comida_inicio ? this.aMinutos(r.comida_inicio) : null;
+    const minComidaFin    = r.comida_fin    ? this.aMinutos(r.comida_fin)    : null;
+
+    // Si la entrada ocurre después de que inició la comida, se asume
+    // que es el regreso de comer y se compara contra comida_fin
+    const esRegresoComida = minComidaInicio !== null && minComidaFin !== null
+      && horaRealMin >= minComidaInicio;
+
+    const referencia = esRegresoComida ? (minComidaFin as number) : minEntrada;
+    const diff = horaRealMin - referencia;
+
+    if (diff <= 0) {
+      return { texto: 'Puntual', detalle: horaFmt, clase: 'puntual' };
+    }
+    return { texto: 'Retraso', detalle: `${diff} min`, clase: 'tarde' };
   }
 }
