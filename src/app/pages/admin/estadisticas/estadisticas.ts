@@ -6,11 +6,15 @@ import { Router } from '@angular/router';
 import { SidebarAdminComponent } from '../../../shared/sidebar-admin/sidebar-admin';
 import { environment } from '../../../../environments/environment';
 
-interface PuntoConcurrido {
-  id:     number;
-  nombre: string;
-  tipo:   string;
-  total:  number;
+interface PuntoEstadistica {
+  id:                     number;
+  nombre:                 string;
+  tipo:                   string;
+  total_evaluadas:        number;
+  total_puntuales:        number;
+  total_tarde:            number;
+  porcentaje_puntualidad: number;
+  promedio_retraso_min:   number;
 }
 
 interface UsuarioEstadistica {
@@ -25,9 +29,10 @@ interface UsuarioEstadistica {
 }
 
 interface EstadisticasData {
-  puntos_concurridos:   PuntoConcurrido[];
   usuarios_puntuales:   UsuarioEstadistica[];
   usuarios_impuntuales: UsuarioEstadistica[];
+  puntos_puntuales:     PuntoEstadistica[];
+  puntos_impuntuales:   PuntoEstadistica[];
 }
 
 @Component({
@@ -40,15 +45,17 @@ interface EstadisticasData {
 export class Estadisticas implements OnInit {
 
   cargando = true;
+  error    = '';
 
-  periodo     = 'mes';
+  periodo     = 'hoy';
   fechaInicio = '';
   fechaFin    = '';
   errorFecha  = '';
 
-  puntosConcurridos:   PuntoConcurrido[]      = [];
-  usuariosPuntuales:   UsuarioEstadistica[]   = [];
-  usuariosImpuntuales: UsuarioEstadistica[]   = [];
+  usuariosPuntuales:   UsuarioEstadistica[] = [];
+  usuariosImpuntuales: UsuarioEstadistica[] = [];
+  puntosPuntuales:     PuntoEstadistica[]   = [];
+  puntosImpuntuales:   PuntoEstadistica[]   = [];
 
   constructor(
     private http:   HttpClient,
@@ -70,6 +77,7 @@ export class Estadisticas implements OnInit {
 
   cargar(): void {
     this.cargando = true;
+    this.error    = '';
     this.cdr.detectChanges();
 
     const params: Record<string, string> = {};
@@ -90,17 +98,22 @@ export class Estadisticas implements OnInit {
 
     this.http.get<EstadisticasData>(url, { headers: this.headers() }).subscribe({
       next: (data) => {
-        this.puntosConcurridos   = data?.puntos_concurridos   ?? [];
         this.usuariosPuntuales   = data?.usuarios_puntuales   ?? [];
         this.usuariosImpuntuales = data?.usuarios_impuntuales ?? [];
+        this.puntosPuntuales     = data?.puntos_puntuales     ?? [];
+        this.puntosImpuntuales   = data?.puntos_impuntuales   ?? [];
         this.cargando = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error cargando estadísticas:', err);
-        this.puntosConcurridos   = [];
         this.usuariosPuntuales   = [];
         this.usuariosImpuntuales = [];
+        this.puntosPuntuales     = [];
+        this.puntosImpuntuales   = [];
+        this.error = err?.status
+          ? `Error ${err.status}: ${err.error?.message ?? 'no se pudieron cargar las estadísticas.'}`
+          : 'No se pudo conectar con el servidor.';
         this.cargando = false;
         this.cdr.detectChanges();
       }
@@ -126,10 +139,6 @@ export class Estadisticas implements OnInit {
     } else if (this.periodo === 'rango' && this.fechaInicio && this.fechaFin) {
       this.cargar();
     }
-  }
-
-  get maxPunto(): number {
-    return this.puntosConcurridos.length ? this.puntosConcurridos[0].total : 1;
   }
 
   rankClase(i: number): string {
@@ -158,7 +167,15 @@ export class Estadisticas implements OnInit {
     return map[tipo] ?? '📍';
   }
 
-  irAHistorialPunto(p: PuntoConcurrido): void {
+  // Convierte minutos a "Xh Ym" cuando pasa de 60, si no deja "Y min"
+  formatMinutos(min: number): string {
+    if (min < 60) return `${min} min`;
+    const horas   = Math.floor(min / 60);
+    const restoMin = min % 60;
+    return restoMin > 0 ? `${horas}h ${restoMin} min` : `${horas}h`;
+  }
+
+  irAHistorialPunto(p: PuntoEstadistica): void {
     this.router.navigate(['/admin/puntos-acceso', p.id, 'historial']);
   }
 }

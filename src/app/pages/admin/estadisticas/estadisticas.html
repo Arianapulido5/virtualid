@@ -12,10 +12,10 @@
         <div class="filtro-grupo">
           <label class="filtro-label">Periodo</label>
           <select class="filtro-select" [(ngModel)]="periodo" (ngModelChange)="onPeriodoChange()">
-            <option value="todos">Todos</option>
             <option value="hoy">Hoy</option>
             <option value="semana">Esta semana</option>
             <option value="mes">Este mes</option>
+            <option value="todos">Todos</option>
             <option value="fecha">Día específico</option>
             <option value="rango">Rango de fechas</option>
           </select>
@@ -64,34 +64,12 @@
       <!-- CARGANDO -->
       <div class="estado-txt" *ngIf="cargando">Cargando estadísticas...</div>
 
-      <ng-container *ngIf="!cargando && !(periodo === 'fecha' && !fechaInicio) && !(periodo === 'rango' && !(fechaInicio && fechaFin))">
+      <!-- ERROR -->
+      <div class="estado-txt estado-error" *ngIf="!cargando && error">{{ error }}</div>
 
-        <!-- PUNTOS MÁS CONCURRIDOS -->
-        <div class="card">
-          <h3 class="card-title">Puntos más concurridos</h3>
-          <div class="ranking-lista" *ngIf="puntosConcurridos.length > 0">
-            <div
-              class="ranking-item punto-item"
-              *ngFor="let p of puntosConcurridos; let i = index"
-              (click)="irAHistorialPunto(p)"
-            >
-              <span class="rank-num" [ngClass]="rankClase(i)">{{ i + 1 }}</span>
-              <span class="punto-tipo-icon">{{ puntoIcon(p.tipo) }}</span>
-              <div class="ranking-info">
-                <span class="ranking-nombre">{{ p.nombre }}</span>
-                <div class="barra-wrap">
-                  <div class="barra-fill" [style.width.%]="(p.total / maxPunto) * 100"></div>
-                </div>
-              </div>
-              <span class="ranking-valor">{{ p.total }}</span>
-            </div>
-          </div>
-          <div class="empty-state" *ngIf="puntosConcurridos.length === 0">
-            Sin datos en este periodo.
-          </div>
-        </div>
+      <ng-container *ngIf="!cargando && !error && !(periodo === 'fecha' && !fechaInicio) && !(periodo === 'rango' && !(fechaInicio && fechaFin))">
 
-        <!-- PUNTUALIDAD -->
+        <!-- PUNTUALIDAD DE USUARIOS -->
         <div class="bottom-grid">
 
           <div class="card">
@@ -124,12 +102,63 @@
                 <div class="user-avatar" [ngClass]="avatarColor(i)">{{ iniciales(u.nombre_completo) }}</div>
                 <div class="ranking-info">
                   <span class="ranking-nombre">{{ u.nombre_completo }}</span>
-                  <span class="ranking-sub">{{ u.total_tarde }} retrasos · {{ u.promedio_retraso_min }} min promedio</span>
-                </div>
+                  <span class="ranking-sub">{{ u.total_tarde }} retrasos · {{ formatMinutos(u.promedio_retraso_min) }} promedio</span>                </div>
                 <span class="porcentaje-badge denegado">{{ u.total_tarde }}</span>
               </div>
             </div>
             <div class="empty-state" *ngIf="usuariosImpuntuales.length === 0">
+              Sin retrasos registrados en este periodo.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- PUNTUALIDAD DE PUNTOS DE ACCESO -->
+        <div class="bottom-grid">
+
+          <div class="card">
+            <h3 class="card-title">
+              <span class="title-icon puntual-icon">✓</span> Puntos más puntuales
+            </h3>
+            <div class="ranking-lista" *ngIf="puntosPuntuales.length > 0">
+              <div
+                class="ranking-item punto-item"
+                *ngFor="let p of puntosPuntuales; let i = index"
+                (click)="irAHistorialPunto(p)"
+              >
+                <span class="rank-num" [ngClass]="rankClase(i)">{{ i + 1 }}</span>
+                <span class="punto-tipo-icon">{{ puntoIcon(p.tipo) }}</span>
+                <div class="ranking-info">
+                  <span class="ranking-nombre">{{ p.nombre }}</span>
+                  <span class="ranking-sub">{{ p.total_puntuales }}/{{ p.total_evaluadas }} accesos puntuales</span>
+                </div>
+                <span class="porcentaje-badge exito">{{ p.porcentaje_puntualidad }}%</span>
+              </div>
+            </div>
+            <div class="empty-state" *ngIf="puntosPuntuales.length === 0">
+              Sin datos suficientes en este periodo.
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="card-title">
+              <span class="title-icon impuntual-icon">!</span> Puntos más impuntuales
+            </h3>
+            <div class="ranking-lista" *ngIf="puntosImpuntuales.length > 0">
+              <div
+                class="ranking-item punto-item"
+                *ngFor="let p of puntosImpuntuales; let i = index"
+                (click)="irAHistorialPunto(p)"
+              >
+                <span class="rank-num" [ngClass]="rankClase(i)">{{ i + 1 }}</span>
+                <span class="punto-tipo-icon">{{ puntoIcon(p.tipo) }}</span>
+                <div class="ranking-info">
+                  <span class="ranking-nombre">{{ p.nombre }}</span>
+                    <span class="ranking-sub">{{ p.total_tarde }} retrasos · {{ formatMinutos(p.promedio_retraso_min) }} promedio</span>                </div>
+                <span class="porcentaje-badge denegado">{{ p.total_tarde }}</span>
+              </div>
+            </div>
+            <div class="empty-state" *ngIf="puntosImpuntuales.length === 0">
               Sin retrasos registrados en este periodo.
             </div>
           </div>
