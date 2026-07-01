@@ -12,6 +12,7 @@ interface Registro {
   exitoso:           boolean;
   motivo_denegacion: string | null;
   creado_en:         string;
+  tipo_movimiento:   string;
   nombre:            string;
   apellido_paterno:  string;
   apellido_materno:  string;
@@ -28,17 +29,25 @@ interface Paginacion {
 }
 
 interface PuntoInfo {
-  id:            number;
-  nombre:        string;
-  descripcion:   string;
-  tipo:          string;
-  activo:        boolean;
-  accesos_hoy:   number;
-  denegados_hoy: number;
-  estado_actual: string;        // ← agregar
-  hora_entrada:  string | null; // ← agregar
-  hora_salida:   string | null; // ← agregar
-  horario_activo: boolean;      // ← agregar
+  id:             number;
+  nombre:         string;
+  descripcion:    string;
+  tipo:           string;
+  activo:         boolean;
+  accesos_hoy:    number;
+  denegados_hoy:  number;
+  estado_actual:  string;
+  hora_entrada:   string | null;
+  hora_salida:    string | null;
+  horario_activo: boolean;
+  comida_inicio:  string | null;
+  comida_fin:     string | null;
+}
+
+interface EstadoPuntualidad {
+  texto:   string;
+  detalle: string;
+  clase:   string;
 }
 
 @Component({
@@ -75,11 +84,12 @@ export class HistorialAccesos implements OnInit, OnDestroy {
     }, 350);
   }
 
-punto: PuntoInfo = {
-  id: 0, nombre: '', descripcion: '', tipo: '',
-  activo: true, accesos_hoy: 0, denegados_hoy: 0,
-  estado_actual: 'abierto', hora_entrada: null, hora_salida: null, horario_activo: false
-};
+  punto: PuntoInfo = {
+    id: 0, nombre: '', descripcion: '', tipo: '',
+    activo: true, accesos_hoy: 0, denegados_hoy: 0,
+    estado_actual: 'abierto', hora_entrada: null, hora_salida: null,
+    horario_activo: false, comida_inicio: null, comida_fin: null
+  };
 
   registros:  Registro[]  = [];
   paginacion: Paginacion  = {
@@ -265,6 +275,10 @@ punto: PuntoInfo = {
     this.cdr.detectChanges();
   }
 
+  verDetalle(r: Registro): void {
+    this.router.navigate(['/admin/acceso', r.id]);
+  }
+
   iniciales(r: Registro): string {
     return (r.nombre[0] + r.apellido_paterno[0]).toUpperCase();
   }
@@ -277,44 +291,142 @@ punto: PuntoInfo = {
     return `${r.nombre} ${r.apellido_paterno} ${r.apellido_materno ?? ''}`.trim();
   }
 
-  formatHora(fecha: string): string {
-    return new Date(fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  /** Formatea fecha estilo "Hoy, HH:mm" / "Ayer, HH:mm" / "dd mmm, HH:mm" (zona México) */
+  formatFecha(fecha: string): string {
+    const d   = new Date(fecha);
+    const now = new Date();
+
+    const fechaMX = new Date(d.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+    const hoyMX   = new Date(now.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+    const ayerMX  = new Date(now.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+    ayerMX.setDate(ayerMX.getDate() - 1);
+
+    const hora = d.toLocaleTimeString('es-MX', {
+      timeZone: 'America/Mexico_City',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const mismodia = (a: Date, b: Date) =>
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth()    === b.getMonth()    &&
+      a.getDate()     === b.getDate();
+
+    if (mismodia(fechaMX, hoyMX))  return `Hoy, ${hora}`;
+    if (mismodia(fechaMX, ayerMX)) return `Ayer, ${hora}`;
+
+    return fechaMX.toLocaleDateString('es-MX', {
+      timeZone: 'America/Mexico_City',
+      day: '2-digit',
+      month: 'short'
+    }) + `, ${hora}`;
   }
 
-  formatDia(fecha: string): string {
-    const d    = new Date(fecha);
-    const hoy  = new Date();
-    const ayer = new Date(); ayer.setDate(hoy.getDate() - 1);
-    if (d.toDateString() === hoy.toDateString())  return 'Hoy';
-    if (d.toDateString() === ayer.toDateString()) return 'Ayer';
-    return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' });
+  /** Convierte "HH:mm:ss" o "HH:mm" a minutos desde medianoche */
+  private aMinutos(hora: string): number {
+    const [h, m] = hora.substring(0, 5).split(':').map(Number);
+    return h * 60 + m;
   }
 
-  detalle(r: Registro): string {
-    if (!r.exitoso && r.motivo_denegacion) return `⚠ ${r.motivo_denegacion}`;
-    if (!r.exitoso) return '⚠ Acceso denegado';
-    return `Credencial válida `;
+  /** Hora real del registro (zona México) en minutos desde medianoche */
+  private minutosReales(fecha: string): number {
+    return this.aMinutos(
+      new Date(fecha).toLocaleTimeString('en-GB', {
+        timeZone: 'America/Mexico_City',
+        hour: '2-digit', minute: '2-digit', hour12: false
+      })
+    );
   }
 
-  esAdvertencia(r: Registro): boolean {
-    return !r.exitoso;
+  /** Formatea minutos a texto legible: 35 → "35 min", 107 → "1h 47min", 120 → "2h" */
+  private formatMin(mins: number): string {
+    if (mins < 60) return `${mins} min`;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m === 0 ? `${h}h` : `${h}h ${m}min`;
   }
 
-estadoBanner(): { texto: string; clase: string } {
-  if (!this.punto.activo) return { texto: 'Desactivado', clase: 'banner-estado-inactivo' };
-  switch (this.punto.estado_actual) {
-    case 'fuera_de_horario': return { texto: 'Cerrado (fuera de horario)', clase: 'banner-estado-cerrado'  };
-    case 'cerrado_comida':   return { texto: 'Cerrado (hora de comida)',   clase: 'banner-estado-comida'   };
-    case 'sin_horario':      return { texto: 'Sin horario definido',       clase: 'banner-estado-inactivo' };
-    default:                 return { texto: 'Abierto',                    clase: 'banner-estado-abierto'  };
-  }
-}
+  /**
+   * Calcula el estado de puntualidad de un registro para el punto de acceso actual.
+   * Usa el horario de `this.punto` (todos los registros de esta página pertenecen
+   * al mismo punto), aplicando la misma lógica que en Historial Global.
+   */
+  puntualidad(r: Registro): EstadoPuntualidad {
+    if (!this.punto.horario_activo) {
+      return { texto: 'Sin horario', detalle: '', clase: 'neutro' };
+    }
 
-formatHora12Banner(hora: string | null): string {
-  if (!hora) return '';
-  const [hh, mm] = hora.substring(0, 5).split(':').map(Number);
-  const p  = hh >= 12 ? 'p. m.' : 'a. m.';
-  const h12 = hh % 12 === 0 ? 12 : hh % 12;
-  return `${h12.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')} ${p}`;
-}
+    const horaRealMin = this.minutosReales(r.creado_en);
+
+    const minEntrada      = this.punto.hora_entrada  ? this.aMinutos(this.punto.hora_entrada)  : null;
+    const minSalida       = this.punto.hora_salida   ? this.aMinutos(this.punto.hora_salida)   : null;
+    const minComidaInicio = this.punto.comida_inicio ? this.aMinutos(this.punto.comida_inicio) : null;
+    const minComidaFin    = this.punto.comida_fin    ? this.aMinutos(this.punto.comida_fin)    : null;
+
+    const hayComida = minComidaInicio !== null && minComidaFin !== null;
+
+    // ── ENTRADA (llegada inicial o regreso de comer) ──
+    if (r.tipo_movimiento === 'entrada') {
+      if (minEntrada === null) {
+        return { texto: 'Sin horario', detalle: '', clase: 'neutro' };
+      }
+
+      const esRegreso = hayComida && horaRealMin >= (minComidaInicio as number);
+      const referencia = esRegreso ? (minComidaFin as number) : minEntrada;
+
+      const diff = horaRealMin - referencia;
+
+      if (diff <= 0) {
+        return {
+          texto: 'Puntual',
+          detalle: diff === 0 ? 'A tiempo' : `${this.formatMin(-diff)} antes`,
+          clase: 'puntual'
+        };
+      }
+      return { texto: 'Impuntual', detalle: `${this.formatMin(diff)} de retraso`, clase: 'tarde' };
+    }
+
+    // ── SALIDA (a comer o salida final) ──
+    if (r.tipo_movimiento === 'salida') {
+      if (minSalida === null && minComidaInicio === null) {
+        return { texto: 'Sin horario', detalle: '', clase: 'neutro' };
+      }
+
+      const esSalidaFinal = !hayComida || horaRealMin >= (minComidaFin as number);
+      const referencia = esSalidaFinal
+        ? (minSalida !== null ? minSalida : (minComidaInicio as number))
+        : (minComidaInicio as number);
+
+      const diff = horaRealMin - referencia;
+
+      if (diff >= 0) {
+        return {
+          texto: 'Puntual',
+          detalle: diff === 0 ? 'A tiempo' : `${this.formatMin(diff)} después`,
+          clase: 'puntual'
+        };
+      }
+      return { texto: 'Anticipada', detalle: `${this.formatMin(-diff)} antes`, clase: 'anticipada' };
+    }
+
+    return { texto: 'Sin horario', detalle: '', clase: 'neutro' };
+  }
+
+  estadoBanner(): { texto: string; clase: string } {
+    if (!this.punto.activo) return { texto: 'Desactivado', clase: 'banner-estado-inactivo' };
+    switch (this.punto.estado_actual) {
+      case 'fuera_de_horario': return { texto: 'Cerrado (fuera de horario)', clase: 'banner-estado-cerrado'  };
+      case 'cerrado_comida':   return { texto: 'Cerrado (hora de comida)',   clase: 'banner-estado-comida'   };
+      case 'sin_horario':      return { texto: 'Sin horario definido',       clase: 'banner-estado-inactivo' };
+      default:                 return { texto: 'Abierto',                    clase: 'banner-estado-abierto'  };
+    }
+  }
+
+  formatHora12Banner(hora: string | null): string {
+    if (!hora) return '';
+    const [hh, mm] = hora.substring(0, 5).split(':').map(Number);
+    const p  = hh >= 12 ? 'p. m.' : 'a. m.';
+    const h12 = hh % 12 === 0 ? 12 : hh % 12;
+    return `${h12.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')} ${p}`;
+  }
 }

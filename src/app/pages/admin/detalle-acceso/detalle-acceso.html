@@ -144,12 +144,31 @@
                 </div>
               </div>
               <div class="timeline-item">
+                <div class="tl-dot" [ngClass]="acceso.tipo_movimiento === 'entrada' ? 'tl-dot--tipo-entrada' : 'tl-dot--tipo-salida'"></div>
+                <div class="tl-content">
+                  <span class="tl-label">Tipo</span>
+                  <span class="tl-val tipo-inline" [ngClass]="acceso.tipo_movimiento === 'entrada' ? 'entrada' : 'salida'">
+                    {{ acceso.tipo_movimiento === 'entrada' ? 'Entrada' : 'Salida' }}
+                  </span>
+                </div>
+              </div>
+              <div class="timeline-item">
                 <div class="tl-dot" [ngClass]="acceso.exitoso ? 'tl-dot--ok' : 'tl-dot--err'"></div>
                 <div class="tl-content">
                   <span class="tl-label">Resultado</span>
                   <span class="tl-val resultado-inline" [ngClass]="acceso.exitoso ? 'ok' : 'err'">
                     {{ acceso.exitoso ? 'Acceso permitido' : 'Acceso denegado' }}
                   </span>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <div class="tl-dot" [ngClass]="'tl-dot--' + puntualidadInfo.clase"></div>
+                <div class="tl-content">
+                  <span class="tl-label">Estado</span>
+                  <span class="tl-val estado-inline" [ngClass]="puntualidadInfo.clase">
+                    {{ puntualidadInfo.texto }}
+                  </span>
+                  <span class="tl-detalle" *ngIf="puntualidadInfo.detalle">{{ puntualidadInfo.detalle }}</span>
                 </div>
               </div>
               <div class="timeline-item" *ngIf="!acceso.exitoso && acceso.motivo_denegacion">

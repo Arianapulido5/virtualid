@@ -15,9 +15,20 @@ interface Registro {
   punto_id:          number;
   punto_nombre:      string;
   punto_tipo:        string;
+  horario_activo:    boolean;
+  hora_entrada:      string | null;
+  hora_salida:       string | null;
+  comida_inicio:     string | null;
+  comida_fin:        string | null;
 }
 
 interface PuntoFiltro { id: number; nombre: string; }
+
+interface EstadoPuntualidad {
+  texto:   string;
+  detalle: string;
+  clase:   string;
+}
 
 @Component({
   selector: 'app-historial-usuario',
@@ -168,5 +179,96 @@ export class HistorialUsuario implements OnInit {
       day: '2-digit',
       month: 'short'
     }) + `, ${hora}`;
+  }
+
+  /** Convierte "HH:mm:ss" o "HH:mm" a minutos desde medianoche */
+  private aMinutos(hora: string): number {
+    const [h, m] = hora.substring(0, 5).split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  /** Hora real del registro (zona México) en minutos desde medianoche */
+  private minutosReales(fecha: string): number {
+    return this.aMinutos(
+      new Date(fecha).toLocaleTimeString('en-GB', {
+        timeZone: 'America/Mexico_City',
+        hour: '2-digit', minute: '2-digit', hour12: false
+      })
+    );
+  }
+
+  /** Formatea minutos a texto legible: 35 → "35 min", 107 → "1h 47min", 120 → "2h" */
+  private formatMin(mins: number): string {
+    if (mins < 60) return `${mins} min`;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m === 0 ? `${h}h` : `${h}h ${m}min`;
+  }
+
+  /**
+   * Calcula el estado de puntualidad de un registro (mismo criterio que en
+   * Historial Global / Historial de Acceso), usando el horario propio de
+   * CADA registro, ya que aquí los registros pueden venir de distintos
+   * puntos de acceso.
+   */
+  puntualidad(r: Registro): EstadoPuntualidad {
+    if (!r.horario_activo) {
+      return { texto: 'Sin horario', detalle: '', clase: 'neutro' };
+    }
+
+    const horaRealMin = this.minutosReales(r.creado_en);
+
+    const minEntrada      = r.hora_entrada  ? this.aMinutos(r.hora_entrada)  : null;
+    const minSalida       = r.hora_salida   ? this.aMinutos(r.hora_salida)   : null;
+    const minComidaInicio = r.comida_inicio ? this.aMinutos(r.comida_inicio) : null;
+    const minComidaFin    = r.comida_fin    ? this.aMinutos(r.comida_fin)    : null;
+
+    const hayComida = minComidaInicio !== null && minComidaFin !== null;
+
+    // ── ENTRADA (llegada inicial o regreso de comer) ──
+    if (r.tipo_movimiento === 'entrada') {
+      if (minEntrada === null) {
+        return { texto: 'Sin horario', detalle: '', clase: 'neutro' };
+      }
+
+      const esRegreso = hayComida && horaRealMin >= (minComidaInicio as number);
+      const referencia = esRegreso ? (minComidaFin as number) : minEntrada;
+
+      const diff = horaRealMin - referencia;
+
+      if (diff <= 0) {
+        return {
+          texto: 'Puntual',
+          detalle: diff === 0 ? 'A tiempo' : `${this.formatMin(-diff)} antes`,
+          clase: 'puntual'
+        };
+      }
+      return { texto: 'Impuntual', detalle: `${this.formatMin(diff)} de retraso`, clase: 'tarde' };
+    }
+
+    // ── SALIDA (a comer o salida final) ──
+    if (r.tipo_movimiento === 'salida') {
+      if (minSalida === null && minComidaInicio === null) {
+        return { texto: 'Sin horario', detalle: '', clase: 'neutro' };
+      }
+
+      const esSalidaFinal = !hayComida || horaRealMin >= (minComidaFin as number);
+      const referencia = esSalidaFinal
+        ? (minSalida !== null ? minSalida : (minComidaInicio as number))
+        : (minComidaInicio as number);
+
+      const diff = horaRealMin - referencia;
+
+      if (diff >= 0) {
+        return {
+          texto: 'Puntual',
+          detalle: diff === 0 ? 'A tiempo' : `${this.formatMin(diff)} después`,
+          clase: 'puntual'
+        };
+      }
+      return { texto: 'Anticipada', detalle: `${this.formatMin(-diff)} antes`, clase: 'anticipada' };
+    }
+
+    return { texto: 'Sin horario', detalle: '', clase: 'neutro' };
   }
 }

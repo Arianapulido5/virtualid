@@ -121,13 +121,13 @@
                 </td>
                 <td class="col-tipo">
                   <span class="tipo-badge" [ngClass]="r.tipo_movimiento === 'entrada' ? 'entrada' : 'salida'">
-                    {{ r.tipo_movimiento === 'entrada' ? '↓ Acceso' : '↑ Salida' }}
+                    {{ r.tipo_movimiento === 'entrada' ? ' Entrada' : ' Salida' }}
                   </span>
                 </td>
                 <td class="col-fecha">{{ formatFecha(r.creado_en) }}</td>
                 <td>
                   <span class="resultado-badge" [ngClass]="r.exitoso ? 'exitoso' : 'denegado'">
-                    {{ r.exitoso ? '✓ Exitoso' : '✗ Denegado' }}
+                    {{ r.exitoso ? ' Exitoso' : ' Denegado' }}
                   </span>
                 </td>
                 <td class="col-estado">

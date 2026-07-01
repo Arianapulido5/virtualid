@@ -146,51 +146,63 @@
       <!-- TABLA -->
       <div class="tabla-card"
         *ngIf="!cargando && !(periodo === 'personalizado' && !fechaInicio && !fechaFin)">
-        <table class="tabla">
-          <thead>
-            <tr>
-              <th>USUARIO</th>
-              <th>TIPO</th>
-              <th>HORA</th>
-              <th>DETALLES</th>
-              <th>RESULTADO</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="tabla-row" *ngFor="let r of registros; let i = index">
-              <td>
-                <div class="col-usuario">
+        <div class="tabla-scroll">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>USUARIO</th>
+                <th>PERFIL</th>
+                <th>TIPO</th>
+                <th>FECHA Y HORA</th>
+                <th>RESULTADO</th>
+                <th>ESTADO</th>
+                <th>DETALLE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="tabla-row clickeable"
+                *ngFor="let r of registros; let i = index"
+                (click)="verDetalle(r)"
+              >
+                <td class="col-usuario">
                   <div class="user-avatar" [ngClass]="avatarColor(i)">{{ iniciales(r) }}</div>
                   <div class="user-info">
                     <span class="user-nombre">{{ nombreCompleto(r) }}</span>
-                    <span class="user-id">{{ r.numero_id ?? r.correo }}</span>
+                    <span class="user-correo">{{ r.numero_id ?? r.correo }}</span>
                   </div>
-                </div>
-              </td>
-              <td>
-                <span class="tipo-badge" [ngClass]="r.tipo_usuario">{{ r.tipo_usuario }}</span>
-              </td>
-              <td>
-                <div class="col-hora">
-                  <span class="hora-val">{{ formatHora(r.creado_en) }}</span>
-                  <span class="hora-dia">{{ formatDia(r.creado_en) }}</span>
-                </div>
-              </td>
-              <td class="col-detalle">
-                <span [ngClass]="{'detalle-warn': esAdvertencia(r)}">{{ detalle(r) }}</span>
-              </td>
-              <td>
-                <span class="resultado-badge" [ngClass]="r.exitoso ? 'exitoso' : 'denegado'">
-                  {{ r.exitoso ? '' : '' }} {{ r.exitoso ? 'Exitoso' : 'Denegado' }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+                <td class="col-perfil">
+                  <span class="perfil-badge" [ngClass]="r.tipo_usuario">{{ r.tipo_usuario }}</span>
+                </td>
+                <td class="col-tipo">
+                  <span class="tipo-badge" [ngClass]="r.tipo_movimiento === 'entrada' ? 'entrada' : 'salida'">
+                    {{ r.tipo_movimiento === 'entrada' ? ' Entrada' : ' Salida' }}
+                  </span>
+                </td>
+                <td class="col-fecha">{{ formatFecha(r.creado_en) }}</td>
+                <td>
+                  <span class="resultado-badge" [ngClass]="r.exitoso ? 'exitoso' : 'denegado'">
+                    {{ r.exitoso ? ' Exitoso' : ' Denegado' }}
+                  </span>
+                </td>
+                <td class="col-estado">
+                  <div class="estado-puntualidad" [ngClass]="puntualidad(r).clase">
+                    <span class="estado-texto">{{ puntualidad(r).texto }}</span>
+                    <span class="estado-detalle" *ngIf="puntualidad(r).detalle">{{ puntualidad(r).detalle }}</span>
+                  </div>
+                </td>
+                <td class="col-accion">
+                  <span class="ver-detalle-hint">Ver</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-        <!-- VACÍO -->
-        <div class="empty-state" *ngIf="registros.length === 0">
-          No hay registros para los filtros seleccionados.
+          <!-- VACÍO -->
+          <div class="empty-state" *ngIf="registros.length === 0">
+            No hay registros para los filtros seleccionados.
+          </div>
         </div>
 
         <!-- PAGINACIÓN -->
