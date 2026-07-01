@@ -69,6 +69,7 @@ export const routes: Routes = [
       { path: 'historial-usuario/:id', loadComponent: () => import('./pages/admin/historial-usuario/historial-usuario').then(m => m.HistorialUsuario) },
       { path: 'historial-global',      loadComponent: () => import('./pages/admin/historial-global/historial-global').then(m => m.HistorialGlobal) },
       { path: 'acceso/:id',            loadComponent: () => import('./pages/admin/detalle-acceso/detalle-acceso').then(m => m.DetalleAcceso) },
+      { path: 'estadisticas',          loadComponent: () => import('./pages/admin/estadisticas/estadisticas').then(m => m.Estadisticas) },
       { path: 'reportes',              loadComponent: () => import('./pages/admin/reportes/reportes').then(m => m.Reportes) },
       { path: 'soporte',               loadComponent: () => import('./pages/admin/soporte/soporte').then(m => m.Soporte) },
     ]
